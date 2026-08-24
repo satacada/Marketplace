@@ -39,16 +39,34 @@ export class ProductRepository extends BaseRepository<Product> {
   /**
    * Obtiene productos de un vendedor específico con relaciones
    */
-  async findBySeller(sellerId: string): Promise<Product[]> {
+  async findBySeller(sellerId: string, includeFavoriteCount: boolean = false): Promise<Product[]> {
+    let selectQuery = '*, categories(name), profiles(store_name)';
+    
+    if (includeFavoriteCount) {
+      selectQuery = '*, categories(name), profiles(store_name), favorites!product_id(favorite_count)';
+    }
+    
     const { data, error } = await supabase
       .from(this.tableName)
-      .select('*, categories(name), profiles(store_name)')
+      .select(selectQuery)
       .eq('seller_id', sellerId)
       .eq('is_deleted', false)
       .order('created_at', { ascending: false });
 
     if (error) this.handleError(error);
-    return data || [];
+    
+    // Procesar para convertir array de favorites a count
+    const processedData = (data || []).map(product => {
+      if (includeFavoriteCount && product.favorites) {
+        return {
+          ...product,
+          favorite_count: Array.isArray(product.favorites) ? product.favorites.length : 0
+        };
+      }
+      return product;
+    });
+
+    return processedData;
   }
 
   /**

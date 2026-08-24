@@ -78,6 +78,7 @@ export interface ProductFilters {
   minPrice?: number;
   maxPrice?: number;
   inStock?: boolean;
+  includeFavoriteCount?: boolean;
 }
 
 /**

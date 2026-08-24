@@ -70,18 +70,21 @@ const ProductCard = memo(({
   userId, 
   cartItems, 
   onAddToCart,
-  onViewDetails 
+  onViewDetails,
+  isFavorite,
+  onToggleFavorite
 }: { 
   product: Product; 
   userId: string | null; 
   cartItems: string[]; 
   onAddToCart: (id: string) => void;
   onViewDetails: (id: string) => void;
+  isFavorite: boolean;
+  onToggleFavorite: (productId: string) => void;
 }) => {
   const router = useRouter();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
   const images = product.image_urls || [];
   const isInCart = cartItems.includes(product.id);
   const isOwnProduct = userId && product.seller_id === userId;
@@ -110,62 +113,6 @@ const ProductCard = memo(({
   const handleClick = useCallback(() => {
     onViewDetails(product.id);
   }, [product.id, onViewDetails]);
-
-  const handleToggleFavorite = useCallback(async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!userId) {
-      alert('Debes iniciar sesión para agregar a favoritos');
-      router.push('/auth');
-      return;
-    }
-
-    if (isOwnProduct) return;
-
-    try {
-      const { supabase } = await import('@/infrastructure/database/supabase.client');
-      
-      if (isFavorite) {
-        // Quitar de favoritos
-        await supabase
-          .from('favorites')
-          .delete()
-          .eq('user_id', userId)
-          .eq('product_id', product.id);
-        setIsFavorite(false);
-      } else {
-        // Agregar a favoritos
-        await supabase
-          .from('favorites')
-          .insert({ user_id: userId, product_id: product.id });
-        setIsFavorite(true);
-      }
-    } catch (error) {
-      console.error('Error al manejar favoritos:', error);
-    }
-  }, [userId, product.id, isFavorite, isOwnProduct, router]);
-
-  // Verificar si es favorito al montar
-  useEffect(() => {
-    const checkFavorite = async () => {
-      if (!userId || isOwnProduct) return;
-      
-      try {
-        const { supabase } = await import('@/infrastructure/database/supabase.client');
-        const { data } = await supabase
-          .from('favorites')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('product_id', product.id)
-          .single();
-        
-        setIsFavorite(!!data);
-      } catch (error) {
-        console.error('Error al verificar favorito:', error);
-      }
-    };
-
-    checkFavorite();
-  }, [userId, product.id, isOwnProduct]);
 
   return (
     <>
@@ -286,11 +233,14 @@ const ProductCard = memo(({
           <div className="flex gap-2 mb-3">
             {userId && !isOwnProduct && (
               <button
-                onClick={handleToggleFavorite}
-                className={`flex-1 py-2 rounded font-medium transition text-sm flex items-center justify-center gap-1 ${
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleFavorite(product.id);
+                }}
+                className={`flex-1 py-2 rounded font-medium transition text-sm flex items-center justify-center gap-1 border-2 ${
                   isFavorite 
-                    ? 'bg-red-100 text-red-700 hover:bg-red-200' 
-                    : 'bg-pink-100 text-pink-700 hover:bg-pink-200'
+                    ? 'bg-white text-black border-gray-300 hover:bg-gray-50' 
+                    : 'bg-white text-black border-gray-300 hover:bg-gray-50'
                 }`}
               >
                 {isFavorite ? '❤️ Guardado' : '🤍 Agregar a favoritos'}
@@ -390,6 +340,7 @@ const ProductCard = memo(({
 ProductCard.displayName = 'ProductCard';
 
 export default function MarketplacePage() {
+  const router = useRouter();
   const { user } = useAuth();
   const { cart, addToCart } = useCart(user?.id || null);
   const { categories } = useCategories({ level: 1 });
@@ -405,6 +356,7 @@ export default function MarketplacePage() {
   
   // Productos vistos recientemente
   const [recentlyViewed, setRecentlyViewed] = useState<string[]>([]);
+  const [favoriteProductIds, setFavoriteProductIds] = useState<Set<string>>(new Set());
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -415,6 +367,31 @@ export default function MarketplacePage() {
     const viewed = getLocalStorageItem<string[]>('recentlyViewed', []);
     setRecentlyViewed(viewed);
   }, []);
+
+  // Cargar favoritos del usuario en una sola consulta
+  useEffect(() => {
+    const loadUserFavorites = async () => {
+      if (!userId) {
+        setFavoriteProductIds(new Set());
+        return;
+      }
+
+      try {
+        const { supabase } = await import('@/infrastructure/database/supabase.client');
+        const { data } = await supabase
+          .from('favorites')
+          .select('product_id')
+          .eq('user_id', userId);
+        
+        const favoriteIds = new Set(data?.map(f => f.product_id) || []);
+        setFavoriteProductIds(favoriteIds);
+      } catch (error) {
+        console.error('Error al cargar favoritos:', error);
+      }
+    };
+
+    loadUserFavorites();
+  }, [userId]);
 
   // Debounce para búsqueda
   const debouncedSearch = useCallback(
@@ -493,6 +470,40 @@ export default function MarketplacePage() {
     // Navegar a detalle
     window.location.href = `/marketplace/product/${productId}`;
   }, [recentlyViewed]);
+
+  const handleToggleFavorite = useCallback(async (productId: string) => {
+    if (!userId) {
+      alert('Debes iniciar sesión para agregar a favoritos');
+      window.location.href = '/auth';
+      return;
+    }
+
+    try {
+      const { supabase } = await import('@/infrastructure/database/supabase.client');
+      
+      if (favoriteProductIds.has(productId)) {
+        // Quitar de favoritos
+        await supabase
+          .from('favorites')
+          .delete()
+          .eq('user_id', userId)
+          .eq('product_id', productId);
+        setFavoriteProductIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(productId);
+          return newSet;
+        });
+      } else {
+        // Agregar a favoritos
+        await supabase
+          .from('favorites')
+          .insert({ user_id: userId, product_id: productId });
+        setFavoriteProductIds(prev => new Set(prev).add(productId));
+      }
+    } catch (error) {
+      console.error('Error al manejar favoritos:', error);
+    }
+  }, [userId, favoriteProductIds]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -705,6 +716,8 @@ export default function MarketplacePage() {
                       cartItems={cartItems}
                       onAddToCart={handleAddToCart}
                       onViewDetails={handleViewDetails}
+                      isFavorite={favoriteProductIds.has(product.id)}
+                      onToggleFavorite={handleToggleFavorite}
                     />
                   ))}
                 </div>

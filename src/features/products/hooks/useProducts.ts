@@ -50,6 +50,7 @@ export function useProducts(filters?: ProductFilters) {
     filters?.searchQuery,
     filters?.minPrice,
     filters?.maxPrice,
+    filters?.includeFavoriteCount,
   ]);
 
   const fetchProducts = useCallback(async () => {
@@ -59,7 +60,10 @@ export function useProducts(filters?: ProductFilters) {
 
       if (memoizedFilters?.sellerId) {
         // Productos de un vendedor
-        const data = await productService.getSellerProducts(memoizedFilters.sellerId);
+        const data = await productService.getSellerProducts(
+          memoizedFilters.sellerId, 
+          memoizedFilters.includeFavoriteCount
+        );
         setProducts(data);
       } else if (memoizedFilters?.categoryId) {
         // Productos por categoría

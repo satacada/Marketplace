@@ -33,14 +33,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Faltan variables de entorno de Supabase');
 }
 
-// Obtener el origin de forma segura para SSR
-const getOrigin = () => {
-  if (typeof window !== 'undefined') {
-    return window.location.origin;
-  }
-  // Fallback para SSR
-  return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-};
+// URL de redirección predeterminada (segura para SSR)
+const defaultRedirectUrl = process.env.NEXT_PUBLIC_SITE_URL 
+  ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
+  : 'http://localhost:3000/auth/callback';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
@@ -48,7 +44,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     flowType: 'pkce',
     // Configurar URLs de redirección para recuperación de contraseña
-    redirectTo: `${getOrigin()}/auth/callback`,
+    redirectTo: defaultRedirectUrl,
   },
 });
 

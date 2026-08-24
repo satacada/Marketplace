@@ -69,7 +69,7 @@ export default function ProductsPage() {
     deleteProduct, 
     toggleStock,
     refresh 
-  } = useProducts(shouldLoadProducts ? { sellerId: user?.id } : undefined);
+  } = useProducts(shouldLoadProducts ? { sellerId: user?.id, includeFavoriteCount: true } : undefined);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -170,6 +170,24 @@ export default function ProductsPage() {
                 </div>
 
                 <p className="text-gray-600 mb-4 line-clamp-2">{product.description}</p>
+
+                {/* Estadísticas de interés */}
+                <div className="flex gap-4 mb-4 p-3 bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg border border-pink-100">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">🤍</span>
+                    <div>
+                      <p className="text-xs text-gray-500">Interés</p>
+                      <p className="text-lg font-bold text-pink-700">{product.favorite_count || 0}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">👁️</span>
+                    <div>
+                      <p className="text-xs text-gray-500">Vistas</p>
+                      <p className="text-lg font-bold text-purple-700">0</p>
+                    </div>
+                  </div>
+                </div>
 
                 <div className="flex gap-2 border-t border-gray-200 pt-4">
                   <Link href={`/dashboard/products/edit/${product.id}`}>

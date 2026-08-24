@@ -148,8 +148,8 @@ export const productService = {
   /**
    * Obtiene productos del vendedor
    */
-  async getSellerProducts(sellerId: string): Promise<Product[]> {
-    return await productRepository.findBySeller(sellerId);
+  async getSellerProducts(sellerId: string, includeFavoriteCount: boolean = false): Promise<Product[]> {
+    return await productRepository.findBySeller(sellerId, includeFavoriteCount);
   },
 
   /**
