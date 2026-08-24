@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ImageGallery from '@/components/marketplace/ImageGallery';
 import Header from '@/components/layout/Header';
+import { useCart } from '@/features/cart/hooks/useCart';
+import { useOrders } from '@/features/orders/hooks/useOrders';
 
 type FavoriteProductRaw = {
   id: string;

@@ -5,8 +5,11 @@ import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ImageGallery from '@/components/marketplace/ImageGallery';
+import Header from '@/components/layout/Header';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import { useCart } from '@/features/cart/hooks/useCart';
+import { useOrders } from '@/features/orders/hooks/useOrders';
 
 type Product = {
   id: string;
@@ -66,6 +69,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     setModalData({ title, message, type, actionUrl, actionText });
     setShowModal(true);
   };
+  
+  const { cart } = useCart();
+  const { orders } = useOrders();
 
   const router = useRouter();
 
@@ -85,7 +91,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       .from('products')
       .select('*, categories(name), profiles(store_name, email)')
       .eq('id', productId)
-      .eq('is_deleted', false)
       .single();
 
     if (productError || !productData) {
@@ -112,7 +117,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     
     setQuestions(mappedQuestions);
 
-    // 4. Verificar si es favorito
+    // Verificar si es favorito
     if (user) {
       const { data: favData } = await supabase
         .from('favorites')
@@ -210,8 +215,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
-        <div className="max-w-6xl mx-auto">
+      <div className="min-h-screen bg-gray-50">
+        <Header 
+          cartItemCount={cart.itemCount} 
+          cartTotal={cart.total} 
+          ordersCount={orders.length} 
+        />
+        <div className="max-w-6xl mx-auto p-8">
           <p className="text-gray-500 text-center py-8">Cargando producto...</p>
         </div>
       </div>
@@ -220,76 +230,95 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   if (!product) return null;
 
+  const formattedPrice = new Intl.NumberFormat('es-CL', {
+    style: 'currency',
+    currency: 'CLP',
+    maximumFractionDigits: 0,
+  }).format(product.price);
+
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header estandarizado con Widget de Carrito ($monto total y cantidad) */}
+      <Header 
+        cartItemCount={cart.itemCount} 
+        cartTotal={cart.total} 
+        ordersCount={orders.length} 
+      />
+
+      <div className="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <div className="mb-6">
-          <Link href="/marketplace" className="text-indigo-600 hover:text-indigo-700 text-sm">
-            ← Volver al Marketplace
+          <Link href="/marketplace" className="text-blue-600 hover:text-blue-700 text-sm font-medium transition flex items-center gap-1">
+            <span>←</span> Volver al Marketplace
           </Link>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* Galería de imágenes */}
-          <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <ImageGallery images={product.image_urls || []} />
           </div>
 
           {/* Información del producto */}
-          <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
-            <div className="mb-4">
-              {product.categories?.name && (
-                <span className="inline-block text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded mb-2">
-                  {product.categories.name}
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+            <div>
+              <div className="mb-4">
+                {product.categories?.name && (
+                  <span className="inline-block text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full mb-2 border border-blue-100">
+                    {product.categories.name}
+                  </span>
+                )}
+                <h1 className="text-3xl font-bold text-gray-900 leading-tight">{product.title}</h1>
+              </div>
+
+              <div className="flex items-baseline gap-4 mb-6">
+                <span className="text-4xl font-extrabold text-blue-600 tracking-tight">{formattedPrice}</span>
+                <span className={`text-sm font-semibold px-2.5 py-1 rounded-full ${product.stock > 0 ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                  {product.stock > 0 ? `Stock: ${product.stock} disponibles` : 'Sin stock'}
                 </span>
-              )}
-              <h1 className="text-3xl font-bold text-gray-900">{product.title}</h1>
+              </div>
+
+              <div className="prose prose-gray mb-6">
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Descripción</h3>
+                <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{product.description}</p>
+              </div>
+
+              <div className="border-t border-gray-100 pt-4 mb-6">
+                <p className="text-xs text-gray-400 mb-1">Vendido por:</p>
+                <p className="text-base font-bold text-gray-800">
+                  🏪 {product.profiles?.store_name || 'Tienda sin nombre'}
+                </p>
+              </div>
             </div>
 
-            <div className="flex items-baseline gap-4 mb-6">
-              <span className="text-4xl font-bold text-indigo-600">${product.price}</span>
-              <span className={`text-sm font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {product.stock > 0 ? `Stock: ${product.stock} disponibles` : 'Sin stock'}
-              </span>
-            </div>
-
-            <div className="prose prose-gray mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Descripción</h3>
-              <p className="text-gray-600 whitespace-pre-wrap">{product.description}</p>
-            </div>
-
-            <div className="border-t border-gray-200 pt-4 mb-6">
-              <p className="text-xs text-gray-500 mb-1">Vendido por:</p>
-              <p className="text-lg font-semibold text-gray-900">
-                {product.profiles?.store_name || 'Tienda sin nombre'}
-              </p>
-            </div>
             {/* Botones de acción */}
-            <div className="flex gap-3">
+            <div className="flex gap-3 pt-4 border-t border-gray-100">
               <button
                 onClick={handleAddToCart}
                 disabled={product.stock === 0 || product.seller_id === userId}
-                className={`flex-1 py-3 rounded-lg font-bold text-white transition ${
+                className={`flex-1 py-3.5 px-6 rounded-xl font-bold text-white transition shadow-sm flex items-center justify-center gap-2 text-base ${
                   product.stock === 0 || product.seller_id === userId
                     ? 'bg-gray-300 cursor-not-allowed'
-                    : 'bg-indigo-600 hover:bg-indigo-700'
+                    : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
                 }`}
               >
-                {product.seller_id === userId ? 'Es tu producto' : ' Agregar al carrito'}
+                <span>🛒</span>
+                <span>{product.seller_id === userId ? 'Es tu producto' : 'Agregar al carrito'}</span>
               </button>
               
-              {/* Solo mostrar favoritos si NO es tu propio producto */}
+              {/* Botón de Favorito estilizado */}
               {product.seller_id !== userId && (
                 <button
                   onClick={handleToggleFavorite}
-                  className={`px-6 py-3 rounded-lg font-bold transition ${
+                  className={`px-5 py-3.5 rounded-xl font-bold transition flex items-center justify-center gap-2 border shadow-2xs ${
                     isFavorite
-                      ? 'bg-red-100 text-red-600 hover:bg-red-200'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
+                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-blue-500'
                   }`}
+                  title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
                 >
-                  {isFavorite ? '❤️' : '🤍'}
+                  <span className="text-xl">{isFavorite ? '❤️' : '🤍'}</span>
+                  <span className="text-sm font-semibold">{isFavorite ? 'Favorito' : 'Favorito'}</span>
                 </button>
               )}
             </div>
