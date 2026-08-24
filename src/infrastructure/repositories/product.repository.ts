@@ -56,7 +56,11 @@ export class ProductRepository extends BaseRepository<Product> {
     if (error) this.handleError(error);
     
     // Procesar para convertir array de favorites a count
-    const processedData = (data || []).map(product => {
+    // Procesar para convertir array de favorites a count
+    // Garantizamos que data sea un arreglo para evitar el error de GenericStringError
+    const productsArray = Array.isArray(data) ? data : [];
+    
+    const processedData = productsArray.map((product: any) => {
       if (includeFavoriteCount && product.favorites) {
         return {
           ...product,
