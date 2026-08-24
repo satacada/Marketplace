@@ -41,6 +41,7 @@ import { useAdvancedProducts } from '@/features/products/hooks/useAdvancedProduc
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useCategories } from '@/features/categories/hooks/useCategories';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useOrders } from '@/features/orders/hooks/useOrders';
 import Image from 'next/image';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
@@ -195,89 +196,97 @@ const ProductCard = memo(({
           </div>
         </div>
         
-        <div className="p-4 flex-1 flex flex-col">
-          <div className="mb-2 flex gap-2 flex-wrap">
-            <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded">
-              {product.categories?.name || 'Sin categoría'}
-            </span>
-            
-            {isOwnProduct && product.status === 'pending' && (
-              <span className="text-xs font-semibold text-yellow-700 bg-yellow-100 px-2 py-1 rounded border border-yellow-300">
-                 Pendiente de aprobación
+        <div className="p-4 flex-1 flex flex-col justify-between">
+          <div>
+            <div className="mb-2 flex items-center justify-between gap-2 flex-wrap">
+              <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md">
+                {product.categories?.name || 'Sin categoría'}
               </span>
-            )}
-            
-            {isOwnProduct && product.status === 'rejected' && (
-              <span className="text-xs font-semibold text-red-700 bg-red-100 px-2 py-1 rounded border border-red-300">
-                ❌ Rechazado
-              </span>
-            )}
-          </div>
-          
-          <h3 className="text-lg font-bold text-gray-900 mb-2 hover:text-indigo-600 transition line-clamp-2">
-            {product.title}
-          </h3>
-          
-          <p className="text-gray-600 mb-3 line-clamp-2 flex-1 text-sm">
-            {product.description}
-          </p>
-          
-          <div className="flex justify-between items-center mb-3">
-            <span className="text-2xl font-bold text-blue-600">${product.price}</span>
-            <span className={`text-sm font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {product.stock > 0 ? `Stock: ${product.stock}` : 'Sin stock'}
-            </span>
-          </div>
-          
-          {/* Botones de acción */}
-          <div className="flex gap-2 mb-3">
-            {userId && !isOwnProduct && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleFavorite(product.id);
-                }}
-                className={`flex-1 py-2 rounded font-medium transition text-sm flex items-center justify-center gap-1 border-2 ${
-                  isFavorite 
-                    ? 'bg-white text-black border-gray-300 hover:bg-gray-50' 
-                    : 'bg-white text-black border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                {isFavorite ? '❤️ Guardado' : '🤍 Agregar a favoritos'}
-              </button>
-            )}
-            
-            {userId && (
-              isOwnProduct ? (
-                <button disabled className="flex-1 py-2 rounded font-medium bg-gray-200 text-gray-500 cursor-not-allowed text-sm">
-                  Es tu producto
-                </button>
-              ) : (
+              
+              {userId && !isOwnProduct && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    onAddToCart(product.id);
+                    onToggleFavorite(product.id);
                   }}
-                  disabled={isInCart || product.stock === 0}
-                  className={`flex-1 py-2 rounded font-medium transition text-sm ${
-                    isInCart 
-                      ? 'bg-green-100 text-green-700 cursor-not-allowed' 
-                      : product.stock === 0
-                      ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                      : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                  }`}
+                  className="text-gray-400 hover:text-red-500 transition text-sm p-1"
+                  title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
                 >
-                  {isInCart ? '✓ En carrito' : product.stock === 0 ? 'Sin stock' : 'Agregar al carrito'}
+                  {isFavorite ? '❤️' : '🤍'}
                 </button>
-              )
-            )}
-          </div>
+              )}
 
-          <div className="pt-3 mt-3 border-t border-gray-100">
-            <p className="text-xs text-gray-400">Vendido por:</p>
-            <p className="text-sm font-medium text-gray-700 truncate">
-              {product.profiles?.store_name || 'Tienda sin nombre'}
+              {isOwnProduct && product.status === 'pending' && (
+                <span className="text-xs font-semibold text-yellow-700 bg-yellow-100 px-2 py-1 rounded border border-yellow-300">
+                  Pendiente
+                </span>
+              )}
+              
+              {isOwnProduct && product.status === 'rejected' && (
+                <span className="text-xs font-semibold text-red-700 bg-red-100 px-2 py-1 rounded border border-red-300">
+                  ❌ Rechazado
+                </span>
+              )}
+            </div>
+            
+            <h3 className="text-base font-bold text-gray-900 mb-1 hover:text-blue-600 transition line-clamp-2">
+              {product.title}
+            </h3>
+            
+            <p className="text-gray-500 mb-3 line-clamp-2 text-xs">
+              {product.description}
             </p>
+            
+            <div className="flex justify-between items-baseline mb-3">
+              <span className="text-2xl font-bold text-blue-600">
+                ${product.price?.toLocaleString('es-CL')}
+              </span>
+              <span className={`text-xs font-medium ${product.stock > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                {product.stock > 0 ? `Stock: ${product.stock}` : 'Sin stock'}
+              </span>
+            </div>
+          </div>
+          
+          {/* Botón de acción Agregar (Estilo Importadora Mitre) */}
+          <div className="pt-2">
+            {isOwnProduct ? (
+              <button disabled className="w-full py-2.5 rounded-lg font-medium bg-gray-100 text-gray-400 cursor-not-allowed text-xs">
+                Es tu producto
+              </button>
+            ) : isInCart ? (
+              <button
+                disabled
+                className="w-full py-2.5 px-4 rounded-lg font-semibold bg-blue-50 text-blue-700 border border-blue-200 cursor-default text-sm flex items-center justify-center gap-2"
+              >
+                <span>✓</span>
+                <span>En carrito</span>
+              </button>
+            ) : product.stock === 0 ? (
+              <button
+                disabled
+                className="w-full py-2.5 px-4 rounded-lg font-medium bg-gray-100 text-gray-400 cursor-not-allowed text-sm flex items-center justify-center gap-2"
+              >
+                <span>Sin stock</span>
+              </button>
+            ) : (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddToCart(product.id);
+                }}
+                className="w-full py-2.5 px-4 rounded-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white transition text-sm flex items-center justify-center gap-2 shadow-xs active:scale-[0.98]"
+              >
+                <span className="text-base">🛒</span>
+                <span>Agregar</span>
+              </button>
+            )}
+
+            <div className="pt-2.5 mt-2.5 border-t border-gray-100 flex justify-between items-center text-xs text-gray-400">
+              <span>Vendido por:</span>
+              <span className="font-medium text-gray-600 truncate max-w-[130px]">
+                {product.profiles?.store_name || 'Tienda sin nombre'}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -343,6 +352,7 @@ export default function MarketplacePage() {
   const router = useRouter();
   const { user } = useAuth();
   const { cart, addToCart } = useCart(user?.id || null);
+  const { orders } = useOrders('buyer', user?.id || null);
   const { categories } = useCategories({ level: 1 });
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -351,7 +361,6 @@ export default function MarketplacePage() {
   const [priceRange, setPriceRange] = useState({ min: 0, max: 0 });
   const [sortBy, setSortBy] = useState<SortOption>('relevance');
   const [hasFreeShipping, setHasFreeShipping] = useState(false);
-  const [cartItems, setCartItems] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   
   // Productos vistos recientemente
@@ -361,6 +370,7 @@ export default function MarketplacePage() {
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const userId = user?.id || null;
+  const cartProductIds = cart.items.map(item => item.product_id);
 
   // Cargar productos vistos recientemente
   useEffect(() => {
@@ -449,13 +459,14 @@ export default function MarketplacePage() {
 
   const handleAddToCart = async (productId: string) => {
     if (!userId) {
-      alert('Debes iniciar sesión para comprar');
+      alert('Debes iniciar sesión para agregar productos al carrito');
+      router.push('/auth');
       return;
     }
 
     const result = await addToCart({ productId, quantity: 1 });
     if (result.success) {
-      setCartItems([...cartItems, productId]);
+      // Carrito actualizado
     } else {
       alert('Error al agregar: ' + result.error);
     }
@@ -513,7 +524,6 @@ export default function MarketplacePage() {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Búsqueda explícita con Enter o botón
     const input = e.currentTarget.querySelector('input') as HTMLInputElement;
     if (input) {
       const query = input.value;
@@ -561,7 +571,13 @@ export default function MarketplacePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header title="" cartItemCount={cart.itemCount} isMarketplacePublic={true} />
+      <Header
+        title=""
+        cartItemCount={cart.itemCount}
+        cartTotal={cart.total}
+        ordersCount={user ? orders.length : undefined}
+        isMarketplacePublic={true}
+      />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header de búsqueda */}
@@ -577,7 +593,7 @@ export default function MarketplacePage() {
               />
               <button
                 type="submit"
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition"
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white p-2.5 rounded-lg hover:bg-blue-700 transition"
                 aria-label="Buscar"
               >
                 🔍
@@ -599,7 +615,7 @@ export default function MarketplacePage() {
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className="lg:hidden px-4 py-2 bg-indigo-600 text-white rounded-lg"
+              className="lg:hidden px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
               {showFilters ? 'Ocultar filtros' : 'Mostrar filtros'}
             </button>
@@ -614,7 +630,7 @@ export default function MarketplacePage() {
                 <h3 className="text-lg font-bold text-gray-900">Filtros</h3>
                 <button
                   onClick={clearFilters}
-                  className="text-sm text-indigo-600 hover:text-indigo-800"
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
                 >
                   Limpiar
                 </button>
@@ -665,7 +681,7 @@ export default function MarketplacePage() {
                     type="checkbox"
                     checked={hasFreeShipping}
                     onChange={(e) => setHasFreeShipping(e.target.checked)}
-                    className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
                   <span className="text-gray-700">Solo envío gratis</span>
                 </label>
@@ -685,7 +701,7 @@ export default function MarketplacePage() {
             {loading && products.length === 0 ? (
               <div className="flex items-center justify-center py-12">
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
                   <p className="text-gray-500">Cargando productos...</p>
                 </div>
               </div>
@@ -700,7 +716,7 @@ export default function MarketplacePage() {
                 </p>
                 <button
                   onClick={clearFilters}
-                  className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
                 >
                   Limpiar filtros
                 </button>
@@ -713,7 +729,7 @@ export default function MarketplacePage() {
                       key={product.id} 
                       product={product as any} 
                       userId={userId}
-                      cartItems={cartItems}
+                      cartItems={cartProductIds}
                       onAddToCart={handleAddToCart}
                       onViewDetails={handleViewDetails}
                       isFavorite={favoriteProductIds.has(product.id)}
@@ -726,7 +742,7 @@ export default function MarketplacePage() {
                 {hasMore && (
                   <div ref={loadMoreRef} className="flex justify-center py-8">
                     {loading ? (
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                     ) : (
                       <p className="text-gray-500">Cargar más productos...</p>
                     )}

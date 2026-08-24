@@ -56,7 +56,7 @@ export default function CartPage() {
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Mi Carrito de Compras</h1>
-          <Link href="/marketplace" className="text-indigo-600 hover:text-indigo-800 font-medium">
+          <Link href="/marketplace" className="text-blue-600 hover:text-blue-800 font-medium">
             ← Seguir comprando
           </Link>
         </div>
@@ -64,7 +64,7 @@ export default function CartPage() {
         {cartItems.length === 0 ? (
           <div className="bg-white p-12 rounded-lg shadow-md text-center">
             <p className="text-gray-500 text-lg mb-4">Tu carrito está vacío.</p>
-            <Link href="/marketplace" className="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700">
+            <Link href="/marketplace" className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 font-medium transition inline-block">
               Ir al Marketplace
             </Link>
           </div>
@@ -74,12 +74,12 @@ export default function CartPage() {
             <div className="flex-1 space-y-4">
               {cartItems.map((item) => (
                 <div key={item.id} className="bg-white p-4 rounded-lg shadow-sm flex gap-4 items-center">
-                  {item.products.image_urls && item.products.image_urls.length > 0 && (
+                  {item.products?.image_urls && item.products.image_urls.length > 0 && (
                     <img src={item.products.image_urls[0]} alt={item.products.title} className="w-20 h-20 object-cover rounded" />
                   )}
                   <div className="flex-1">
-                    <h3 className="font-bold text-gray-900">{item.products.title}</h3>
-                    <p className="text-indigo-600 font-semibold">${item.products.price}</p>
+                    <h3 className="font-bold text-gray-900">{item.products?.title}</h3>
+                    <p className="text-blue-600 font-semibold">${item.products?.price?.toLocaleString('es-CL')}</p>
                     <p className="text-sm text-gray-500">Cantidad: {item.quantity}</p>
                   </div>
                   <button 
@@ -94,11 +94,11 @@ export default function CartPage() {
 
             {/* Resumen de compra */}
             <div className="w-full md:w-80">
-              <div className="bg-white p-6 rounded-lg shadow-md sticky top-8">
+              <div className="bg-white p-6 rounded-lg shadow-md sticky top-8 border border-gray-100">
                 <h2 className="text-xl font-bold mb-4">Resumen</h2>
                 <div className="flex justify-between mb-4 text-gray-600">
                   <span>Subtotal</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>${total.toLocaleString('es-CL')}</span>
                 </div>
                 <div className="flex justify-between mb-6 text-gray-600">
                   <span>Envío</span>
@@ -106,9 +106,9 @@ export default function CartPage() {
                 </div>
                 <div className="border-t pt-4 flex justify-between mb-6">
                   <span className="text-lg font-bold">Total</span>
-                  <span className="text-lg font-bold text-indigo-600">${total.toFixed(2)}</span>
+                  <span className="text-lg font-bold text-blue-600">${total.toLocaleString('es-CL')}</span>
                 </div>
-                <Link href="/marketplace/checkout" className="block w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition text-center">
+                <Link href="/marketplace/checkout" className="block w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition text-center shadow-xs">
                     Proceder al Pago
                 </Link>
               </div>

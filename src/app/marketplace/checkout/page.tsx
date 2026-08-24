@@ -89,7 +89,7 @@ export default function CheckoutPage() {
         {cartItems.length === 0 ? (
           <div className="bg-white p-12 rounded-lg shadow-md text-center border border-gray-100">
             <p className="text-gray-500 text-lg mb-4">No hay productos para comprar.</p>
-            <Link href="/marketplace" className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
+            <Link href="/marketplace" className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 font-medium transition inline-block">
               Ir al Marketplace
             </Link>
           </div>
@@ -98,12 +98,12 @@ export default function CheckoutPage() {
             <div className="flex-1 space-y-4">
               {cartItems.map((item) => (
                 <div key={item.id} className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex gap-4 items-center">
-                  {item.products.image_urls && item.products.image_urls.length > 0 && (
+                  {item.products?.image_urls && item.products.image_urls.length > 0 && (
                     <img src={item.products.image_urls[0]} alt={item.products.title} className="w-20 h-20 object-cover rounded" />
                   )}
                   <div className="flex-1">
-                    <h3 className="font-bold text-gray-900">{item.products.title}</h3>
-                    <p className="text-indigo-600 font-semibold">${item.products.price}</p>
+                    <h3 className="font-bold text-gray-900">{item.products?.title}</h3>
+                    <p className="text-blue-600 font-semibold">${item.products?.price?.toLocaleString('es-CL')}</p>
                     <p className="text-sm text-gray-500">Cantidad: {item.quantity}</p>
                   </div>
                 </div>
@@ -115,14 +115,14 @@ export default function CheckoutPage() {
                 <h2 className="text-xl font-bold mb-4">Resumen del Pedido</h2>
                 <div className="flex justify-between mb-6 text-gray-600 border-b border-gray-100 pb-4">
                   <span className="text-lg font-bold">Total a pagar</span>
-                  <span className="text-lg font-bold text-indigo-600">${total.toFixed(2)}</span>
+                  <span className="text-lg font-bold text-blue-600">${total.toLocaleString('es-CL')}</span>
                 </div>
                 
                 <button 
                   onClick={handleConfirmPurchase}
                   disabled={processing}
-                  className={`w-full py-3 rounded-lg font-bold text-white transition ${
-                    processing ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
+                  className={`w-full py-3 rounded-lg font-bold text-white transition shadow-xs ${
+                    processing ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
                   }`}
                 >
                   {processing ? 'Procesando...' : 'Confirmar y Pagar'}
