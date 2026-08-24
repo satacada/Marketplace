@@ -40,7 +40,7 @@ export interface Category extends BaseEntity {
   // description?: string; // No existe en DB actual
   parent_id?: string;
   level: number;
-  // is_active: boolean; // No existe en DB actual
+  is_active: boolean; // No existe en DB actual
   // sort_order?: number; // No existe en DB actual
   created_at: string;
 
