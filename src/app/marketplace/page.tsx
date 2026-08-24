@@ -46,6 +46,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import ImageGallery from '@/components/marketplace/ImageGallery';
+import { Modal } from '@/components/ui/Modal';
+import { Button } from '@/components/ui/Button';
 import { debounce } from '@/shared/utils/debounce';
 import { getLocalStorageItem, setLocalStorageItem } from '@/shared/utils/localStorage';
 import { AdvancedProductFilters, SortOption } from '@/features/products/types/product-filters.types';
@@ -369,6 +371,31 @@ export default function MarketplacePage() {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
+  // Estado para Modal estándar UI
+  const [showModal, setShowModal] = useState(false);
+  const [modalData, setModalData] = useState<{
+    title: string;
+    message: string;
+    type: 'success' | 'info' | 'error' | 'warning';
+    actionUrl?: string;
+    actionText?: string;
+  }>({
+    title: '',
+    message: '',
+    type: 'info',
+  });
+
+  const showModalMessage = useCallback((
+    title: string,
+    message: string,
+    type: 'success' | 'info' | 'error' | 'warning' = 'info',
+    actionUrl?: string,
+    actionText?: string
+  ) => {
+    setModalData({ title, message, type, actionUrl, actionText });
+    setShowModal(true);
+  }, []);
+
   const userId = user?.id || null;
   const cartProductIds = cart.items.map(item => item.product_id);
 
@@ -459,16 +486,19 @@ export default function MarketplacePage() {
 
   const handleAddToCart = async (productId: string) => {
     if (!userId) {
-      alert('Debes iniciar sesión para agregar productos al carrito');
-      router.push('/auth');
+      showModalMessage(
+        'Iniciar Sesión Requerido',
+        'Debes iniciar sesión para agregar productos a tu carrito de compras.',
+        'info',
+        '/auth',
+        'Iniciar Sesión'
+      );
       return;
     }
 
     const result = await addToCart({ productId, quantity: 1 });
-    if (result.success) {
-      // Carrito actualizado
-    } else {
-      alert('Error al agregar: ' + result.error);
+    if (!result.success) {
+      showModalMessage('Error', result.error || 'No se pudo agregar el producto al carrito', 'error');
     }
   };
 
@@ -484,8 +514,13 @@ export default function MarketplacePage() {
 
   const handleToggleFavorite = useCallback(async (productId: string) => {
     if (!userId) {
-      alert('Debes iniciar sesión para agregar a favoritos');
-      window.location.href = '/auth';
+      showModalMessage(
+        'Iniciar Sesión Requerido',
+        'Debes iniciar sesión para guardar productos en tus favoritos.',
+        'info',
+        '/auth',
+        'Iniciar Sesión'
+      );
       return;
     }
 
@@ -514,7 +549,7 @@ export default function MarketplacePage() {
     } catch (error) {
       console.error('Error al manejar favoritos:', error);
     }
-  }, [userId, favoriteProductIds]);
+  }, [userId, favoriteProductIds, showModalMessage]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -759,6 +794,68 @@ export default function MarketplacePage() {
           </main>
         </div>
       </div>
+
+      {/* Modal Profesional Estándar */}
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        size="sm"
+      >
+        <div className={`text-center p-6 rounded-t-lg ${
+          modalData.type === 'success' 
+            ? 'bg-gradient-to-br from-green-50 to-emerald-50' 
+            : modalData.type === 'error'
+            ? 'bg-gradient-to-br from-red-50 to-pink-50'
+            : modalData.type === 'warning'
+            ? 'bg-gradient-to-br from-yellow-50 to-amber-50'
+            : 'bg-gradient-to-br from-blue-50 to-indigo-50'
+        }`}>
+          <div className="text-6xl mb-3">
+            {modalData.type === 'success' ? '✅' : modalData.type === 'error' ? '❌' : modalData.type === 'warning' ? '⚠️' : '🔒'}
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900">
+            {modalData.title}
+          </h3>
+        </div>
+        
+        <div className="p-6">
+          <p className="text-gray-600 text-center whitespace-pre-line leading-relaxed mb-6">
+            {modalData.message}
+          </p>
+          
+          <div className="flex gap-3">
+            {modalData.actionUrl ? (
+              <>
+                <Button
+                  onClick={() => setShowModal(false)}
+                  variant="secondary"
+                  fullWidth
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowModal(false);
+                    router.push(modalData.actionUrl!);
+                  }}
+                  variant="primary"
+                  fullWidth
+                >
+                  {modalData.actionText || 'Iniciar Sesión'}
+                </Button>
+              </>
+            ) : (
+              <Button
+                onClick={() => setShowModal(false)}
+                fullWidth
+                variant={modalData.type === 'success' ? 'success' : modalData.type === 'error' ? 'danger' : 'primary'}
+              >
+                Entendido
+              </Button>
+            )}
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

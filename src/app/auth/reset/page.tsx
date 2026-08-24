@@ -55,11 +55,36 @@ export default function ResetPage() {
   const { updatePassword } = useAuth();
 
   useEffect(() => {
-    // Obtener el email de los parámetros de la URL si está disponible
     const emailParam = searchParams.get('email');
     if (emailParam) {
       setUserEmail(emailParam);
     }
+
+    const checkSessionUser = async () => {
+      const { supabase } = await import('@/infrastructure/database/supabase.client');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user?.email) {
+        setUserEmail(session.user.email);
+      }
+    };
+    checkSessionUser();
+
+    const setupListener = async () => {
+      const { supabase } = await import('@/infrastructure/database/supabase.client');
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (session?.user?.email) {
+          setUserEmail(session.user.email);
+        }
+      });
+      return subscription;
+    };
+
+    let sub: any;
+    setupListener().then(s => { sub = s; });
+
+    return () => {
+      if (sub) sub.unsubscribe();
+    };
   }, [searchParams]);
 
   const showModalMessage = (title: string, message: string, type: 'success' | 'info' | 'error' = 'success') => {

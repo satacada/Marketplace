@@ -42,6 +42,13 @@ import { Modal } from '@/components/ui/Modal';
 export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  
+  // Estados para recuperación de contraseña (Reset)
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const [showModal, setShowModal] = useState(false);
   const [modalData, setModalData] = useState({ 
     title: '', 
@@ -52,14 +59,54 @@ export default function AuthPage() {
   
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, isLoading } = useAuth();
+  const { login, updatePassword, isLoading } = useAuth();
 
-  // Efecto para pre-llenar el email si viene como parámetro
+  // Efecto para detectar tokens de recuperación o pre-llenar email
   useEffect(() => {
     const emailParam = searchParams.get('email');
     if (emailParam) {
       setEmail(emailParam);
     }
+
+    const typeParam = searchParams.get('type');
+    if (typeParam === 'recovery') {
+      setIsRecoveryMode(true);
+    }
+
+    // Detectar si el hash de la URL incluye access_token o type=recovery
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash;
+      if (hash.includes('type=recovery') || hash.includes('access_token')) {
+        setIsRecoveryMode(true);
+      }
+    }
+
+    // Escuchar eventos de sesión de Supabase (PASSWORD_RECOVERY)
+    const checkRecoveryEvent = async () => {
+      const { supabase } = await import('@/infrastructure/database/supabase.client');
+      
+      // Verificar si ya hay una sesión activa de recuperación
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user && typeof window !== 'undefined' && (window.location.hash.includes('recovery') || searchParams.get('type') === 'recovery')) {
+        setIsRecoveryMode(true);
+        if (session.user.email) setEmail(session.user.email);
+      }
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          setIsRecoveryMode(true);
+          if (session?.user?.email) setEmail(session.user.email);
+        }
+      });
+      return subscription;
+    };
+
+    let sub: any;
+    checkRecoveryEvent().then(s => { sub = s; });
+
+    return () => {
+      if (sub) sub.unsubscribe();
+    };
   }, [searchParams]);
 
   const showModalMessage = (title: string, message: string, type: 'success' | 'info' | 'error' = 'success') => {
@@ -94,110 +141,234 @@ export default function AuthPage() {
     }
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLocalError('');
+
+    if (newPassword.length < 6) {
+      setLocalError('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setLocalError('Las contraseñas no coinciden');
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const result = await updatePassword(newPassword);
+      if (result.success) {
+        showModalMessage(
+          '¡Contraseña restablecida!',
+          'Tu contraseña ha sido actualizada exitosamente.\n\nAhora puedes iniciar sesión con tu nueva contraseña.',
+          'success'
+        );
+        setIsRecoveryMode(false);
+        setPassword('');
+      } else {
+        setLocalError(result.error || 'Error al restablecer contraseña');
+      }
+    } catch (error: any) {
+      setLocalError(error.message || 'Error al restablecer contraseña');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
         {/* Card principal */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
           {/* Header con branding */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6">
-            <div className="text-center">
-              <div className="text-4xl mb-2">🛒</div>
-              <h1 className="text-2xl font-bold text-white">Marketplace SaaS</h1>
-              <p className="text-blue-100 text-sm mt-1">Multi-Tenant Platform</p>
-            </div>
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6 text-center">
+            <div className="text-4xl mb-2">{isRecoveryMode ? '🔐' : '🛒'}</div>
+            <h1 className="text-2xl font-bold text-white">
+              {isRecoveryMode ? 'Restablecer Contraseña' : 'Marketplace SaaS'}
+            </h1>
+            <p className="text-blue-100 text-sm mt-1">
+              {isRecoveryMode ? 'Ingresa tu nueva contraseña' : 'Multi-Tenant Platform'}
+            </p>
           </div>
 
           {/* Contenido del formulario */}
           <div className="px-8 py-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">
-              Iniciar Sesión
-            </h2>
-
-            <form onSubmit={handleLogin} className="space-y-5">
-              {/* Email field */}
+            {isRecoveryMode ? (
+              /* VISTA DE RESTABLECER CONTRASEÑA (RECOVERY) */
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Correo electrónico
-                </label>
-                <div className="relative">
-                  <Input
-                    id="email"
-                    type="email"
-                    required
-                    placeholder="tu@correo.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    fullWidth
-                    className="pl-10"
-                  />
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    📧
+                {email && (
+                  <div className="mb-5 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+                    <span className="font-medium">Usuario:</span> {email}
                   </div>
-                </div>
-              </div>
+                )}
 
-              {/* Password field */}
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Contraseña
-                </label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    fullWidth
-                    className="pl-10"
-                  />
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    🔒
+                <p className="text-gray-600 mb-6 text-sm">
+                  Ingresa tu nueva contraseña y su confirmación para restablecer tu cuenta.
+                </p>
+
+                <form onSubmit={handleResetPassword} className="space-y-5">
+                  {/* Nueva contraseña */}
+                  <div>
+                    <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                      Nueva contraseña
+                    </label>
+                    <div className="relative">
+                      <Input
+                        id="newPassword"
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        fullWidth
+                        className="pl-10"
+                      />
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        🔒
+                      </div>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">Mínimo 6 caracteres</p>
                   </div>
-                </div>
-                <div className="mt-2 text-right">
-                  <Link
-                    href="/auth/reset-password"
-                    className="text-sm text-blue-600 hover:text-blue-800 transition"
+
+                  {/* Confirmar contraseña */}
+                  <div>
+                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                      Confirmar nueva contraseña
+                    </label>
+                    <div className="relative">
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        fullWidth
+                        className="pl-10"
+                      />
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        🔒
+                      </div>
+                    </div>
+                  </div>
+
+                  {localError && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                      {localError}
+                    </div>
+                  )}
+
+                  <Button
+                    type="submit"
+                    isLoading={isProcessing}
+                    fullWidth
+                    variant="primary"
+                    className="py-3 text-base font-medium"
                   >
-                    ¿Olvidaste tu contraseña?
-                  </Link>
+                    {isProcessing ? 'Procesando...' : 'Restablecer Contraseña'}
+                  </Button>
+                </form>
+
+                <div className="mt-6 text-center text-sm text-gray-500">
+                  <button
+                    type="button"
+                    onClick={() => setIsRecoveryMode(false)}
+                    className="text-blue-600 hover:text-blue-800 font-medium transition"
+                  >
+                    ← Volver a Iniciar Sesión
+                  </button>
                 </div>
               </div>
+            ) : (
+              /* VISTA DE INICIAR SESIÓN (LOGIN) */
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 mb-6">
+                  Iniciar Sesión
+                </h2>
 
-              {/* Error message */}
-              {localError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                  {localError}
+                <form onSubmit={handleLogin} className="space-y-5">
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                      Correo electrónico
+                    </label>
+                    <div className="relative">
+                      <Input
+                        id="email"
+                        type="email"
+                        required
+                        placeholder="tu@correo.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        fullWidth
+                        className="pl-10"
+                      />
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        📧
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                      Contraseña
+                    </label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        fullWidth
+                        className="pl-10"
+                      />
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        🔒
+                      </div>
+                    </div>
+                    <div className="mt-2 text-right">
+                      <Link
+                        href="/auth/reset-password"
+                        className="text-sm text-blue-600 hover:text-blue-800 transition"
+                      >
+                        ¿Olvidaste tu contraseña?
+                      </Link>
+                    </div>
+                  </div>
+
+                  {localError && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                      {localError}
+                    </div>
+                  )}
+
+                  <Button
+                    type="submit"
+                    isLoading={isLoading}
+                    fullWidth
+                    variant="primary"
+                    className="py-3 text-base font-medium"
+                  >
+                    Iniciar Sesión
+                  </Button>
+                </form>
+
+                <div className="mt-6 text-center text-sm text-gray-500">
+                  <p>
+                    ¿No tienes cuenta?{' '}
+                    <Link
+                      href="/auth/register"
+                      className="text-blue-600 hover:text-blue-800 font-medium transition"
+                    >
+                      Regístrate gratis
+                    </Link>
+                  </p>
                 </div>
-              )}
-
-              {/* Submit button */}
-              <Button
-                type="submit"
-                isLoading={isLoading}
-                fullWidth
-                variant="primary"
-                className="py-3 text-base font-medium"
-              >
-                Iniciar Sesión
-              </Button>
-            </form>
-
-            {/* Additional info */}
-            <div className="mt-6 text-center text-sm text-gray-500">
-              <p>
-                ¿No tienes cuenta?{' '}
-                <Link
-                  href="/auth/register"
-                  className="text-blue-600 hover:text-blue-800 font-medium transition"
-                >
-                  Regístrate gratis
-                </Link>
-              </p>
-            </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -240,7 +411,7 @@ export default function AuthPage() {
             variant={modalData.type === 'success' ? 'success' : modalData.type === 'error' ? 'danger' : 'primary'}
             className="mt-6"
           >
-            Entendido
+            Entendido / Ir a Iniciar Sesión
           </Button>
         </div>
       </Modal>

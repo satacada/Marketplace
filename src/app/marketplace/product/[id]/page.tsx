@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ImageGallery from '@/components/marketplace/ImageGallery';
+import { Modal } from '@/components/ui/Modal';
+import { Button } from '@/components/ui/Button';
 
 type Product = {
   id: string;
@@ -39,6 +41,32 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [newQuestion, setNewQuestion] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
+  // Estado para Modal estándar UI
+  const [showModal, setShowModal] = useState(false);
+  const [modalData, setModalData] = useState<{
+    title: string;
+    message: string;
+    type: 'success' | 'info' | 'error' | 'warning';
+    actionUrl?: string;
+    actionText?: string;
+  }>({
+    title: '',
+    message: '',
+    type: 'info',
+  });
+
+  const showModalMessage = (
+    title: string,
+    message: string,
+    type: 'success' | 'info' | 'error' | 'warning' = 'info',
+    actionUrl?: string,
+    actionText?: string
+  ) => {
+    setModalData({ title, message, type, actionUrl, actionText });
+    setShowModal(true);
+  };
+
   const router = useRouter();
 
   useEffect(() => {
@@ -48,26 +76,28 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const loadData = async () => {
     setLoading(true);
     
-    // 1. Verificar usuario
+    // Obtener sesión actual
     const { data: { user } } = await supabase.auth.getUser();
-    if (user) setUserId(user.id);
+    setUserId(user ? user.id : null);
 
-    // 2. Cargar producto
-    const { data: productData, error } = await supabase
+    // Cargar producto
+    const { data: productData, error: productError } = await supabase
       .from('products')
       .select('*, categories(name), profiles(store_name, email)')
       .eq('id', productId)
       .eq('is_deleted', false)
       .single();
 
-    if (error || !productData) {
-      alert('Producto no encontrado');
+    if (productError || !productData) {
+      showModalMessage('Error', 'Producto no encontrado', 'error');
       router.push('/marketplace');
+      setLoading(false);
       return;
     }
-    setProduct(productData);
 
-    // 3. Cargar preguntas
+    setProduct(productData as Product);
+
+    // Cargar preguntas
     const { data: questionsData } = await supabase
       .from('questions')
       .select('id, question, answer, created_at, profiles(store_name)')
@@ -75,10 +105,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       .order('created_at', { ascending: false });
     
     // Mapear para convertir profiles de array a objeto
-    const mappedQuestions = questionsData?.map(q => ({
+    const mappedQuestions = (questionsData?.map(q => ({
       ...q,
-      profiles: q.profiles?.[0] || null
-    })) || [];
+      profiles: Array.isArray(q.profiles) ? q.profiles[0] : (q.profiles as any)
+    })) || []) as Question[];
     
     setQuestions(mappedQuestions);
 
@@ -99,8 +129,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   const handleToggleFavorite = async () => {
     if (!userId) {
-      alert('Debes iniciar sesión para agregar a favoritos');
-      router.push('/auth');
+      showModalMessage(
+        'Iniciar Sesión Requerido',
+        'Debes iniciar sesión para agregar productos a favoritos.',
+        'info',
+        '/auth',
+        'Iniciar Sesión'
+      );
       return;
     }
 
@@ -123,13 +158,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   const handleAddToCart = async () => {
     if (!userId) {
-      alert('Debes iniciar sesión para comprar');
-      router.push('/auth');
+      showModalMessage(
+        'Iniciar Sesión Requerido',
+        'Debes iniciar sesión para agregar productos al carrito de compras.',
+        'info',
+        '/auth',
+        'Iniciar Sesión'
+      );
       return;
     }
 
     if (product!.seller_id === userId) {
-      alert('No puedes comprar tu propio producto');
+      showModalMessage('Atención', 'No puedes comprar tu propio producto.', 'warning');
       return;
     }
 
@@ -138,9 +178,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       .insert({ buyer_id: userId, product_id: productId, quantity: 1 });
 
     if (error) {
-      alert('Error al agregar: ' + error.message);
+      showModalMessage('Error', 'Error al agregar al carrito: ' + error.message, 'error');
     } else {
-      alert('✅ Producto agregado al carrito');
+      showModalMessage('¡Producto Agregado!', 'El producto fue agregado a tu carrito exitosamente.', 'success');
     }
   };
 
@@ -160,9 +200,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     setSubmitting(false);
 
     if (error) {
-      alert('Error al enviar pregunta: ' + error.message);
+      showModalMessage('Error', 'Error al enviar pregunta: ' + error.message, 'error');
     } else {
-      alert('✅ Pregunta enviada');
+      showModalMessage('¡Pregunta Enviada!', 'Tu pregunta ha sido enviada al vendedor exitosamente.', 'success');
       setNewQuestion('');
       loadData(); // Recargar preguntas
     }
@@ -323,13 +363,75 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           {!userId && (
             <div className="border-t border-gray-200 pt-6 text-center">
               <p className="text-gray-600 mb-3">¿Tienes preguntas sobre este producto?</p>
-              <Link href="/auth" className="text-indigo-600 hover:text-indigo-700 font-medium">
+              <Link href="/auth" className="text-blue-600 hover:text-blue-700 font-medium">
                 Inicia sesión para preguntar
               </Link>
             </div>
           )}
         </div>
       </div>
+
+      {/* Modal Profesional Estándar */}
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        size="sm"
+      >
+        <div className={`text-center p-6 rounded-t-lg ${
+          modalData.type === 'success' 
+            ? 'bg-gradient-to-br from-green-50 to-emerald-50' 
+            : modalData.type === 'error'
+            ? 'bg-gradient-to-br from-red-50 to-pink-50'
+            : modalData.type === 'warning'
+            ? 'bg-gradient-to-br from-yellow-50 to-amber-50'
+            : 'bg-gradient-to-br from-blue-50 to-indigo-50'
+        }`}>
+          <div className="text-6xl mb-3">
+            {modalData.type === 'success' ? '✅' : modalData.type === 'error' ? '❌' : modalData.type === 'warning' ? '⚠️' : '🔒'}
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900">
+            {modalData.title}
+          </h3>
+        </div>
+        
+        <div className="p-6">
+          <p className="text-gray-600 text-center whitespace-pre-line leading-relaxed mb-6">
+            {modalData.message}
+          </p>
+          
+          <div className="flex gap-3">
+            {modalData.actionUrl ? (
+              <>
+                <Button
+                  onClick={() => setShowModal(false)}
+                  variant="secondary"
+                  fullWidth
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowModal(false);
+                    router.push(modalData.actionUrl!);
+                  }}
+                  variant="primary"
+                  fullWidth
+                >
+                  {modalData.actionText || 'Iniciar Sesión'}
+                </Button>
+              </>
+            ) : (
+              <Button
+                onClick={() => setShowModal(false)}
+                fullWidth
+                variant={modalData.type === 'success' ? 'success' : modalData.type === 'error' ? 'danger' : 'primary'}
+              >
+                Entendido
+              </Button>
+            )}
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

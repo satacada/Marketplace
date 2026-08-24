@@ -59,77 +59,142 @@ export default function ImageGallery({
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  const sizeClass = thumbnailMode ? 'w-full h-24 object-cover' : 'w-full h-48 object-cover';
+  // Si no hay imágenes, mostrar placeholder
+  if (!images || images.length === 0) {
+    return (
+      <div className={`w-full bg-slate-100 flex flex-col items-center justify-center text-gray-400 rounded-xl border border-dashed border-gray-200 ${thumbnailMode ? 'h-48' : 'h-[350px]'}`}>
+        <span className="text-4xl mb-2">🖼️</span>
+        <span className="text-sm font-medium">Sin imagen disponible</span>
+      </div>
+    );
+  }
 
+  // MODO THUMBNAIL (Para tarjetas de producto pequeñas)
+  if (thumbnailMode) {
+    return (
+      <div className="relative w-full h-48 bg-slate-100 overflow-hidden rounded-t-xl group cursor-pointer" onClick={openModal}>
+        <img 
+          src={images[currentIndex]} 
+          alt={`Imagen ${currentIndex + 1}`}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+        />
+        {showArrows && images.length > 1 && (
+          <>
+            <button 
+              onClick={prevImage}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 text-white p-1 rounded-full hover:bg-black/80 transition opacity-0 group-hover:opacity-100"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button 
+              onClick={nextImage}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 text-white p-1 rounded-full hover:bg-black/80 transition opacity-0 group-hover:opacity-100"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  // MODO DETALLE (Para la página de detalle de producto)
   return (
-    <>
-      {/* Galería principal */}
+    <div className="flex flex-col gap-4">
+      {/* Contenedor principal de la foto */}
       <div 
-        className="relative bg-gray-100 cursor-pointer"
+        className="relative w-full h-[360px] sm:h-[420px] bg-slate-50 rounded-2xl overflow-hidden flex items-center justify-center border border-gray-200 group cursor-zoom-in shadow-inner"
         onClick={openModal}
       >
-        {images.length > 0 ? (
+        <img 
+          src={images[currentIndex]} 
+          alt={`Imagen ${currentIndex + 1}`}
+          className="w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105" 
+        />
+
+        {/* Badge para indicar zoom */}
+        <div className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm px-2.5 py-1 rounded-full text-xs font-medium text-gray-700 shadow-sm opacity-0 group-hover:opacity-100 transition">
+          🔍 Haz clic para ampliar
+        </div>
+
+        {/* Flechas de navegación principal */}
+        {showArrows && images.length > 1 && (
           <>
-            <img 
-              src={images[currentIndex]} 
-              alt={`Imagen ${currentIndex + 1}`}
-              className={`${sizeClass} transition-opacity duration-300`} 
-            />
-            
-            {/* Flechas de navegación */}
-            {showArrows && images.length > 1 && (
-              <>
-                <button 
-                  onClick={prevImage}
-                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70 transition"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                <button 
-                  onClick={nextImage}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70 transition"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-                
-                {/* Indicadores */}
-                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
-                  {images.map((_, idx) => (
-                    <div 
-                      key={idx} 
-                      className={`w-2 h-2 rounded-full ${idx === currentIndex ? 'bg-white' : 'bg-white/50'}`}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
+            <button 
+              onClick={prevImage}
+              className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full shadow-md hover:shadow-lg transition transform hover:scale-110"
+              title="Anterior imagen"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button 
+              onClick={nextImage}
+              className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full shadow-md hover:shadow-lg transition transform hover:scale-110"
+              title="Siguiente imagen"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            {/* Contador de fotos en badge */}
+            <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full font-medium">
+              {currentIndex + 1} / {images.length}
+            </div>
           </>
-        ) : (
-          <div className={`${sizeClass} flex items-center justify-center text-gray-400`}>Sin imagen</div>
         )}
       </div>
 
-      {/* Modal / Lightbox */}
+      {/* Tira de miniatura (Thumbnails) para seleccionar imagen */}
+      {images.length > 1 && (
+        <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-thin">
+          {images.map((img, idx) => (
+            <button
+              key={idx}
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentIndex(idx);
+              }}
+              className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 bg-slate-50 ${
+                idx === currentIndex
+                  ? 'border-blue-600 shadow-md ring-2 ring-blue-100 scale-105'
+                  : 'border-gray-200 opacity-70 hover:opacity-100 hover:border-gray-300'
+              }`}
+            >
+              <img 
+                src={img} 
+                alt={`Miniatura ${idx + 1}`} 
+                className="w-full h-full object-cover" 
+              />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Modal / Lightbox Pantalla Completa */}
       {isModalOpen && (
         <div 
-          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div 
-            className="relative max-w-4xl w-full max-h-[90vh] flex items-center justify-center"
+            className="relative max-w-5xl w-full max-h-[90vh] flex items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Botón cerrar */}
             <button 
               onClick={closeModal}
-              className="absolute top-4 right-4 text-white bg-black/50 p-2 rounded-full hover:bg-black/70 z-10"
+              className="absolute top-2 right-2 text-white bg-white/20 hover:bg-white/40 p-2.5 rounded-full transition z-10"
+              title="Cerrar"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
 
@@ -137,7 +202,7 @@ export default function ImageGallery({
             <img 
               src={images[currentIndex]} 
               alt={`Imagen ${currentIndex + 1}`}
-              className="max-w-full max-h-[85vh] object-contain"
+              className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
             />
 
             {/* Flechas en modal */}
@@ -145,23 +210,23 @@ export default function ImageGallery({
               <>
                 <button 
                   onClick={prevImage}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-3 rounded-full hover:bg-black/70"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full transition"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
                 <button 
                   onClick={nextImage}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-3 rounded-full hover:bg-black/70"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full transition"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
 
                 {/* Contador */}
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white bg-black/50 px-4 py-2 rounded-full">
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white bg-black/60 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm font-medium">
                   {currentIndex + 1} / {images.length}
                 </div>
               </>
@@ -169,6 +234,6 @@ export default function ImageGallery({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
