@@ -44,7 +44,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     flowType: 'pkce',
     // Configurar URLs de redirección para recuperación de contraseña
-    redirectTo: defaultRedirectUrl,
+    //redirectTo: defaultRedirectUrl,
   },
 });
 
