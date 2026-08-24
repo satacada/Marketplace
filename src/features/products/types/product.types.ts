@@ -47,6 +47,7 @@ export interface Product extends BaseEntity {
   category_id: string | null;
   status: ProductStatus;
   is_deleted: boolean;
+  favorite_count?: number;
   
   // Relaciones (joins)
   categories?: Category | null;
