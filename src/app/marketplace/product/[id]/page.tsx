@@ -332,17 +332,22 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                       >
                         {/* Mapa Interactivo / Estilo OpenStreetMap real de Buenos Aires / Quilmes / Palermo */}
                         <div className="relative h-40 w-full bg-[#e5e3df] overflow-hidden flex items-center justify-center">
-                          {/* Mapa real de azulejos geográficos OpenStreetMap (100% en español) */}
+                          {/* Mapa geográfico vistoso (río azul, parques) con textos forzados en idioma español/latín (lang=es_ES) */}
                           <img
-                            src={`https://staticmap.openstreetmap.de/staticmap.php?center=${
-                              displayLoc.includes('Palermo') ? '-34.5781,-58.4233' :
-                              displayLoc.includes('Quilmes') ? '-34.7268,-58.2612' :
-                              displayLoc.includes('Barracas') ? '-34.6428,-58.3756' : '-34.6037,-58.3816'
-                            }&zoom=13&size=650x200&maptype=mapnik`}
+                            src={`https://static-maps.yandex.ru/1.x/?lang=es_ES&l=map&ll=${
+                              displayLoc.includes('Palermo') ? '-58.4233,-34.5781' :
+                              displayLoc.includes('Quilmes') ? '-58.2612,-34.7268' :
+                              displayLoc.includes('Barracas') ? '-58.3756,-34.6428' : '-58.3816,-34.6037'
+                            }&z=12&size=650,200`}
                             alt={`Mapa de ${displayLoc}`}
                             className="absolute inset-0 w-full h-full object-cover filter brightness-[0.98] contrast-[1.02] group-hover:scale-105 transition duration-500"
                             onError={(e) => {
-                              (e.target as HTMLElement).style.display = 'none';
+                              // Fallback a OpenStreetMap si la red externa lo requiere
+                              (e.target as HTMLImageElement).src = `https://staticmap.openstreetmap.de/staticmap.php?center=${
+                                displayLoc.includes('Palermo') ? '-34.5781,-58.4233' :
+                                displayLoc.includes('Quilmes') ? '-34.7268,-58.2612' :
+                                displayLoc.includes('Barracas') ? '-34.6428,-58.3756' : '-34.6037,-58.3816'
+                              }&zoom=13&size=650x200&maptype=mapnik`;
                             }}
                           />
 
