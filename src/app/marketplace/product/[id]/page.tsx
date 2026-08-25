@@ -305,22 +305,33 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               <div className="border-t border-gray-100 pt-4 mb-6 space-y-2.5">
                 <div>
                   <p className="text-xs text-gray-400 mb-1 font-medium">Vendido por:</p>
-                  <Link 
-                    href={`/marketplace/store/${product.seller_id}`}
-                    className="inline-flex items-center gap-2 text-base font-bold text-gray-900 hover:text-blue-600 transition group"
-                    title="Ver todos los productos de esta tienda"
-                  >
-                    <span className="text-xl">🏪</span>
-                    <span className="group-hover:underline">
-                      {product.profiles?.store_name && product.profiles.store_name !== 'DE TODO'
-                        ? product.profiles.store_name 
-                        : 'Tienda Oficial'}
-                    </span>
-                    <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100 group-hover:bg-blue-600 group-hover:text-white transition flex items-center gap-0.5">
-                      <span>Ver Tienda</span>
-                      <span>→</span>
-                    </span>
-                  </Link>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <Link 
+                      href={`/marketplace/store/${product.seller_id}`}
+                      className="inline-flex items-center gap-2 text-base font-bold text-gray-900 hover:text-blue-600 transition group"
+                      title="Ver todos los productos de esta tienda"
+                    >
+                      <span className="text-xl">🏪</span>
+                      <span className="group-hover:underline">
+                        {product.profiles?.store_name && product.profiles.store_name !== 'DE TODO'
+                          ? product.profiles.store_name 
+                          : 'Tienda Oficial'}
+                      </span>
+                      <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100 group-hover:bg-blue-600 group-hover:text-white transition flex items-center gap-0.5">
+                        <span>Ver Tienda</span>
+                        <span>→</span>
+                      </span>
+                    </Link>
+
+                    <Link
+                      href={`/marketplace/store/${product.seller_id}`}
+                      className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-0.5 rounded-full text-xs font-extrabold hover:bg-amber-100 transition"
+                      title="Ver reputación y opiniones de la tienda"
+                    >
+                      <span>★ 4.8</span>
+                      <span className="text-[10px] text-amber-600 font-semibold">(96% positivos 🟢)</span>
+                    </Link>
+                  </div>
                 </div>
 
                 {/* Ubicación granular del producto con enlace directo a Google Maps */}

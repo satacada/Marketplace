@@ -22,6 +22,8 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useOrders } from '@/features/orders/hooks/useOrders';
 import { useCategories } from '@/features/categories/hooks/useCategories';
 import { useAdvancedProducts } from '@/features/products/hooks/useAdvancedProducts';
+import { useSellerReviews } from '@/features/reviews/hooks/useSellerReviews';
+import SellerRatingSummaryCard from '@/components/reviews/SellerRatingSummaryCard';
 import { SortOption } from '@/features/products/types/product-filters.types';
 
 type SellerProfile = {
@@ -59,6 +61,7 @@ export default function StoreShowcasePage({ params }: { params: Promise<{ seller
   const { cart, addToCart } = useCart(userId);
   const { orders } = useOrders('buyer', userId);
   const { categories } = useCategories({ level: 1 });
+  const { reviews, summary: ratingSummary, loading: loadingReviews, submitting: submittingReview, addReview } = useSellerReviews(sellerId);
 
   const [sellerProfile, setSellerProfile] = useState<SellerProfile | null>(null);
   const [loadingSeller, setLoadingSeller] = useState(true);
@@ -214,6 +217,14 @@ export default function StoreShowcasePage({ params }: { params: Promise<{ seller
                         ✓ Vendedor Verificado
                       </span>
                     )}
+                  </div>
+
+                  {/* Rating Badge de Estrellas */}
+                  <div className="flex items-center gap-2 mt-1 font-semibold text-xs text-blue-100">
+                    <span className="bg-amber-400/20 text-amber-300 border border-amber-400/40 px-2 py-0.5 rounded-md font-extrabold flex items-center gap-1">
+                      ★ {ratingSummary.averageRating}
+                    </span>
+                    <span>({ratingSummary.totalReviews} opinión{ratingSummary.totalReviews !== 1 ? 'es' : ''} • {ratingSummary.positivePercentage}% positivos 🟢)</span>
                   </div>
 
                   <p className="text-blue-100 text-xs sm:text-sm mt-1 flex items-center gap-2 flex-wrap font-medium">
@@ -401,6 +412,19 @@ export default function StoreShowcasePage({ params }: { params: Promise<{ seller
               ))}
             </div>
           )}
+
+          {/* Sección Completa de Reputación, Estrellas y Comentarios */}
+          <SellerRatingSummaryCard
+            sellerStoreName={storeDisplayName}
+            summary={ratingSummary}
+            reviews={reviews}
+            loading={loadingReviews}
+            onAddReview={async (input) => {
+              await addReview({ seller_id: sellerId, ...input }, userId || 'guest-user');
+            }}
+            isSubmitting={submittingReview}
+            canReview={true}
+          />
         </div>
       </div>
 
