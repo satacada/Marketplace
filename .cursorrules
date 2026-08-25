@@ -1,0 +1,11 @@
+# Project Standards Enforcement for AI Agents
+
+Every AI agent working on this codebase MUST follow the standards located in:
+- `docs/standards/README.md`
+- `docs/standards/ux_specialist_guide.md`
+- `docs/standards/frontend_architecture_guide.md`
+- `docs/standards/security_patterns.md`
+- `docs/standards/design_patterns.md`
+- `docs/standards/scalability_patterns.md`
+
+Always verify code with `npx tsc --noEmit` and `npm run build` after editing.

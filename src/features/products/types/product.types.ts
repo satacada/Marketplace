@@ -47,12 +47,17 @@ export interface Product extends BaseEntity {
   category_id: string | null;
   status: ProductStatus;
   is_deleted: boolean;
+  location_name?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   favorite_count?: number;
   
   // Relaciones (joins)
   categories?: Category | null;
   profiles?: {
     store_name: string | null;
+    city?: string | null;
+    address?: string | null;
   } | null;
 }
 

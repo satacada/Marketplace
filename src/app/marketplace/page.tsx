@@ -62,6 +62,7 @@ type Product = {
   seller_id: string;
   category_id: string | null;
   status: string;
+  location_name?: string | null;
   categories: { name: string } | null;
   profiles: { store_name: string | null } | null;
   has_free_shipping?: boolean;
@@ -80,7 +81,7 @@ const ProductCard = memo(({
   product: Product; 
   userId: string | null; 
   cartItems: string[]; 
-  onAddToCart: (id: string) => void;
+  onAddToCart: (id: string, productInfo?: { title: string; price?: number; image_url: string | null; seller_id: string }) => void;
   onViewDetails: (id: string) => void;
   isFavorite: boolean;
   onToggleFavorite: (productId: string) => void;
@@ -120,11 +121,11 @@ const ProductCard = memo(({
   return (
     <>
       <div 
-        className="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden flex flex-col hover:shadow-xl transition-all duration-300 cursor-pointer group"
+        className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col hover:shadow-md transition-all duration-300 cursor-pointer group"
         onClick={handleClick}
       >
-        {/* Galería de imágenes con navegación */}
-        <div className="relative aspect-square bg-gray-100">
+        {/* Imagen compacta con navegación por flechas e indicador */}
+        <div className="relative h-40 bg-slate-50">
           {images.length > 0 ? (
             <>
               <div className="relative w-full h-full">
@@ -132,161 +133,160 @@ const ProductCard = memo(({
                   src={images[currentImageIndex]}
                   alt={product.title}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="object-cover group-hover:scale-105 transition-transform duration-300 rounded-t-2xl cursor-pointer"
                   loading="lazy"
+                  title={`Ver detalle de "${product.title}"`}
                   onClick={openLightbox}
                 />
-                
+
+                {/* Flechas de navegación de fotos en la tarjeta (izquierda / derecha) */}
                 {images.length > 1 && (
                   <>
                     <button
+                      type="button"
                       onClick={prevImage}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      aria-label="Imagen anterior"
+                      className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold shadow-md z-10"
+                      title="Foto anterior"
                     >
                       ‹
                     </button>
                     <button
+                      type="button"
                       onClick={nextImage}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      aria-label="Imagen siguiente"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold shadow-md z-10"
+                      title="Foto siguiente"
                     >
                       ›
                     </button>
+
+                    {/* Indicador visual de fotos (📷 1/3) */}
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-xs flex items-center gap-1 z-10 pointer-events-none">
+                      <span>📷</span>
+                      <span>{currentImageIndex + 1}/{images.length}</span>
+                    </div>
                   </>
                 )}
-              </div>
-              
-              {images.length > 1 && (
-                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1">
-                  {images.map((_, idx) => (
-                    <div
-                      key={idx}
-                      className={`w-2 h-2 rounded-full transition ${
-                        idx === currentImageIndex ? 'bg-white' : 'bg-white/50'
-                      }`}
-                    />
-                  ))}
+                
+                {/* Botón de Favoritos (Esquinado arriba a la derecha) */}
+                <div className="absolute top-2 right-2 z-10">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleFavorite(product.id);
+                    }}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110 ${
+                      isFavorite 
+                        ? 'bg-rose-500 text-white' 
+                        : 'bg-white/95 hover:bg-white text-gray-700 hover:text-rose-500'
+                    }`}
+                    title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill={isFavorite ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.684a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                  </button>
                 </div>
-              )}
-              
-              <button
-                onClick={(e) => openLightbox(e)}
-                className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                📷 Ver fotos
-              </button>
+
+                {/* Badges compactos */}
+                <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                  {product.has_free_shipping && (
+                    <span className="bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded font-medium shadow-xs">
+                      🚚
+                    </span>
+                  )}
+                  {product.average_rating && product.average_rating >= 4 && (
+                    <span className="bg-yellow-500 text-white text-[10px] px-1.5 py-0.5 rounded font-medium shadow-xs">
+                      ⭐ {product.average_rating.toFixed(1)}
+                    </span>
+                  )}
+                </div>
+              </div>
             </>
           ) : (
             <div className="flex items-center justify-center h-full text-gray-400">
-              <span className="text-6xl">📦</span>
+              <span className="text-4xl">📦</span>
             </div>
           )}
-          
-          {/* Badges */}
-          <div className="absolute top-2 left-2 flex flex-col gap-1">
-            {product.has_free_shipping && (
-              <span className="bg-green-500 text-white text-xs px-2 py-1 rounded font-medium">
-                🚚 Envío gratis
-              </span>
-            )}
-            {product.average_rating && product.average_rating >= 4 && (
-              <span className="bg-yellow-500 text-white text-xs px-2 py-1 rounded font-medium">
-                ⭐ {product.average_rating.toFixed(1)}
-              </span>
-            )}
-          </div>
         </div>
         
-        <div className="p-4 flex-1 flex flex-col justify-between">
+        {/* Cuerpo de la tarjeta */}
+        <div className="p-3 flex-1 flex flex-col justify-between">
           <div>
-            <div className="mb-2 flex items-center justify-between gap-2 flex-wrap">
-              <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md">
+            <div className="mb-1 flex items-center justify-between gap-1">
+              <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
                 {product.categories?.name || 'Sin categoría'}
               </span>
               
-              {userId && !isOwnProduct && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onToggleFavorite(product.id);
-                  }}
-                  className="text-gray-400 hover:text-red-500 transition text-sm p-1"
-                  title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-                >
-                  {isFavorite ? '❤️' : '🤍'}
-                </button>
-              )}
-
               {isOwnProduct && product.status === 'pending' && (
-                <span className="text-xs font-semibold text-yellow-700 bg-yellow-100 px-2 py-1 rounded border border-yellow-300">
+                <span className="text-[10px] font-semibold text-yellow-700 bg-yellow-100 px-1 py-0.5 rounded border border-yellow-300">
                   Pendiente
                 </span>
               )}
               
               {isOwnProduct && product.status === 'rejected' && (
-                <span className="text-xs font-semibold text-red-700 bg-red-100 px-2 py-1 rounded border border-red-300">
-                  ❌ Rechazado
+                <span className="text-[10px] font-semibold text-red-700 bg-red-100 px-1 py-0.5 rounded border border-red-300">
+                  ❌
                 </span>
               )}
             </div>
             
-            <h3 className="text-base font-bold text-gray-900 mb-1 hover:text-blue-600 transition line-clamp-2">
+            <h3 
+              className="text-sm font-bold text-gray-900 mb-1 hover:text-blue-600 transition line-clamp-1 cursor-pointer"
+              title={`Ver detalle de "${product.title}"`}
+            >
               {product.title}
             </h3>
             
-            <p className="text-gray-500 mb-3 line-clamp-2 text-xs">
-              {product.description}
-            </p>
-            
-            <div className="flex justify-between items-baseline mb-3">
-              <span className="text-2xl font-bold text-blue-600">
-                ${product.price?.toLocaleString('es-CL')}
-              </span>
-              <span className={`text-xs font-medium ${product.stock > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                {product.stock > 0 ? `Stock: ${product.stock}` : 'Sin stock'}
-              </span>
-            </div>
-          </div>
-          
-          {/* Botón de acción Agregar (Estilo Importadora Mitre) */}
-          <div className="pt-2">
-            {isOwnProduct ? (
-              <button disabled className="w-full py-2.5 rounded-lg font-medium bg-gray-100 text-gray-400 cursor-not-allowed text-xs">
-                Es tu producto
-              </button>
-            ) : isInCart ? (
-              <button
-                disabled
-                className="w-full py-2.5 px-4 rounded-lg font-semibold bg-blue-50 text-blue-700 border border-blue-200 cursor-default text-sm flex items-center justify-center gap-2"
-              >
-                <span>✓</span>
-                <span>En carrito</span>
-              </button>
-            ) : product.stock === 0 ? (
-              <button
-                disabled
-                className="w-full py-2.5 px-4 rounded-lg font-medium bg-gray-100 text-gray-400 cursor-not-allowed text-sm flex items-center justify-center gap-2"
-              >
-                <span>Sin stock</span>
-              </button>
-            ) : (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAddToCart(product.id);
-                }}
-                className="w-full py-2.5 px-4 rounded-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white transition text-sm flex items-center justify-center gap-2 shadow-xs active:scale-[0.98]"
-              >
-                <span className="text-base">🛒</span>
-                <span>Agregar</span>
-              </button>
-            )}
+            {/* Precio, Stock y Botón de Carrito */}
+            <div className="flex items-center justify-between my-1">
+              <div title={`Ver detalle de "${product.title}"`} className="cursor-pointer">
+                <div className="text-base font-extrabold text-blue-600">
+                  ${product.price?.toLocaleString('es-CL')}
+                </div>
+                <div className={`text-[10px] font-medium ${product.stock > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                  {product.stock > 0 ? `Stock: ${product.stock}` : 'Sin stock'}
+                </div>
+              </div>
 
-            <div className="pt-2.5 mt-2.5 border-t border-gray-100 flex justify-between items-center text-xs text-gray-400">
-              <span>Vendido por:</span>
-              <span className="font-medium text-gray-600 truncate max-w-[130px]">
-                {product.profiles?.store_name || 'Tienda sin nombre'}
+              {/* Botón de Añadir al Carrito con cambio de color verde al estar agregado */}
+              {!isOwnProduct && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddToCart(product.id, {
+                      title: product.title,
+                      price: product.price,
+                      image_url: product.image_urls?.[0] || null,
+                      seller_id: product.seller_id
+                    });
+                  }}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110 flex-shrink-0 ${
+                    isInCart 
+                      ? 'bg-emerald-500 hover:bg-emerald-600 text-white ring-2 ring-emerald-200' 
+                      : 'bg-blue-600 hover:bg-blue-700 text-white'
+                  }`}
+                  title={isInCart ? 'Agregado al carrito (haz clic para sumar otro)' : 'Añadir al carrito'}
+                >
+                  {isInCart ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  )}
+                </button>
+              )}
+            </div>
+            
+            {/* Ubicación del producto */}
+            <div className="flex items-center gap-1 text-[10px] text-gray-500 mt-1 pt-1 border-t border-gray-100">
+              <span>📍</span>
+              <span className="truncate font-medium">
+                {product.location_name || product.profiles?.store_name || 'Buenos Aires'}
               </span>
             </div>
           </div>
@@ -365,6 +365,12 @@ export default function MarketplacePage() {
   const [hasFreeShipping, setHasFreeShipping] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   
+  // Estado de Ubicación y Geolocalización (Estilo Facebook Marketplace)
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [locationName, setLocationName] = useState('Buenos Aires');
+  const [locationRadius, setLocationRadius] = useState(6);
+  const [isGeolocating, setIsGeolocating] = useState(false);
+
   // Productos vistos recientemente
   const [recentlyViewed, setRecentlyViewed] = useState<string[]>([]);
   const [favoriteProductIds, setFavoriteProductIds] = useState<Set<string>>(new Set());
@@ -484,19 +490,8 @@ export default function MarketplacePage() {
     };
   }, [hasMore, loading, loadMore]);
 
-  const handleAddToCart = async (productId: string) => {
-    if (!userId) {
-      showModalMessage(
-        'Iniciar Sesión Requerido',
-        'Debes iniciar sesión para agregar productos a tu carrito de compras.',
-        'info',
-        '/auth',
-        'Iniciar Sesión'
-      );
-      return;
-    }
-
-    const result = await addToCart({ productId, quantity: 1 });
+  const handleAddToCart = async (productId: string, productInfo?: { title: string; price?: number; image_url: string | null; seller_id: string }) => {
+    const result = await addToCart({ productId, quantity: 1 }, productInfo);
     if (!result.success) {
       showModalMessage('Error', result.error || 'No se pudo agregar el producto al carrito', 'error');
     }
@@ -658,26 +653,66 @@ export default function MarketplacePage() {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar de filtros */}
+          {/* Sidebar de filtros Estilo Facebook Marketplace */}
           <aside className={`lg:w-64 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-            <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 sticky top-4">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-bold text-gray-900">Filtros</h3>
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 sticky top-4">
+              <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
+                <h3 className="text-base font-extrabold text-gray-900">Filtros</h3>
                 <button
                   onClick={clearFilters}
-                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                  className="text-xs text-blue-600 hover:text-blue-800 font-semibold"
                 >
-                  Limpiar
+                  Limpiar todo
                 </button>
               </div>
 
+              {/* Filtro de Ubicación Estilo Facebook Marketplace */}
+              <div className="mb-5 border-b border-gray-100 pb-4">
+                <button
+                  type="button"
+                  onClick={() => setShowLocationModal(true)}
+                  className="w-full text-left font-semibold text-blue-600 hover:text-blue-800 transition text-sm flex items-center justify-between group"
+                >
+                  <span className="flex items-center gap-1.5 truncate">
+                    <span>📍</span>
+                    <span className="underline decoration-dotted">{locationName} · En un radio de {locationRadius} km</span>
+                  </span>
+                </button>
+
+                {/* Radio Buttons para Ordenamiento (Sugerencias, Distancia, Fecha, Precio) */}
+                <div className="mt-4 space-y-2">
+                  <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Ordenar por</h4>
+                  {[
+                    { id: 'relevance', label: 'Sugerencias' },
+                    { id: 'distance', label: 'Distancia: más cerca' },
+                    { id: 'newest', label: 'Fecha de publicación: más recientes' },
+                    { id: 'price_asc', label: 'Precio: más bajo' },
+                    { id: 'price_desc', label: 'Precio: más alto' },
+                  ].map((opt) => (
+                    <label key={opt.id} className="flex items-center justify-between text-sm text-gray-700 cursor-pointer hover:text-blue-600 py-0.5">
+                      <span>{opt.label}</span>
+                      <input
+                        type="radio"
+                        name="sortByOption"
+                        checked={sortBy === opt.id}
+                        onChange={() => {
+                          setSortBy(opt.id as SortOption);
+                          setHookSortBy(opt.id as SortOption);
+                        }}
+                        className="text-blue-600 focus:ring-blue-500 h-4 w-4 accent-blue-600"
+                      />
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               {/* Categorías */}
-              <div className="mb-6">
-                <h4 className="font-semibold text-gray-700 mb-3">Categorías</h4>
+              <div className="mb-5 border-b border-gray-100 pb-4">
+                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Categorías</h4>
                 <select
                   value={selectedCategoryId}
                   onChange={(e) => handleCategoryChange(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  className="w-full p-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
                 >
                   <option value="">Todas las categorías</option>
                   {categories.map((cat) => (
@@ -689,29 +724,29 @@ export default function MarketplacePage() {
               </div>
 
               {/* Rango de precio */}
-              <div className="mb-6">
-                <h4 className="font-semibold text-gray-700 mb-3">Precio</h4>
+              <div className="mb-5 border-b border-gray-100 pb-4">
+                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Precio</h4>
                 <div className="flex gap-2">
                   <input
                     type="number"
                     placeholder="Mín"
                     value={priceRange.min || ''}
                     onChange={(e) => handlePriceRangeChange('min', e.target.value)}
-                    className="w-1/2 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-1/2 p-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   />
                   <input
                     type="number"
                     placeholder="Máx"
                     value={priceRange.max || ''}
                     onChange={(e) => handlePriceRangeChange('max', e.target.value)}
-                    className="w-1/2 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-1/2 p-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   />
                 </div>
               </div>
 
               {/* Envío gratis */}
-              <div className="mb-6">
-                <label className="flex items-center gap-2 cursor-pointer">
+              <div className="mb-4">
+                <label className="flex items-center gap-2 cursor-pointer text-sm">
                   <input
                     type="checkbox"
                     checked={hasFreeShipping}
@@ -723,15 +758,15 @@ export default function MarketplacePage() {
               </div>
 
               {/* Resultados */}
-              <div className="pt-4 border-t border-gray-200">
-                <p className="text-sm text-gray-600">
+              <div className="pt-3 border-t border-gray-100">
+                <p className="text-xs text-gray-500 font-medium">
                   {total} productos encontrados
                 </p>
               </div>
             </div>
           </aside>
 
-          {/* Grid de productos */}
+          {/* Grid de productos compacto estilo Facebook Marketplace */}
           <main className="flex-1">
             {loading && products.length === 0 ? (
               <div className="flex items-center justify-center py-12">
@@ -741,24 +776,24 @@ export default function MarketplacePage() {
                 </div>
               </div>
             ) : products.length === 0 ? (
-              <div className="bg-white p-12 rounded-lg shadow-md border border-gray-100 text-center">
+              <div className="bg-white p-12 rounded-2xl shadow-sm border border-gray-100 text-center">
                 <span className="text-6xl mb-4 block">🔍</span>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
                   No se encontraron productos
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-500 text-sm mb-4">
                   Intenta con otros filtros o términos de búsqueda
                 </p>
                 <button
                   onClick={clearFilters}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                  className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition font-bold text-sm shadow-sm"
                 >
                   Limpiar filtros
                 </button>
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5">
                   {products.map((product) => (
                     <ProductCard 
                       key={product.id} 
@@ -854,6 +889,111 @@ export default function MarketplacePage() {
               </Button>
             )}
           </div>
+        </div>
+      </Modal>
+
+      {/* Modal Cambiar Ubicación Estilo Facebook Marketplace */}
+      <Modal
+        isOpen={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        size="md"
+      >
+        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
+          <h3 className="text-xl font-extrabold text-gray-900">Cambiar ubicación</h3>
+          <button 
+            onClick={() => setShowLocationModal(false)} 
+            className="text-gray-400 hover:text-gray-600 font-bold text-lg p-1 rounded-full hover:bg-gray-200/60 transition"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="p-6 space-y-5">
+          <p className="text-xs text-gray-500 font-medium">
+            Buscar por ciudad, localidad o código postal
+          </p>
+
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">Ubicación</label>
+            <div className="relative">
+              <input
+                type="text"
+                value={locationName}
+                onChange={(e) => setLocationName(e.target.value)}
+                placeholder="Ej: Buenos Aires, Quilmes, Santiago..."
+                className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm font-medium"
+              />
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">📍</span>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">Radio</label>
+            <select
+              value={locationRadius}
+              onChange={(e) => setLocationRadius(Number(e.target.value))}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm font-medium bg-white"
+            >
+              <option value={2}>2 kilómetros</option>
+              <option value={6}>6 kilómetros</option>
+              <option value={10}>10 kilómetros</option>
+              <option value={25}>25 kilómetros</option>
+              <option value={50}>50 kilómetros</option>
+              <option value={100}>100 kilómetros</option>
+            </select>
+          </div>
+
+          {/* Previsualización visual de mapa interactivo real de la ciudad */}
+          <div className="relative h-52 w-full bg-slate-100 rounded-2xl overflow-hidden border border-gray-200 shadow-inner">
+            <iframe
+              title={`Mapa de ${locationName}`}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              src={`https://maps.google.com/maps?q=${encodeURIComponent(locationName || 'Buenos Aires')}&t=&z=${locationRadius <= 6 ? 13 : locationRadius <= 25 ? 11 : 9}&ie=UTF8&iwloc=&output=embed`}
+              className="w-full h-full rounded-2xl"
+            />
+            
+            {/* Pill de cobertura de radio sobre el mapa */}
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10">
+              <span className="text-xs font-bold text-blue-900 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-lg border border-blue-200 flex items-center gap-1.5">
+                <span className="animate-pulse">📍</span>
+                <span>{locationName || 'Buenos Aires'} (Radio: {locationRadius} km)</span>
+              </span>
+            </div>
+
+            {/* Botón GPS */}
+            <button
+              type="button"
+              onClick={() => {
+                if (navigator.geolocation) {
+                  setIsGeolocating(true);
+                  navigator.geolocation.getCurrentPosition(
+                    () => {
+                      setLocationName('Buenos Aires');
+                      setIsGeolocating(false);
+                    },
+                    () => setIsGeolocating(false)
+                  );
+                }
+              }}
+              className="absolute top-3 right-3 z-10 bg-white/95 hover:bg-white backdrop-blur-md text-gray-800 p-2 px-3 rounded-xl shadow-md text-xs font-bold flex items-center gap-1.5 border border-gray-200 transition active:scale-95"
+              title="Obtener coordenadas GPS de mi dispositivo"
+            >
+              <span>🎯</span>
+              <span>{isGeolocating ? 'Obteniendo GPS...' : 'GPS'}</span>
+            </button>
+          </div>
+
+          <Button
+            onClick={() => setShowLocationModal(false)}
+            fullWidth
+            variant="primary"
+            className="py-3.5 text-base font-bold rounded-xl shadow-sm"
+          >
+            Aplicar
+          </Button>
         </div>
       </Modal>
     </div>

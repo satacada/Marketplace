@@ -70,8 +70,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     setShowModal(true);
   };
   
-  const { cart } = useCart();
-  const { orders } = useOrders();
+  const { cart } = useCart(userId);
+  const { orders } = useOrders('buyer', userId);
 
   const router = useRouter();
 
@@ -291,34 +291,52 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               </div>
             </div>
 
-            {/* Botones de acción */}
-            <div className="flex gap-3 pt-4 border-t border-gray-100">
+            {/* Botones de acción equilibrados y proporcionales (Estándares UX & Design) */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100">
               <button
                 onClick={handleAddToCart}
                 disabled={product.stock === 0 || product.seller_id === userId}
-                className={`flex-1 py-3.5 px-6 rounded-xl font-bold text-white transition shadow-sm flex items-center justify-center gap-2 text-base ${
+                className={`flex-1 py-3.5 px-6 rounded-xl font-bold transition shadow-sm flex items-center justify-center gap-2.5 text-base ${
                   product.stock === 0 || product.seller_id === userId
-                    ? 'bg-gray-300 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
+                    ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                    : cart.items.some(item => item.product_id === productId)
+                    ? 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white ring-2 ring-emerald-200 shadow-md'
+                    : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white'
                 }`}
               >
-                <span>🛒</span>
-                <span>{product.seller_id === userId ? 'Es tu producto' : 'Agregar al carrito'}</span>
+                {cart.items.some(item => item.product_id === productId) ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                )}
+                <span>
+                  {product.seller_id === userId 
+                    ? 'Es tu producto' 
+                    : cart.items.some(item => item.product_id === productId) 
+                    ? 'Agregado al carrito' 
+                    : 'Agregar al carrito'}
+                </span>
               </button>
               
-              {/* Botón de Favorito estilizado */}
+              {/* Botón de Favorito proporcional */}
               {product.seller_id !== userId && (
                 <button
                   onClick={handleToggleFavorite}
-                  className={`px-5 py-3.5 rounded-xl font-bold transition flex items-center justify-center gap-2 border shadow-2xs ${
+                  className={`py-3.5 px-6 rounded-xl font-bold transition flex items-center justify-center gap-2 border shadow-xs sm:w-44 ${
                     isFavorite
-                      ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
+                      ? 'bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100'
                       : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-blue-500'
                   }`}
                   title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
                 >
-                  <span className="text-xl">{isFavorite ? '❤️' : '🤍'}</span>
-                  <span className="text-sm font-semibold">{isFavorite ? 'Favorito' : 'Favorito'}</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill={isFavorite ? "currentColor" : "none"} viewBox="0 0 24 24" stroke={isFavorite ? "currentColor" : "currentColor"} strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.684a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                  <span className="text-base font-bold">{isFavorite ? 'Favorito' : 'Favorito'}</span>
                 </button>
               )}
             </div>

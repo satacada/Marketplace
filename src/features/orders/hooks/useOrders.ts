@@ -37,7 +37,7 @@ import { Order, CreateOrderInput, OrderSummary } from '../types/order.types';
 
 type OrderType = 'buyer' | 'seller';
 
-export function useOrders(type: OrderType, userId: string | null) {
+export function useOrders(type: OrderType = 'buyer', userId: string | null = null) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
