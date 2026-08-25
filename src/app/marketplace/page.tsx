@@ -678,7 +678,7 @@ export default function MarketplacePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 transition-colors duration-200">
       <Header
         title=""
         cartItemCount={cart.itemCount}
@@ -689,11 +689,11 @@ export default function MarketplacePage() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header de búsqueda moderno y sobrio */}
-        <div className="bg-white p-2.5 sm:p-3.5 rounded-2xl shadow-xs border border-gray-200/90 mb-6 transition-all hover:shadow-sm">
+        <div className="bg-white dark:bg-slate-900 p-2.5 sm:p-3.5 rounded-2xl shadow-xs border border-gray-200/90 dark:border-slate-800 mb-6 transition-all hover:shadow-sm">
           <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row items-center gap-3">
             {/* Campo de búsqueda integrado sobrio */}
-            <div className="relative flex-1 w-full flex items-center bg-gray-50/80 hover:bg-gray-50 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 rounded-xl border border-gray-200 transition-all">
-              <span className="pl-3.5 text-gray-400">
+            <div className="relative flex-1 w-full flex items-center bg-gray-50/80 dark:bg-slate-800/80 hover:bg-gray-50 dark:hover:bg-slate-800 focus-within:bg-white dark:focus-within:bg-slate-900 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 rounded-xl border border-gray-200 dark:border-slate-700 transition-all">
+              <span className="pl-3.5 text-gray-400 dark:text-slate-400">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -703,7 +703,7 @@ export default function MarketplacePage() {
                 placeholder="Buscar productos por nombre o descripción..."
                 value={searchInputValue}
                 onChange={handleSearchChange}
-                className="w-full py-2.5 px-3 text-sm text-gray-900 placeholder-gray-400 bg-transparent focus:outline-none font-medium"
+                className="w-full py-2.5 px-3 text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 bg-transparent focus:outline-none font-medium"
               />
               <button
                 type="submit"
@@ -720,7 +720,7 @@ export default function MarketplacePage() {
                 <select
                   value={sortBy}
                   onChange={handleSortChange}
-                  className="w-full py-2.5 pl-3.5 pr-8 border border-gray-200 rounded-xl bg-gray-50/80 hover:bg-gray-50 text-gray-700 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none cursor-pointer transition"
+                  className="w-full py-2.5 pl-3.5 pr-8 border border-gray-200 dark:border-slate-700 rounded-xl bg-gray-50/80 dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none cursor-pointer transition"
                 >
                   <option value="relevance">Ordenar: Relevancia</option>
                   <option value="price_asc">Precio: Menor a Mayor</option>
@@ -728,7 +728,7 @@ export default function MarketplacePage() {
                   <option value="rating_desc">Mejor valorados</option>
                   <option value="newest">Más recientes</option>
                 </select>
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[10px]">
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 pointer-events-none text-[10px]">
                   ▼
                 </span>
               </div>
@@ -738,7 +738,7 @@ export default function MarketplacePage() {
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className="lg:hidden w-full py-2 bg-gray-100 text-gray-700 font-semibold text-xs rounded-xl hover:bg-gray-200 transition"
+              className="lg:hidden w-full py-2 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-200 font-semibold text-xs rounded-xl hover:bg-gray-200 dark:hover:bg-slate-700 transition"
             >
               {showFilters ? 'Ocultar filtros' : 'Mostrar filtros'}
             </button>
@@ -748,23 +748,23 @@ export default function MarketplacePage() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar de filtros Estilo Facebook Marketplace */}
           <aside className={`lg:w-64 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-            <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 sticky top-4">
-              <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
-                <h3 className="text-base font-extrabold text-gray-900">Filtros</h3>
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 sticky top-4">
+              <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-100 dark:border-slate-800">
+                <h3 className="text-base font-extrabold text-gray-900 dark:text-slate-100">Filtros</h3>
                 <button
                   onClick={clearFilters}
-                  className="text-xs text-blue-600 hover:text-blue-800 font-semibold"
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-semibold"
                 >
                   Limpiar todo
                 </button>
               </div>
 
               {/* Filtro de Ubicación Estilo Facebook Marketplace */}
-              <div className="mb-5 border-b border-gray-100 pb-4">
+              <div className="mb-5 border-b border-gray-100 dark:border-slate-800 pb-4">
                 <button
                   type="button"
                   onClick={() => setShowLocationModal(true)}
-                  className="w-full text-left font-semibold text-blue-600 hover:text-blue-800 transition text-sm flex items-center justify-between group"
+                  className="w-full text-left font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition text-sm flex items-center justify-between group"
                 >
                   <span className="flex items-center gap-1.5 truncate">
                     <span>📍</span>
@@ -774,7 +774,7 @@ export default function MarketplacePage() {
 
                 {/* Radio Buttons para Ordenamiento (Sugerencias, Distancia, Fecha, Precio) */}
                 <div className="mt-4 space-y-2">
-                  <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Ordenar por</h4>
+                  <h4 className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Ordenar por</h4>
                   {[
                     { id: 'relevance', label: 'Sugerencias' },
                     { id: 'distance', label: 'Distancia: más cerca' },
@@ -782,7 +782,7 @@ export default function MarketplacePage() {
                     { id: 'price_asc', label: 'Precio: más bajo' },
                     { id: 'price_desc', label: 'Precio: más alto' },
                   ].map((opt) => (
-                    <label key={opt.id} className="flex items-center justify-between text-sm text-gray-700 cursor-pointer hover:text-blue-600 py-0.5">
+                    <label key={opt.id} className="flex items-center justify-between text-sm text-gray-700 dark:text-slate-300 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 py-0.5">
                       <span>{opt.label}</span>
                       <input
                         type="radio"
@@ -800,12 +800,12 @@ export default function MarketplacePage() {
               </div>
 
               {/* Categorías */}
-              <div className="mb-5 border-b border-gray-100 pb-4">
-                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Categorías</h4>
+              <div className="mb-5 border-b border-gray-100 dark:border-slate-800 pb-4">
+                <h4 className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Categorías</h4>
                 <select
                   value={selectedCategoryId}
                   onChange={(e) => handleCategoryChange(e.target.value)}
-                  className="w-full p-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
+                  className="w-full p-2.5 border border-gray-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 text-sm"
                 >
                   <option value="">Todas las categorías</option>
                   {categories.map((cat) => (
@@ -817,22 +817,22 @@ export default function MarketplacePage() {
               </div>
 
               {/* Rango de precio */}
-              <div className="mb-5 border-b border-gray-100 pb-4">
-                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Precio</h4>
+              <div className="mb-5 border-b border-gray-100 dark:border-slate-800 pb-4">
+                <h4 className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Precio</h4>
                 <div className="flex gap-2">
                   <input
                     type="number"
                     placeholder="Mín"
                     value={priceRange.min || ''}
                     onChange={(e) => handlePriceRangeChange('min', e.target.value)}
-                    className="w-1/2 p-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    className="w-1/2 p-2 border border-gray-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 text-sm"
                   />
                   <input
                     type="number"
                     placeholder="Máx"
                     value={priceRange.max || ''}
                     onChange={(e) => handlePriceRangeChange('max', e.target.value)}
-                    className="w-1/2 p-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    className="w-1/2 p-2 border border-gray-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 text-sm"
                   />
                 </div>
               </div>
@@ -846,13 +846,13 @@ export default function MarketplacePage() {
                     onChange={(e) => setHasFreeShipping(e.target.checked)}
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
-                  <span className="text-gray-700">Solo envío gratis</span>
+                  <span className="text-gray-700 dark:text-slate-300">Solo envío gratis</span>
                 </label>
               </div>
 
               {/* Resultados */}
-              <div className="pt-3 border-t border-gray-100">
-                <p className="text-xs text-gray-500 font-medium">
+              <div className="pt-3 border-t border-gray-100 dark:border-slate-800">
+                <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">
                   {total} productos encontrados
                 </p>
               </div>

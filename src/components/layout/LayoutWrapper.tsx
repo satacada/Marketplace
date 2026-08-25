@@ -60,7 +60,9 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   return (
     <ThemeProvider>
       {isPublicNoSidebar ? (
-        <>{children}</>
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 transition-colors duration-300">
+          {children}
+        </div>
       ) : (
         <div className="flex min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 transition-colors duration-300">
           <SidebarWrapper />
