@@ -42,6 +42,7 @@ type CustomerReview = {
   comment: string;
   date: string;
   category: 'description' | 'shipping' | 'communication' | 'packaging';
+  periodLabel?: string;
 };
 
 type RatingEvolutionPoint = {
@@ -64,6 +65,10 @@ export default function SalesAnalyticsPage() {
   const [monthlyGoal, setMonthlyGoal] = useState<number>(20000);
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [newGoalInput, setNewGoalInput] = useState<string>('20000');
+
+  // INTERACTIVIDAD DE CLIC EN BARRAS DE LOS GRÁFICOS
+  const [selectedSalesBarLabel, setSelectedSalesBarLabel] = useState<string | null>(null);
+  const [selectedRatingBarLabel, setSelectedRatingBarLabel] = useState<string | null>(null);
 
   const [summary, setSummary] = useState<SalesSummary>({
     totalRevenue: 0,
@@ -92,7 +97,8 @@ export default function SalesAnalyticsPage() {
       rating: 5,
       comment: '¡El producto llegó súper rápido y exactamente igual a las fotos! El vendedor respondió mis dudas de talle al instante.',
       date: '24/08/2026',
-      category: 'shipping'
+      category: 'shipping',
+      periodLabel: 'Sem 4 (Actual)'
     },
     {
       id: 'r2',
@@ -101,7 +107,8 @@ export default function SalesAnalyticsPage() {
       rating: 5,
       comment: 'Excelente calidad de empaque. Vino bien cubierto contra humedad. Súper recomendado.',
       date: '22/08/2026',
-      category: 'packaging'
+      category: 'packaging',
+      periodLabel: 'Sem 4 (Actual)'
     },
     {
       id: 'r3',
@@ -110,7 +117,8 @@ export default function SalesAnalyticsPage() {
       rating: 4,
       comment: 'El reloj funciona muy bien y la descripción del producto era precisa. Tardó 1 día más de lo esperado por el correo.',
       date: '20/08/2026',
-      category: 'description'
+      category: 'description',
+      periodLabel: 'Sem 3'
     },
     {
       id: 'r4',
@@ -119,7 +127,8 @@ export default function SalesAnalyticsPage() {
       rating: 5,
       comment: 'Muy buena atención por mensaje. Resolvió mi duda sobre la garantía antes de comprar.',
       date: '18/08/2026',
-      category: 'communication'
+      category: 'communication',
+      periodLabel: 'Sem 2'
     },
     {
       id: 'r5',
@@ -128,7 +137,8 @@ export default function SalesAnalyticsPage() {
       rating: 5,
       comment: 'Empaque Impecable y el producto coincide 100% con las medidas especificadas en la publicación.',
       date: '14/08/2026',
-      category: 'packaging'
+      category: 'packaging',
+      periodLabel: 'Sem 1'
     }
   ];
 
@@ -182,8 +192,13 @@ export default function SalesAnalyticsPage() {
   }, []);
 
   useEffect(() => {
+    setSelectedSalesBarLabel(null); // reset ear selection on range change
     loadSalesData();
   }, [timeRange, monthlyGoal, isDemoMode]);
+
+  useEffect(() => {
+    setSelectedRatingBarLabel(null); // reset rating bar selection on range change
+  }, [ratingEvolutionRange]);
 
   const loadSalesData = async () => {
     setLoading(true);
@@ -379,8 +394,28 @@ export default function SalesAnalyticsPage() {
     }
   };
 
+  const getTimeRangeText = (tr: TimeRange) => {
+    switch (tr) {
+      case '7d': return 'Últimos 7 Días';
+      case '30d': return 'Últimos 30 Días';
+      case 'month': return 'Este Mes';
+      case 'year': return 'Este Año';
+      case 'range_years': return 'Rango de Años (2023-2026)';
+    }
+  };
+
+  const getRatingEvolutionText = (rr: RatingEvolutionRange) => {
+    switch (rr) {
+      case 'week': return 'Por Semana';
+      case 'month': return 'Por Mes';
+      case 'year': return 'Por Año';
+      case 'range_years': return 'Rango de Años';
+    }
+  };
+
   const filteredReviews = demoReviews.filter(r => {
     if (reviewCategory !== 'all' && r.category !== reviewCategory) return false;
+    if (selectedRatingBarLabel && r.periodLabel && r.periodLabel !== selectedRatingBarLabel) return false;
     return true;
   });
 
@@ -562,40 +597,95 @@ export default function SalesAnalyticsPage() {
                 </div>
               </div>
 
-              {/* GRÁFICO VISUAL DINÁMICO */}
+              {/* GRÁFICO VISUAL DINÁMICO CON INTERACTIVIDAD DE CLIC EN BARRAS */}
               <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-4">
-                <div className="flex justify-between items-center border-b border-gray-100 dark:border-slate-800 pb-3">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-gray-100 dark:border-slate-800 pb-3">
                   <div>
                     <h2 className="text-base font-extrabold text-gray-900 dark:text-slate-100">
-                      📈 Gráfico Visual de Ventas ({timeRange === '7d' ? '7 Días' : timeRange === '30d' ? '30 Días' : timeRange === 'month' ? 'Este Mes' : timeRange === 'year' ? 'Este Año' : 'Rango de Años'})
+                      📈 Gráfico Visual de Ventas ({getTimeRangeText(timeRange)})
                     </h2>
-                    <p className="text-xs text-gray-500 dark:text-slate-400">Evolución de ingresos generados en el intervalo seleccionado</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400">
+                      Haz clic en cualquier barra para filtrar los datos de abajo por el período exacto elegido.
+                    </p>
                   </div>
+
+                  {selectedSalesBarLabel && (
+                    <button
+                      onClick={() => setSelectedSalesBarLabel(null)}
+                      className="px-3 py-1 bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-blue-200 rounded-full text-xs font-black hover:bg-blue-200 transition flex items-center gap-1 border border-blue-300 dark:border-blue-700"
+                    >
+                      <span>🔍 Filtrado: {selectedSalesBarLabel}</span>
+                      <span className="text-red-500 font-extrabold ml-1">✕ Ver Todo</span>
+                    </button>
+                  )}
                 </div>
 
                 <div className="pt-6 pb-2">
                   <div className="flex items-end justify-between gap-3 h-52 px-2 border-b border-gray-200 dark:border-slate-700 pb-2">
-                    {dailySales.map((d, i) => (
-                      <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
-                        <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 opacity-90 transition transform">
-                          ${d.revenue}
-                        </span>
+                    {dailySales.map((d, i) => {
+                      const isSelected = selectedSalesBarLabel === d.date;
+                      return (
                         <div
-                          className="w-full max-w-[56px] bg-gradient-to-t from-blue-600 via-indigo-600 to-blue-400 rounded-t-xl transition-all duration-700 shadow-2xs relative"
-                          style={{ height: `${d.heightPercent}%` }}
+                          key={i}
+                          onClick={() => setSelectedSalesBarLabel(isSelected ? null : d.date)}
+                          className="flex-1 flex flex-col items-center gap-2 h-full justify-end group cursor-pointer"
+                          title={`Haz clic para filtrar los datos de abajo por: ${d.date}`}
                         >
-                          <div className="absolute top-1 inset-x-1 h-1.5 bg-white/30 rounded-full" />
+                          <span className={`text-[10px] font-black transition transform ${
+                            isSelected ? 'text-emerald-600 dark:text-emerald-400 scale-110' : 'text-blue-600 dark:text-blue-400 opacity-90'
+                          }`}>
+                            ${d.revenue}
+                          </span>
+
+                          <div
+                            className={`w-full max-w-[56px] rounded-t-xl transition-all duration-300 shadow-2xs relative ${
+                              isSelected
+                                ? 'bg-gradient-to-t from-emerald-600 via-teal-500 to-emerald-400 ring-4 ring-emerald-400 dark:ring-emerald-500 scale-105 shadow-md'
+                                : 'bg-gradient-to-t from-blue-600 via-indigo-600 to-blue-400 group-hover:from-blue-500 group-hover:to-indigo-500'
+                            }`}
+                            style={{ height: `${d.heightPercent}%` }}
+                          >
+                            <div className="absolute top-1 inset-x-1 h-1.5 bg-white/40 rounded-full" />
+                            {isSelected && (
+                              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white shadow-xs" />
+                            )}
+                          </div>
+                          
+                          <span className={`text-[11px] font-extrabold mt-1 transition ${
+                            isSelected ? 'text-emerald-700 dark:text-emerald-300 font-black underline' : 'text-gray-600 dark:text-slate-300'
+                          }`}>
+                            {d.date}
+                          </span>
                         </div>
-                        <span className="text-[11px] font-extrabold text-gray-600 dark:text-slate-300 mt-1">{d.date}</span>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </div>
 
-              {/* RANKING TOP 5 PRODUCTOS */}
+              {/* RANKING TOP 5 PRODUCTOS CON SUBTÍTULO DINÁMICO */}
               <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-4">
-                <h2 className="text-base font-extrabold text-gray-900 dark:text-slate-100">🚀 Ranking de Productos Más Vendidos</h2>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-gray-100 dark:border-slate-800 pb-3">
+                  <div>
+                    <h2 className="text-base font-extrabold text-gray-900 dark:text-slate-100 flex items-center gap-2">
+                      <span>🚀 Ranking de Productos Más Vendidos</span>
+                    </h2>
+                    {/* SUBTÍTULO DINÁMICO POR PERÍODO O BARRA SELECCIONADA */}
+                    <p className="text-xs font-bold text-blue-600 dark:text-blue-400 mt-0.5">
+                      {selectedSalesBarLabel ? (
+                        <span>🔍 Sub-Resumen de Productos filtrado por la barra seleccionada: <strong>{selectedSalesBarLabel}</strong></span>
+                      ) : (
+                        <span>📅 Mostrando datos acumulados del período activo: <strong>{getTimeRangeText(timeRange)}</strong></span>
+                      )}
+                    </p>
+                  </div>
+
+                  {selectedSalesBarLabel && (
+                    <span className="bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-xs font-extrabold px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
+                      Filtro Activo: {selectedSalesBarLabel}
+                    </span>
+                  )}
+                </div>
 
                 {topProducts.length === 0 ? (
                   <div className="py-8 text-center text-xs text-gray-400">Sin datos de productos vendidos aún.</div>
@@ -615,7 +705,7 @@ export default function SalesAnalyticsPage() {
                             )}
                             <div className="min-w-0">
                               <p className="text-xs font-bold text-gray-900 dark:text-slate-100 truncate max-w-[170px] sm:max-w-xs">{p.title}</p>
-                              <p className="text-[10px] text-gray-500 dark:text-slate-400 font-medium">Stock: {p.stock} u. | {p.unitsSold} vendidas</p>
+                              <p className="text-[10px] text-gray-500 dark:text-slate-400 font-medium">Stock: {p.stock} u. | {p.unitsSold} vendidas en {selectedSalesBarLabel || getTimeRangeText(timeRange)}</p>
                             </div>
                           </div>
 
@@ -705,54 +795,91 @@ export default function SalesAnalyticsPage() {
           {activeTab === 'audit' && (
             <div className="space-y-6">
               
-              {/* GRÁFICO VISUAL DE EVOLUCIÓN DE PUNTAJE CON FILTROS POR SEMANA, MES, AÑO Y RANGO DE AÑOS */}
+              {/* GRÁFICO VISUAL DE EVOLUCIÓN DE PUNTAJE CON FILTROS Y CLIC EN BARRAS */}
               <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-gray-100 dark:border-slate-800 pb-4">
                   <div>
                     <h2 className="text-base font-extrabold text-gray-900 dark:text-slate-100 flex items-center gap-2">
                       <span>📊 Gráfico Visual de Evolución de Puntaje y Reputación</span>
                     </h2>
-                    <p className="text-xs text-gray-500 dark:text-slate-400">Tendencia histórica de mejoría en la atención del vendedor</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400">
+                      Haz clic en cualquier barra de reputación para filtrar las opiniones de clientes de abajo.
+                    </p>
                   </div>
 
-                  {/* SELECTOR DE FILTRO DE EVOLUCIÓN: SEMANA, MES, AÑO Y RANGO DE AÑOS */}
-                  <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-x-auto">
-                    {(['week', 'month', 'year', 'range_years'] as RatingEvolutionRange[]).map((r) => (
+                  <div className="flex items-center gap-2">
+                    {selectedRatingBarLabel && (
                       <button
-                        key={r}
-                        onClick={() => setRatingEvolutionRange(r)}
-                        className={`px-3 py-1 rounded-xl text-xs font-extrabold transition whitespace-nowrap ${
-                          ratingEvolutionRange === r 
-                            ? 'bg-blue-600 text-white shadow-2xs' 
-                            : 'text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-700'
-                        }`}
+                        onClick={() => setSelectedRatingBarLabel(null)}
+                        className="px-3 py-1 bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 rounded-full text-xs font-black hover:bg-amber-200 transition flex items-center gap-1 border border-amber-300 dark:border-amber-700"
                       >
-                        {r === 'week' ? 'Por Semana' : r === 'month' ? 'Por Mes' : r === 'year' ? 'Por Año' : '📅 Rango de Años'}
+                        <span>🔍 {selectedRatingBarLabel}</span>
+                        <span className="text-red-500 font-extrabold ml-1">✕ Ver Todo</span>
                       </button>
-                    ))}
+                    )}
+
+                    {/* SELECTOR DE FILTRO DE EVOLUCIÓN: SEMANA, MES, AÑO Y RANGO DE AÑOS */}
+                    <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-x-auto">
+                      {(['week', 'month', 'year', 'range_years'] as RatingEvolutionRange[]).map((r) => (
+                        <button
+                          key={r}
+                          onClick={() => setRatingEvolutionRange(r)}
+                          className={`px-3 py-1 rounded-xl text-xs font-extrabold transition whitespace-nowrap ${
+                            ratingEvolutionRange === r 
+                              ? 'bg-blue-600 text-white shadow-2xs' 
+                              : 'text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-700'
+                          }`}
+                        >
+                          {r === 'week' ? 'Por Semana' : r === 'month' ? 'Por Mes' : r === 'year' ? 'Por Año' : '📅 Rango de Años'}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                {/* CONTENEDOR DEL GRÁFICO VISUAL DE REPUTACIÓN POR BARRAS / ALTURAS */}
+                {/* CONTENEDOR DEL GRÁFICO VISUAL DE REPUTACIÓN POR BARRAS INTERACTIVAS */}
                 <div className="pt-4 pb-2 space-y-4">
                   <div className="flex items-end justify-between gap-4 h-56 px-4 border-b border-gray-200 dark:border-slate-700 pb-2">
-                    {ratingPoints.map((pt, idx) => (
-                      <div key={idx} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
-                        <div className="text-center space-y-0.5">
-                          <span className="text-xs font-black text-amber-500 block">{pt.score} ★</span>
-                          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 block">{pt.shippingSpeed}% envíos</span>
-                        </div>
-                        
+                    {ratingPoints.map((pt, idx) => {
+                      const isSelected = selectedRatingBarLabel === pt.periodLabel;
+                      return (
                         <div
-                          className="w-full max-w-[64px] bg-gradient-to-t from-amber-500 via-amber-400 to-yellow-300 rounded-t-2xl transition-all duration-700 shadow-2xs relative group-hover:from-amber-600 group-hover:to-yellow-400"
-                          style={{ height: `${pt.heightPercent}%` }}
+                          key={idx}
+                          onClick={() => setSelectedRatingBarLabel(isSelected ? null : pt.periodLabel)}
+                          className="flex-1 flex flex-col items-center gap-2 h-full justify-end group cursor-pointer"
+                          title={`Haz clic para filtrar las opiniones de clientes de abajo por: ${pt.periodLabel}`}
                         >
-                          <div className="absolute top-1 inset-x-1 h-1.5 bg-white/40 rounded-full" />
+                          <div className="text-center space-y-0.5">
+                            <span className={`text-xs font-black block transition ${
+                              isSelected ? 'text-amber-600 dark:text-amber-300 scale-110' : 'text-amber-500'
+                            }`}>
+                              {pt.score} ★
+                            </span>
+                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 block">{pt.shippingSpeed}% envíos</span>
+                          </div>
+                          
+                          <div
+                            className={`w-full max-w-[64px] rounded-t-2xl transition-all duration-300 shadow-2xs relative ${
+                              isSelected
+                                ? 'bg-gradient-to-t from-amber-600 via-amber-400 to-yellow-300 ring-4 ring-amber-400 dark:ring-amber-500 scale-105 shadow-md'
+                                : 'bg-gradient-to-t from-amber-500 via-amber-400 to-yellow-300 group-hover:from-amber-600 group-hover:to-yellow-400'
+                            }`}
+                            style={{ height: `${pt.heightPercent}%` }}
+                          >
+                            <div className="absolute top-1 inset-x-1 h-1.5 bg-white/40 rounded-full" />
+                            {isSelected && (
+                              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-amber-500 rounded-full border-2 border-white shadow-xs" />
+                            )}
+                          </div>
+                          
+                          <span className={`text-xs mt-1 transition ${
+                            isSelected ? 'text-amber-700 dark:text-amber-300 font-black underline' : 'text-gray-700 dark:text-slate-200 font-extrabold'
+                          }`}>
+                            {pt.periodLabel}
+                          </span>
                         </div>
-                        
-                        <span className="text-xs font-extrabold text-gray-700 dark:text-slate-200 mt-1">{pt.periodLabel}</span>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   <div className="flex justify-between items-center text-xs text-gray-500 dark:text-slate-400 px-2 font-medium">
@@ -762,13 +889,28 @@ export default function SalesAnalyticsPage() {
                 </div>
               </div>
 
-              {/* LISTA EXPLORABLE DE RESEÑAS Y MENSAJES */}
+              {/* LISTA EXPLORABLE DE RESEÑAS Y MENSAJES CON SUBTÍTULO DINÁMICO */}
               <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-4">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-gray-100 dark:border-slate-800 pb-3">
                   <div>
-                    <h2 className="text-base font-extrabold text-gray-900 dark:text-slate-100">💬 Opiniones & Mensajes Exactos de Compradores</h2>
-                    <p className="text-xs text-gray-500 dark:text-slate-400">Filtra por categoría para identificar oportunidades puntuales de mejora</p>
+                    <h2 className="text-base font-extrabold text-gray-900 dark:text-slate-100 flex items-center gap-2">
+                      <span>💬 Opiniones & Mensajes Exactos de Compradores</span>
+                    </h2>
+                    {/* SUBTÍTULO DINÁMICO POR BARRA DE REPUTACIÓN SELECCIONADA */}
+                    <p className="text-xs font-bold text-amber-600 dark:text-amber-400 mt-0.5">
+                      {selectedRatingBarLabel ? (
+                        <span>🔍 Sub-Resumen de Opiniones filtrado exactamente por el período: <strong>{selectedRatingBarLabel}</strong></span>
+                      ) : (
+                        <span>📅 Mostrando todas las opiniones del intervalo activo: <strong>{getRatingEvolutionText(ratingEvolutionRange)}</strong></span>
+                      )}
+                    </p>
                   </div>
+
+                  {selectedRatingBarLabel && (
+                    <span className="bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200 text-xs font-extrabold px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800">
+                      Filtro por Período: {selectedRatingBarLabel}
+                    </span>
+                  )}
                 </div>
 
                 {/* BOTONES DE FILTRO POR CATEGORÍA */}
@@ -828,28 +970,36 @@ export default function SalesAnalyticsPage() {
 
                 {/* LISTA DE OPINIONES */}
                 <div className="space-y-3 pt-2">
-                  {filteredReviews.map((rev) => (
-                    <div key={rev.id} className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-2">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-gray-900 dark:text-slate-100 text-xs">{rev.buyerName}</span>
-                            <span className="text-amber-500 font-black text-xs">
-                              {'★'.repeat(rev.rating)}{'☆'.repeat(5 - rev.rating)} ({rev.rating}/5)
-                            </span>
-                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900 uppercase">
-                              {rev.category === 'description' ? '📦 Descripción' : rev.category === 'shipping' ? '⚡ Envío' : rev.category === 'communication' ? '💬 Comunicación' : '🛡️ Empaque'}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-gray-500 dark:text-slate-400 font-medium mt-0.5">Producto: <strong>{rev.productTitle}</strong></p>
-                        </div>
-                        <span className="text-[10px] font-bold text-gray-400">{rev.date}</span>
-                      </div>
-                      <p className="text-xs text-gray-700 dark:text-slate-300 bg-gray-50 dark:bg-slate-800 p-3 rounded-xl border border-gray-100 dark:border-slate-700 italic">
-                        "{rev.comment}"
-                      </p>
+                  {filteredReviews.length === 0 ? (
+                    <div className="py-8 text-center text-xs text-gray-400 font-medium bg-gray-50 dark:bg-slate-800 rounded-2xl border border-dashed border-gray-200 dark:border-slate-700">
+                      No hay opiniones registradas para el filtro seleccionado.
                     </div>
-                  ))}
+                  ) : (
+                    filteredReviews.map((rev) => (
+                      <div key={rev.id} className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-2">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-gray-900 dark:text-slate-100 text-xs">{rev.buyerName}</span>
+                              <span className="text-amber-500 font-black text-xs">
+                                {'★'.repeat(rev.rating)}{'☆'.repeat(5 - rev.rating)} ({rev.rating}/5)
+                              </span>
+                              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900 uppercase">
+                                {rev.category === 'description' ? '📦 Descripción' : rev.category === 'shipping' ? '⚡ Envío' : rev.category === 'communication' ? '💬 Comunicación' : '🛡️ Empaque'}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-gray-500 dark:text-slate-400 font-medium mt-0.5">
+                              Producto: <strong>{rev.productTitle}</strong> {rev.periodLabel && `(${rev.periodLabel})`}
+                            </p>
+                          </div>
+                          <span className="text-[10px] font-bold text-gray-400">{rev.date}</span>
+                        </div>
+                        <p className="text-xs text-gray-700 dark:text-slate-300 bg-gray-50 dark:bg-slate-800 p-3 rounded-xl border border-gray-100 dark:border-slate-700 italic">
+                          "{rev.comment}"
+                        </p>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
