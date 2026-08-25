@@ -34,7 +34,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { cartService } from '../services/cart.service';
 import { CartSummary, AddToCartInput, UpdateCartItemInput } from '../types/cart.types';
-import { getLocalStorageItem, setLocalStorageItem } from '@/shared/utils/localStorage';
+import { getLocalStorageItem, setLocalStorageItem, removeLocalStorageItem } from '@/shared/utils/localStorage';
 
 type GuestCartItem = {
   productId: string;
@@ -307,6 +307,31 @@ export function useCart(buyerId: string | null = null) {
       loadGuestCart();
     }
   }, [buyerId, loadGuestCart]);
+
+  // Migración automática del carrito de invitado a Supabase al iniciar sesión / registrarse
+  useEffect(() => {
+    const syncGuestCartToDatabase = async () => {
+      if (!buyerId) return;
+
+      const guestCartData = getLocalStorageItem<GuestCartItem[]>(GUEST_CART_KEY, []);
+      if (guestCartData.length === 0) return;
+
+      try {
+        for (const item of guestCartData) {
+          await cartService.addToCart(
+            { productId: item.productId, quantity: item.quantity },
+            buyerId
+          );
+        }
+        removeLocalStorageItem(GUEST_CART_KEY);
+        await fetchCart();
+      } catch (err) {
+        console.error('Error al migrar carrito de invitado a Supabase:', err);
+      }
+    };
+
+    syncGuestCartToDatabase();
+  }, [buyerId, fetchCart]);
 
   /**
    * Actualiza la cantidad de un item por ID e importe
