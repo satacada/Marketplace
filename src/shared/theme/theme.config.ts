@@ -74,18 +74,18 @@ export const THEME_CONFIG = {
     label: 'text-[10px] font-bold uppercase tracking-wider text-gray-400',
   },
 
-  // Contenedores Diferenciados por Sección con Alto Contraste (Accesibilidad Visual / Low Vision)
+  // Contenedores de Sección Profesionales (Estilo Amazon Seller Central / BestBuy / Shopify)
   sectionCards: {
-    admin: 'bg-purple-100/95 border-2 border-purple-300 rounded-2xl p-2.5 mb-3.5 shadow-xs',
-    seller: 'bg-emerald-100/95 border-2 border-emerald-300 rounded-2xl p-2.5 mb-3.5 shadow-xs',
-    account: 'bg-blue-100/95 border-2 border-blue-300 rounded-2xl p-2.5 mb-3.5 shadow-xs',
+    admin: 'bg-slate-50/80 border-l-4 border-l-purple-600 border-y border-r border-slate-200/90 rounded-xl p-2.5 mb-3 shadow-2xs',
+    seller: 'bg-slate-50/80 border-l-4 border-l-emerald-600 border-y border-r border-slate-200/90 rounded-xl p-2.5 mb-3 shadow-2xs',
+    account: 'bg-slate-50/80 border-l-4 border-l-blue-600 border-y border-r border-slate-200/90 rounded-xl p-2.5 mb-3 shadow-2xs',
   },
 
-  // Badges y Distintivos Centralizados de Alto Contraste
+  // Badges y Títulos de Sección Ejecutivos
   badges: {
-    admin: 'bg-purple-800 text-white font-black px-2.5 py-0.5 rounded-lg text-[10px] uppercase tracking-wider shadow-2xs',
-    seller: 'bg-emerald-800 text-white font-black px-2.5 py-0.5 rounded-lg text-[10px] uppercase tracking-wider shadow-2xs',
-    account: 'bg-blue-800 text-white font-black px-2.5 py-0.5 rounded-lg text-[10px] uppercase tracking-wider shadow-2xs',
+    admin: 'text-purple-800 bg-purple-50 border border-purple-200/80 font-black px-2.5 py-0.5 rounded-md text-[10px] uppercase tracking-wider',
+    seller: 'text-emerald-800 bg-emerald-50 border border-emerald-200/80 font-black px-2.5 py-0.5 rounded-md text-[10px] uppercase tracking-wider',
+    account: 'text-blue-800 bg-blue-50 border border-blue-200/80 font-black px-2.5 py-0.5 rounded-md text-[10px] uppercase tracking-wider',
   },
 
   // Componentes de interfaz

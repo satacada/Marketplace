@@ -558,20 +558,72 @@ export default function NewProductPage() {
           )}
         </div>
 
+        {/* SECTOR DE SELECCIÓN DE IMÁGENES EN CASTELLANO */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Imágenes
+          <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 mb-1.5">
+            Imágenes del Producto (PNG, JPG, WEBP)
           </label>
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={(e) => setImageFiles(Array.from(e.target.files || []))}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            Puedes seleccionar múltiples imágenes
-          </p>
+          
+          <div className="border-2 border-dashed border-gray-300 hover:border-blue-500 rounded-2xl p-6 text-center bg-gray-50/80 transition-all cursor-pointer relative group">
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={(e) => setImageFiles(Array.from(e.target.files || []))}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              id="product-image-upload"
+            />
+            <div className="flex flex-col items-center justify-center gap-2">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-2xs">
+                🖼️
+              </div>
+              <div>
+                <p className="text-sm font-extrabold text-blue-600 group-hover:text-blue-700">
+                  Seleccionar imágenes de tu equipo...
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Haz clic aquí o arrastra tus fotos (puedes elegir varias)
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Previsualización de imágenes seleccionadas */}
+          {imageFiles.length > 0 && (
+            <div className="mt-3 bg-white p-3 rounded-2xl border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-extrabold text-gray-800">
+                  📷 {imageFiles.length} {imageFiles.length === 1 ? 'foto seleccionada' : 'fotos seleccionadas'}:
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setImageFiles([])}
+                  className="text-red-600 hover:text-red-800 font-extrabold text-[11px]"
+                >
+                  Quitar todas
+                </button>
+              </div>
+              <div className="flex gap-2.5 overflow-x-auto pb-1">
+                {imageFiles.map((file, idx) => (
+                  <div key={idx} className="relative group/img flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border border-gray-200 bg-gray-100 shadow-2xs">
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={`Vista previa ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setImageFiles(imageFiles.filter((_, i) => i !== idx))}
+                      className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shadow-xs transition"
+                      title="Eliminar esta foto"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex gap-3">

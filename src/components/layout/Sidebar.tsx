@@ -44,10 +44,10 @@ function SidebarContent() {
   };
 
   const linkClass = (path: string, param?: string, activeBg = 'bg-blue-600') =>
-    `flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-all duration-150 ${
+    `flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-all duration-150 ${
       isActiveLink(path, param)
-        ? `${activeBg} text-white font-extrabold shadow-xs`
-        : 'text-gray-900 hover:bg-white hover:text-blue-700 font-extrabold shadow-2xs'
+        ? `${activeBg} text-white font-extrabold shadow-2xs`
+        : 'text-slate-700 hover:bg-white hover:text-blue-700 font-bold border border-transparent hover:border-slate-200/70 hover:shadow-2xs'
     }`;
 
   if (isLoading) return null;

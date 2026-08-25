@@ -317,8 +317,48 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 </div>
               ))}
             </div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Agregar nuevas imágenes (Máx 3 en total):</label>
-            <input type="file" accept="image/*" multiple onChange={(e) => { if (e.target.files) { const maxFiles = 3 - existingImages.length; setFiles(Array.from(e.target.files).slice(0, maxFiles)); } }} className="w-full p-3 border border-gray-300 rounded-lg" />
+            <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 mb-1">
+              Agregar nuevas imágenes (PNG, JPG, WEBP):
+            </label>
+
+            <div className="border-2 border-dashed border-gray-300 hover:border-blue-500 rounded-2xl p-5 text-center bg-gray-50/80 transition-all cursor-pointer relative group">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => {
+                  if (e.target.files) {
+                    const maxFiles = 3 - existingImages.length;
+                    setFiles(Array.from(e.target.files).slice(0, maxFiles));
+                  }
+                }}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              />
+              <div className="flex flex-col items-center justify-center gap-1">
+                <span className="text-2xl">🖼️</span>
+                <p className="text-xs font-extrabold text-blue-600 group-hover:text-blue-700">
+                  Seleccionar imágenes adicionales...
+                </p>
+                <p className="text-[11px] text-gray-500">
+                  Haz clic aquí o arrastra tus fotos (máximo 3 fotos en total)
+                </p>
+              </div>
+            </div>
+
+            {files.length > 0 && (
+              <div className="mt-2 bg-white p-2.5 rounded-xl border border-gray-200 text-xs">
+                <p className="font-extrabold text-emerald-700 mb-1">
+                  ✓ {files.length} {files.length === 1 ? 'nueva foto seleccionada' : 'nuevas fotos seleccionadas'}:
+                </p>
+                <div className="flex gap-2">
+                  {files.map((file, idx) => (
+                    <span key={idx} className="bg-gray-100 px-2 py-1 rounded text-[11px] font-medium text-gray-700">
+                      {file.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-4 pt-4">

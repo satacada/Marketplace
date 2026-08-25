@@ -31,6 +31,7 @@ export default function QuestionsPage() {
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [answerText, setAnswerText] = useState('');
+  const [answerImageFile, setAnswerImageFile] = useState<File | null>(null);
   const [submittingId, setSubmittingId] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | QuestionStatus>('all');
   const router = useRouter();
@@ -128,10 +129,37 @@ export default function QuestionsPage() {
     if (!answerText.trim()) return;
     setSubmittingId(questionId);
 
+    let finalAnswer = answerText;
+
+    // Subir foto adjunta si fue seleccionada por el vendedor
+    if (answerImageFile && userId) {
+      try {
+        const fileExt = answerImageFile.name.split('.').pop();
+        const fileName = `${Date.now()}_ans_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `${userId}/questions/${fileName}`;
+
+        const { error: uploadErr } = await supabase.storage
+          .from('product-images')
+          .upload(filePath, answerImageFile);
+
+        if (!uploadErr) {
+          const { data: urlData } = supabase.storage
+            .from('product-images')
+            .getPublicUrl(filePath);
+
+          if (urlData?.publicUrl) {
+            finalAnswer = `${answerText}\n\n[📷 Foto adjunta de respuesta]: ${urlData.publicUrl}`;
+          }
+        }
+      } catch (err) {
+        console.error('Error al subir foto adjunta:', err);
+      }
+    }
+
     const { error } = await supabase
       .from('questions')
       .update({ 
-        answer: answerText, 
+        answer: finalAnswer, 
         is_answered: true, 
         is_read: true 
       })
@@ -143,9 +171,10 @@ export default function QuestionsPage() {
       alert('Error al responder: ' + error.message);
     } else {
       setQuestions(questions.map(q => 
-        q.id === questionId ? { ...q, answer: answerText, is_answered: true, is_read: true } : q
+        q.id === questionId ? { ...q, answer: finalAnswer, is_answered: true, is_read: true } : q
       ));
       setAnswerText('');
+      setAnswerImageFile(null);
       setExpandedId(null);
     }
   };
@@ -302,31 +331,52 @@ export default function QuestionsPage() {
                     {/* Respuesta existente */}
                     {q.answer && (
                       <div className="mb-4">
-                        <p className="text-sm text-gray-500 mb-1">Tu respuesta:</p>
-                        <p className="text-gray-900 bg-green-50 p-3 rounded-lg border border-green-200">{q.answer}</p>
+                        <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Tu respuesta:</p>
+                        <div className="bg-emerald-50/90 p-3.5 rounded-xl border border-emerald-200/90 text-sm text-gray-900 font-medium whitespace-pre-wrap">
+                          {q.answer}
+                        </div>
                       </div>
                     )}
 
-                    {/* Acciones */}
+                    {/* Acciones para Responder con opción de Adjuntar Foto */}
                     {!q.is_answered && (
-                      <div className="border-t border-gray-200 pt-4">
-                        <p className="text-sm font-semibold text-gray-700 mb-2">Responder:</p>
+                      <div className="border-t border-gray-200 pt-4 space-y-3">
+                        <p className="text-xs font-extrabold uppercase tracking-wider text-gray-700">Responder al comprador:</p>
                         <textarea
                           value={answerText}
                           onChange={(e) => setAnswerText(e.target.value)}
-                          placeholder="Escribe tu respuesta..."
-                          className="w-full p-3 border border-gray-300 rounded-lg text-sm h-24 focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-2"
+                          placeholder="Escribe tu respuesta clara y detallada..."
+                          className="w-full p-3 border border-gray-300 rounded-xl text-sm h-24 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
                         />
+
+                        {/* Adjunto de Foto Opcional en Castellano */}
+                        <div className="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                          <label className="block text-xs font-bold text-gray-700 mb-1">
+                            📷 Adjuntar foto explicativa o comprobante (opcional):
+                          </label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => setAnswerImageFile(e.target.files?.[0] || null)}
+                            className="text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+                          />
+                          {answerImageFile && (
+                            <p className="text-xs text-emerald-700 font-bold mt-1">
+                              ✓ Foto seleccionada: {answerImageFile.name}
+                            </p>
+                          )}
+                        </div>
+
                         <button
                           onClick={() => handleSendAnswer(q.id)}
                           disabled={submittingId === q.id || !answerText.trim()}
-                          className={`w-full py-3 rounded-lg font-medium text-white transition ${
+                          className={`w-full py-3 rounded-xl font-bold text-white transition flex items-center justify-center gap-2 shadow-2xs ${
                             submittingId === q.id || !answerText.trim()
                               ? 'bg-gray-400 cursor-not-allowed'
-                              : 'bg-green-600 hover:bg-green-700'
+                              : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
                           }`}
                         >
-                          {submittingId === q.id ? 'Enviando...' : '📤 Enviar respuesta'}
+                          <span>{submittingId === q.id ? '⏳ Enviando respuesta...' : '📤 Enviar Respuesta al Comprador'}</span>
                         </button>
                       </div>
                     )}
