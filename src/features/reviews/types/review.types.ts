@@ -3,6 +3,7 @@
  * FILE: review.types.ts
  * ============================================================================
  * @description Tipos para el módulo de valoraciones y reseñas de vendedores.
+ *              Incluye criterios multidimensionales e-Commerce (Amazon / AliExpress).
  * @module Features/Reviews/Types
  */
 
@@ -13,7 +14,11 @@ export interface SellerReview {
   seller_id: string;
   buyer_id: string;
   order_id?: string | null;
-  rating: number; // 1 a 5 estrellas
+  rating: number; // Puntuación General 1-5★
+  item_as_described_rating?: number; // 📦 Fidelidad a la Descripción (1-5★)
+  shipping_speed_rating?: number;    // ⚡ Rapidez y Puntualidad de Envío (1-5★)
+  communication_rating?: number;     // 💬 Atención y Comunicación (1-5★)
+  packaging_rating?: number;         // 🛡️ Calidad del Empaque (1-5★)
   sentiment: ReviewSentiment;
   comment: string;
   created_at: string;
@@ -26,6 +31,10 @@ export interface SellerReview {
 export interface CreateReviewInput {
   seller_id: string;
   rating: number;
+  item_as_described_rating?: number;
+  shipping_speed_rating?: number;
+  communication_rating?: number;
+  packaging_rating?: number;
   sentiment: ReviewSentiment;
   comment: string;
 }
@@ -37,6 +46,10 @@ export interface SellerRatingSummary {
   positiveCount: number;
   neutralCount: number;
   negativeCount: number;
+  itemAsDescribedAvg: number;
+  shippingSpeedAvg: number;
+  communicationAvg: number;
+  packagingAvg: number;
   ratingCounts: {
     5: number;
     4: number;

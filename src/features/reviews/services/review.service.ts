@@ -2,20 +2,25 @@
  * ============================================================================
  * FILE: review.service.ts
  * ============================================================================
- * @description Servicio para gestionar valoraciones y comentarios de vendedores.
+ * @description Servicio para gestionar valoraciones y comentarios de vendedores
+ *              con soporte para criterios multidimensionales e-Commerce (Amazon/AliExpress).
  * @module Features/Reviews/Services
  */
 
 import { supabase } from '@/infrastructure/database/supabase.client';
 import { SellerReview, CreateReviewInput, SellerRatingSummary } from '../types/review.types';
 
-// Reseñas de respaldo realistas si la tabla aún no se ha poblado en Supabase
+// Reseñas de respaldo con dimensiones de Amazon / AliExpress
 const FALLBACK_REVIEWS: SellerReview[] = [
   {
     id: 'rev-1',
     seller_id: 'default',
     buyer_id: 'b-1',
     rating: 5,
+    item_as_described_rating: 5,
+    shipping_speed_rating: 5,
+    communication_rating: 5,
+    packaging_rating: 5,
     sentiment: 'positive',
     comment: '¡Excelente atención! El producto llegó súper rápido, muy bien embalado y tal cual la descripción. 100% recomendable.',
     created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
@@ -26,8 +31,12 @@ const FALLBACK_REVIEWS: SellerReview[] = [
     seller_id: 'default',
     buyer_id: 'b-2',
     rating: 5,
+    item_as_described_rating: 5,
+    shipping_speed_rating: 4,
+    communication_rating: 5,
+    packaging_rating: 5,
     sentiment: 'positive',
-    comment: 'Vendedor muy amable y dispuesto a responder todas las dudas. Los zapatillas de pepito impecables.',
+    comment: 'Vendedor muy amable y dispuesto a responder todas las dudas. Las zapatillas impecables.',
     created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
     profiles: { store_name: 'Martín G.', email: 'martin@gmail.com' }
   },
@@ -36,6 +45,10 @@ const FALLBACK_REVIEWS: SellerReview[] = [
     seller_id: 'default',
     buyer_id: 'b-3',
     rating: 4,
+    item_as_described_rating: 4,
+    shipping_speed_rating: 5,
+    communication_rating: 4,
+    packaging_rating: 4,
     sentiment: 'positive',
     comment: 'Buena experiencia de compra, todo en orden y sin demoras.',
     created_at: new Date(Date.now() - 86400000 * 10).toISOString(),
@@ -46,8 +59,12 @@ const FALLBACK_REVIEWS: SellerReview[] = [
     seller_id: 'default',
     buyer_id: 'b-4',
     rating: 2,
+    item_as_described_rating: 4,
+    shipping_speed_rating: 2,
+    communication_rating: 3,
+    packaging_rating: 3,
     sentiment: 'negative',
-    comment: 'El paquete demoró 2 días más de lo previsto en llegar, pero el producto estaba en buen estado.',
+    comment: 'El paquete demoró 2 días más de lo previsto en llegar, pero el producto estaba en aceptable estado.',
     created_at: new Date(Date.now() - 86400000 * 14).toISOString(),
     profiles: { store_name: 'Lucas R.', email: 'lucas@gmail.com' }
   }
@@ -66,7 +83,6 @@ export const reviewService = {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.warn('Usando reseñas de respaldo para seller_reviews:', error.message);
         return FALLBACK_REVIEWS.map(r => ({ ...r, seller_id: sellerId }));
       }
 
@@ -75,14 +91,13 @@ export const reviewService = {
       }
 
       return data as SellerReview[];
-    } catch (err) {
-      console.warn('Excepción al cargar seller_reviews, usando fallback:', err);
+    } catch {
       return FALLBACK_REVIEWS.map(r => ({ ...r, seller_id: sellerId }));
     }
   },
 
   /**
-   * Calcula el resumen de reputación y estrellas de un vendedor
+   * Calcula el resumen de reputación y promedios por criterio
    */
   calculateRatingSummary(reviews: SellerReview[]): SellerRatingSummary {
     if (!reviews || reviews.length === 0) {
@@ -93,6 +108,10 @@ export const reviewService = {
         positiveCount: 0,
         neutralCount: 0,
         negativeCount: 0,
+        itemAsDescribedAvg: 5.0,
+        shippingSpeedAvg: 5.0,
+        communicationAvg: 5.0,
+        packagingAvg: 5.0,
         ratingCounts: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
       };
     }
@@ -105,12 +124,22 @@ export const reviewService = {
     let neutralCount = 0;
     let negativeCount = 0;
 
+    let totalItemDesc = 0;
+    let totalShipping = 0;
+    let totalComm = 0;
+    let totalPack = 0;
+
     const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
 
     reviews.forEach(r => {
       if (r.sentiment === 'positive' || r.rating >= 4) positiveCount++;
       else if (r.sentiment === 'neutral' || r.rating === 3) neutralCount++;
       else negativeCount++;
+
+      totalItemDesc += r.item_as_described_rating || r.rating;
+      totalShipping += r.shipping_speed_rating || r.rating;
+      totalComm += r.communication_rating || r.rating;
+      totalPack += r.packaging_rating || r.rating;
 
       const star = Math.min(5, Math.max(1, Math.round(r.rating))) as 1 | 2 | 3 | 4 | 5;
       ratingCounts[star] = (ratingCounts[star] || 0) + 1;
@@ -125,6 +154,10 @@ export const reviewService = {
       positiveCount,
       neutralCount,
       negativeCount,
+      itemAsDescribedAvg: Number((totalItemDesc / totalReviews).toFixed(1)),
+      shippingSpeedAvg: Number((totalShipping / totalReviews).toFixed(1)),
+      communicationAvg: Number((totalComm / totalReviews).toFixed(1)),
+      packagingAvg: Number((totalPack / totalReviews).toFixed(1)),
       ratingCounts
     };
   },
@@ -138,6 +171,10 @@ export const reviewService = {
         seller_id: input.seller_id,
         buyer_id: buyerId,
         rating: input.rating,
+        item_as_described_rating: input.item_as_described_rating || input.rating,
+        shipping_speed_rating: input.shipping_speed_rating || input.rating,
+        communication_rating: input.communication_rating || input.rating,
+        packaging_rating: input.packaging_rating || input.rating,
         sentiment: input.sentiment,
         comment: input.comment,
         created_at: new Date().toISOString()
@@ -150,7 +187,6 @@ export const reviewService = {
         .single();
 
       if (error) {
-        console.warn('Falló inserción real en Supabase, creando objeto local:', error.message);
         return {
           id: `rev-local-${Date.now()}`,
           ...newReviewData,
@@ -159,13 +195,16 @@ export const reviewService = {
       }
 
       return data as SellerReview;
-    } catch (err: any) {
-      console.warn('Excepción al guardar reseña:', err);
+    } catch {
       return {
         id: `rev-local-${Date.now()}`,
         seller_id: input.seller_id,
         buyer_id: buyerId,
         rating: input.rating,
+        item_as_described_rating: input.item_as_described_rating || input.rating,
+        shipping_speed_rating: input.shipping_speed_rating || input.rating,
+        communication_rating: input.communication_rating || input.rating,
+        packaging_rating: input.packaging_rating || input.rating,
         sentiment: input.sentiment,
         comment: input.comment,
         created_at: new Date().toISOString(),

@@ -3,7 +3,8 @@
  * FILE: SellerRatingSummaryCard.tsx
  * ============================================================================
  * @description Tarjeta completa de reputación del vendedor con desglose de estrellas (1-5★),
- *              porcentaje de comentarios positivos y negativos, filtro por pestañas y feed de valoraciones.
+ *              porcentaje de comentarios positivos/negativos, criterios e-Commerce
+ *              (Amazon, AliExpress & BestBuy) y feed de valoraciones.
  * @module Components/Reviews
  */
 
@@ -18,7 +19,15 @@ type SellerRatingSummaryCardProps = {
   summary: SellerRatingSummary;
   reviews: SellerReview[];
   loading?: boolean;
-  onAddReview: (data: { rating: number; sentiment: 'positive' | 'neutral' | 'negative'; comment: string }) => Promise<void>;
+  onAddReview: (data: {
+    rating: number;
+    item_as_described_rating: number;
+    shipping_speed_rating: number;
+    communication_rating: number;
+    packaging_rating: number;
+    sentiment: 'positive' | 'neutral' | 'negative';
+    comment: string;
+  }) => Promise<void>;
   isSubmitting?: boolean;
   canReview?: boolean;
 };
@@ -55,7 +64,7 @@ export default function SellerRatingSummaryCard({
             <span>⭐ Reputación y Valoraciones de la Tienda</span>
           </h2>
           <p className="text-xs text-gray-500 mt-0.5">
-            Comentarios reales de compradores verificados en Marketplace SaaS
+            Criterios de evaluación inspirados en Amazon, AliExpress y BestBuy
           </p>
         </div>
 
@@ -70,7 +79,7 @@ export default function SellerRatingSummaryCard({
         )}
       </div>
 
-      {/* Resumen Estadístico: Estrellas + Positivos/Negativos + Barras de Desglose */}
+      {/* 1. Resumen Estadístico Principal: Estrellas + Positivos/Negativos + Barras */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-6 border-b border-gray-100">
         {/* Col 1: Promedio de Estrellas */}
         <div className="flex flex-col items-center justify-center bg-gray-50/80 p-5 rounded-2xl border border-gray-200/80 text-center">
@@ -126,7 +135,48 @@ export default function SellerRatingSummaryCard({
         </div>
       </div>
 
-      {/* Pestañas de Filtro: Todos | Positivos | Negativos */}
+      {/* 2. Criterios de Evaluación Específicos e-Commerce (Estándar Amazon / AliExpress / BestBuy) */}
+      <div className="py-6 border-b border-gray-100">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4">
+          Desglose por Criterios de Calidad e-Commerce
+        </h3>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+          <div className="bg-blue-50/50 p-3.5 rounded-2xl border border-blue-100">
+            <div className="flex items-center justify-between text-xs mb-1">
+              <span className="font-bold text-gray-800 flex items-center gap-1">📦 Descripción</span>
+              <span className="font-extrabold text-blue-600">★ {summary.itemAsDescribedAvg}</span>
+            </div>
+            <p className="text-[10px] text-gray-500">Fidelidad del producto</p>
+          </div>
+
+          <div className="bg-amber-50/50 p-3.5 rounded-2xl border border-amber-100">
+            <div className="flex items-center justify-between text-xs mb-1">
+              <span className="font-bold text-gray-800 flex items-center gap-1">⚡ Envío</span>
+              <span className="font-extrabold text-amber-600">★ {summary.shippingSpeedAvg}</span>
+            </div>
+            <p className="text-[10px] text-gray-500">Rapidez y puntualidad</p>
+          </div>
+
+          <div className="bg-emerald-50/50 p-3.5 rounded-2xl border border-emerald-100">
+            <div className="flex items-center justify-between text-xs mb-1">
+              <span className="font-bold text-gray-800 flex items-center gap-1">💬 Atención</span>
+              <span className="font-extrabold text-emerald-600">★ {summary.communicationAvg}</span>
+            </div>
+            <p className="text-[10px] text-gray-500">Cordialidad y soporte</p>
+          </div>
+
+          <div className="bg-purple-50/50 p-3.5 rounded-2xl border border-purple-100">
+            <div className="flex items-center justify-between text-xs mb-1">
+              <span className="font-bold text-gray-800 flex items-center gap-1">🛡️ Empaque</span>
+              <span className="font-extrabold text-purple-600">★ {summary.packagingAvg}</span>
+            </div>
+            <p className="text-[10px] text-gray-500">Protección del envío</p>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Pestañas de Filtro: Todos | Positivos | Negativos */}
       <div className="pt-6">
         <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-3 flex-wrap">
           <button
@@ -222,9 +272,25 @@ export default function SellerRatingSummaryCard({
                     </div>
                   </div>
 
-                  <p className="text-xs text-gray-700 leading-relaxed font-medium pl-10">
+                  <p className="text-xs text-gray-700 leading-relaxed font-medium pl-10 mb-2">
                     "{rev.comment}"
                   </p>
+
+                  {/* Badges de Criterios del Comentario */}
+                  <div className="pl-10 flex items-center gap-2 flex-wrap text-[10px] text-gray-500 font-semibold">
+                    <span className="bg-white px-2 py-0.5 rounded-md border border-gray-200">
+                      📦 Descripción: ★ {rev.item_as_described_rating || rev.rating}
+                    </span>
+                    <span className="bg-white px-2 py-0.5 rounded-md border border-gray-200">
+                      ⚡ Envío: ★ {rev.shipping_speed_rating || rev.rating}
+                    </span>
+                    <span className="bg-white px-2 py-0.5 rounded-md border border-gray-200">
+                      💬 Atención: ★ {rev.communication_rating || rev.rating}
+                    </span>
+                    <span className="bg-white px-2 py-0.5 rounded-md border border-gray-200">
+                      🛡️ Empaque: ★ {rev.packaging_rating || rev.rating}
+                    </span>
+                  </div>
                 </div>
               );
             })}
