@@ -62,22 +62,25 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow-sm">
+      <nav className="bg-white border-b border-gray-200/80 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🛍️</span>
+              <h1 className="text-lg font-extrabold text-gray-900">
                 Marketplace Dashboard
               </h1>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">{profile.email}</span>
-              <span className="text-sm px-2 py-1 bg-indigo-100 text-indigo-800 rounded">
-                {profile.role === 'seller' ? 'Vendedor' : 'Comprador'}
+            <div className="flex items-center space-x-3">
+              <span className="text-xs font-medium text-gray-600">{profile.email}</span>
+              <span className={`text-xs font-extrabold px-2.5 py-0.5 rounded-full border ${
+                profile.role === 'seller' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-blue-50 text-blue-700 border-blue-200'
+              }`}>
+                {profile.role === 'seller' ? '✓ Vendedor' : '👤 Comprador'}
               </span>
               <Button
                 onClick={handleLogout}
-                variant="danger"
+                variant="secondary"
                 size="sm"
               >
                 Cerrar Sesión

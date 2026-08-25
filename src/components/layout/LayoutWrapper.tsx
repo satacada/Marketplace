@@ -33,7 +33,7 @@ import Sidebar from './Sidebar';
 
 function SidebarWrapper() {
   return (
-    <Suspense fallback={<div className="w-64 bg-gray-800 min-h-screen" />}>
+    <Suspense fallback={<div className="w-64 bg-white border-r border-gray-200 min-h-screen" />}>
       <Sidebar />
     </Suspense>
   );
