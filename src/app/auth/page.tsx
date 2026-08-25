@@ -70,14 +70,16 @@ export default function AuthPage() {
 
     const typeParam = searchParams.get('type');
     if (typeParam === 'recovery') {
-      setIsRecoveryMode(true);
+      router.push(`/auth/reset?${searchParams.toString()}`);
+      return;
     }
 
     // Detectar si el hash de la URL incluye access_token o type=recovery
     if (typeof window !== 'undefined') {
       const hash = window.location.hash;
       if (hash.includes('type=recovery') || hash.includes('access_token')) {
-        setIsRecoveryMode(true);
+        router.push(`/auth/reset${hash}`);
+        return;
       }
     }
 
@@ -85,17 +87,10 @@ export default function AuthPage() {
     const checkRecoveryEvent = async () => {
       const { supabase } = await import('@/infrastructure/database/supabase.client');
       
-      // Verificar si ya hay una sesión activa de recuperación
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user && typeof window !== 'undefined' && (window.location.hash.includes('recovery') || searchParams.get('type') === 'recovery')) {
-        setIsRecoveryMode(true);
-        if (session.user.email) setEmail(session.user.email);
-      }
-
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
         if (event === 'PASSWORD_RECOVERY') {
-          setIsRecoveryMode(true);
-          if (session?.user?.email) setEmail(session.user.email);
+          const userEmail = session?.user?.email || '';
+          router.push(`/auth/reset?email=${encodeURIComponent(userEmail)}`);
         }
       });
       return subscription;
@@ -107,7 +102,7 @@ export default function AuthPage() {
     return () => {
       if (sub) sub.unsubscribe();
     };
-  }, [searchParams]);
+  }, [searchParams, router]);
 
   const showModalMessage = (title: string, message: string, type: 'success' | 'info' | 'error' = 'success') => {
     setModalData({ title, message, type });

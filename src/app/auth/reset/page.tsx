@@ -277,12 +277,17 @@ export default function ResetPage() {
           </p>
           
           <Button
-            onClick={() => setShowModal(false)}
+            onClick={() => {
+              setShowModal(false);
+              if (modalData.type === 'success') {
+                router.push(`/auth?email=${encodeURIComponent(userEmail)}`);
+              }
+            }}
             fullWidth
             variant={modalData.type === 'success' ? 'success' : modalData.type === 'error' ? 'danger' : 'primary'}
-            className="mt-6"
+            className="mt-6 font-bold"
           >
-            Entendido
+            {modalData.type === 'success' ? 'Ir a Iniciar Sesión' : 'Entendido'}
           </Button>
         </div>
       </Modal>
