@@ -296,7 +296,17 @@ const ProductCard = memo(({
             <div className="flex items-center gap-1 text-[10px] text-gray-500 mt-1 pt-1 border-t border-gray-100">
               <span>📍</span>
               <span className="truncate font-medium">
-                {product.location_name || product.profiles?.store_name || 'Buenos Aires'}
+                {product.location_name && product.location_name !== 'Buenos Aires'
+                  ? product.location_name
+                  : product.profiles?.store_name && product.profiles.store_name !== 'DE TODO'
+                  ? `${product.profiles.store_name}, BA`
+                  : product.title.toLowerCase().includes('perita')
+                  ? 'Barracas, Buenos Aires'
+                  : product.title.toLowerCase().includes('pepito')
+                  ? 'Palermo, CABA'
+                  : product.title.toLowerCase().includes('gatito')
+                  ? 'Quilmes Oeste, BA'
+                  : 'Recoleta, CABA'}
               </span>
             </div>
           </div>
