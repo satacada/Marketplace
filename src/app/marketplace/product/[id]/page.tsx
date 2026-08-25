@@ -330,44 +330,35 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                         className="block relative rounded-2xl overflow-hidden border border-gray-200/90 group shadow-xs transition hover:shadow-sm"
                         title={`Abrir ${displayLoc} en Google Maps`}
                       >
-                        {/* Map Tile Canvas con mapa geográfico real de calles y costa/río */}
-                        <div className="relative h-36 w-full bg-[#e8ecef] overflow-hidden flex items-center justify-center">
-                          {/* Fondo de calles de ciudad */}
-                          <svg className="absolute inset-0 w-full h-full text-gray-300" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-                            <defs>
-                              <pattern id="fb-map-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
-                                <path d="M 0 10 L 40 10 M 10 0 L 10 40 M 0 25 L 40 25 M 25 0 L 25 40" fill="none" stroke="#d5dbdf" strokeWidth="1" />
-                                <path d="M 0 0 L 40 40 M 40 0 L 0 40" fill="none" stroke="#e1e6ea" strokeWidth="0.5" />
-                              </pattern>
-                            </defs>
-                            <rect width="100%" height="100%" fill="url(#fb-map-pattern)" />
-                            
-                            {/* Masa de Agua / Río de la Plata a la derecha (Celeste) */}
-                            <path d="M 310 -10 Q 330 40 300 90 T 350 170 L 600 170 L 600 -10 Z" fill="#93c5fd" opacity="0.85" />
-                            <path d="M 310 -10 Q 330 40 300 90 T 350 170" fill="none" stroke="#60a5fa" strokeWidth="2" />
+                        {/* Mapa Interactivo / Estilo OpenStreetMap real de Buenos Aires / Quilmes / Palermo */}
+                        <div className="relative h-40 w-full bg-[#e5e3df] overflow-hidden flex items-center justify-center">
+                          {/* Mapa real de azulejos geográficos */}
+                          <img
+                            src={`https://static-maps.yandex.ru/1.x/?l=map&pt=${
+                              displayLoc.includes('Palermo') ? '-58.4233,-34.5781' :
+                              displayLoc.includes('Quilmes') ? '-58.2612,-34.7268' :
+                              displayLoc.includes('Barracas') ? '-58.3756,-34.6428' : '-58.3816,-34.6037'
+                            },pm2rdm&z=12&size=600,180`}
+                            alt={`Mapa de ${displayLoc}`}
+                            className="absolute inset-0 w-full h-full object-cover filter brightness-[0.98] contrast-[1.02] group-hover:scale-105 transition duration-500"
+                            onError={(e) => {
+                              // Fallback a mapa limpio si no carga imagen externa
+                              (e.target as HTMLElement).style.display = 'none';
+                            }}
+                          />
 
-                            {/* Avenidas Principales (Líneas Blancas y Amarillas) */}
-                            <path d="M 0 45 L 600 65" stroke="#fef08a" strokeWidth="4" fill="none" />
-                            <path d="M 0 110 L 600 125" stroke="#ffffff" strokeWidth="5" fill="none" />
-                            <path d="M 140 0 L 210 160" stroke="#ffffff" strokeWidth="6" fill="none" />
-                            <path d="M 260 0 L 200 160" stroke="#ffffff" strokeWidth="5" fill="none" />
-                            <path d="M 70 0 L 150 160" stroke="#ffffff" strokeWidth="4" fill="none" />
-                          </svg>
-
-                          {/* Circulo Azul Translucido de Radio de Ubicación Aproximada (Estilo FB Marketplace) */}
-                          <div className="relative z-10 w-24 h-24 rounded-full bg-blue-500/20 border-2 border-blue-500/50 flex items-center justify-center backdrop-blur-[0.5px] shadow-xs group-hover:scale-105 transition duration-300">
-                            <div className="w-3.5 h-3.5 rounded-full bg-blue-600 border-2 border-white shadow-md"></div>
+                          {/* Capa de Radio Azul Translucido de Facebook Marketplace (Ubicación Aproximada) */}
+                          <div className="relative z-10 w-28 h-28 rounded-full bg-blue-500/25 border-2 border-blue-500/60 flex items-center justify-center backdrop-blur-[0.5px] shadow-sm pointer-events-none">
+                            <div className="w-4 h-4 rounded-full bg-blue-600 border-2 border-white shadow-md"></div>
                           </div>
 
-                          {/* Texto de Ciudad sobre el mapa */}
-                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 -translate-y-1">
-                            <span className="text-slate-800 font-extrabold text-lg tracking-tight drop-shadow-xs opacity-85">
-                              Buenos Aires
-                            </span>
+                          {/* Etiqueta de la Ciudad / Zona */}
+                          <div className="absolute top-3 left-3 z-10 bg-slate-900/80 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-xl shadow-xs flex items-center gap-1.5">
+                            <span>📍 {displayLoc}</span>
                           </div>
 
                           {/* Icono Info ℹ bottom right */}
-                          <div className="absolute bottom-2.5 right-2.5 bg-white/90 backdrop-blur-xs rounded-full w-5 h-5 flex items-center justify-center text-slate-600 text-xs font-bold shadow-2xs group-hover:bg-blue-600 group-hover:text-white transition">
+                          <div className="absolute bottom-2.5 right-2.5 bg-white/90 backdrop-blur-xs rounded-full w-5 h-5 flex items-center justify-center text-slate-600 text-xs font-bold shadow-2xs group-hover:bg-blue-600 group-hover:text-white transition z-10">
                             ℹ
                           </div>
                         </div>
