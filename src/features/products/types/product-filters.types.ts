@@ -39,6 +39,7 @@ export type SortOption =
 export interface AdvancedProductFilters {
   searchQuery?: string;
   categoryId?: string;
+  sellerId?: string;
   priceRange?: PriceRange;
   minRating?: number;
   hasFreeShipping?: boolean;

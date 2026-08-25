@@ -276,6 +276,11 @@ export const productService = {
       query = query.eq('category_id', filters.categoryId);
     }
 
+    // Filtro por tienda / vendedor
+    if (filters.sellerId) {
+      query = query.eq('seller_id', filters.sellerId);
+    }
+
     // Filtro por rango de precio
     if (filters.priceRange) {
       query = query.gte('price', filters.priceRange.min);

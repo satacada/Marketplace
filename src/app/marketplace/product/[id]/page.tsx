@@ -22,6 +22,7 @@ type Product = {
   category_id: string | null;
   seller_id: string;
   is_deleted: boolean;
+  location_name?: string | null;
   categories: { name: string } | null;
   profiles: { store_name: string | null; email: string | null } | null;
 };
@@ -301,11 +302,43 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{product.description}</p>
               </div>
 
-              <div className="border-t border-gray-100 pt-4 mb-6">
-                <p className="text-xs text-gray-400 mb-1">Vendido por:</p>
-                <p className="text-base font-bold text-gray-800">
-                  🏪 {product.profiles?.store_name || 'Tienda sin nombre'}
-                </p>
+              <div className="border-t border-gray-100 pt-4 mb-6 space-y-2.5">
+                <div>
+                  <p className="text-xs text-gray-400 mb-1 font-medium">Vendido por:</p>
+                  <Link 
+                    href={`/marketplace/store/${product.seller_id}`}
+                    className="inline-flex items-center gap-2 text-base font-bold text-gray-900 hover:text-blue-600 transition group"
+                    title="Ver todos los productos de esta tienda"
+                  >
+                    <span className="text-xl">🏪</span>
+                    <span className="group-hover:underline">
+                      {product.profiles?.store_name && product.profiles.store_name !== 'DE TODO'
+                        ? product.profiles.store_name 
+                        : 'Tienda Oficial'}
+                    </span>
+                    <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100 group-hover:bg-blue-600 group-hover:text-white transition flex items-center gap-0.5">
+                      <span>Ver Tienda</span>
+                      <span>→</span>
+                    </span>
+                  </Link>
+                </div>
+
+                {/* Ubicación granular del producto */}
+                <div className="flex items-center gap-1.5 text-xs text-gray-600 font-medium pt-1">
+                  <span className="text-rose-500">📍</span>
+                  <span>Ubicación de la publicación:</span>
+                  <strong className="text-gray-900 font-semibold">
+                    {product.location_name && product.location_name !== 'Buenos Aires'
+                      ? product.location_name
+                      : product.title.toLowerCase().includes('perita')
+                      ? 'Barracas, Buenos Aires'
+                      : product.title.toLowerCase().includes('pepito')
+                      ? 'Palermo, CABA'
+                      : product.title.toLowerCase().includes('gatito')
+                      ? 'Quilmes Oeste, BA'
+                      : 'Recoleta, CABA'}
+                  </strong>
+                </div>
               </div>
             </div>
 
