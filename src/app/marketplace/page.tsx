@@ -45,6 +45,7 @@ import { useOrders } from '@/features/orders/hooks/useOrders';
 import Image from 'next/image';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 import ImageGallery from '@/components/marketplace/ImageGallery';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
@@ -610,42 +611,57 @@ export default function MarketplacePage() {
       />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header de búsqueda */}
-        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 mb-8">
-          <form onSubmit={handleSearchSubmit} className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1 relative">
+        {/* Header de búsqueda moderno y sobrio */}
+        <div className="bg-white p-2.5 sm:p-3.5 rounded-2xl shadow-xs border border-gray-200/90 mb-6 transition-all hover:shadow-sm">
+          <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row items-center gap-3">
+            {/* Campo de búsqueda integrado sobrio */}
+            <div className="relative flex-1 w-full flex items-center bg-gray-50/80 hover:bg-gray-50 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 rounded-xl border border-gray-200 transition-all">
+              <span className="pl-3.5 text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </span>
               <input
                 type="text"
                 placeholder="Buscar productos por nombre o descripción..."
                 value={searchInputValue}
                 onChange={handleSearchChange}
-                className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg pr-12"
+                className="w-full py-2.5 px-3 text-sm text-gray-900 placeholder-gray-400 bg-transparent focus:outline-none font-medium"
               />
               <button
                 type="submit"
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white p-2.5 rounded-lg hover:bg-blue-700 transition"
+                className="mr-1.5 px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition shadow-xs flex items-center gap-1 flex-shrink-0"
                 aria-label="Buscar"
               >
-                🔍
+                <span>Buscar</span>
               </button>
             </div>
-            <div className="lg:w-48">
-              <select
-                value={sortBy}
-                onChange={handleSortChange}
-                className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-              >
-                <option value="relevance">Relevancia</option>
-                <option value="price_asc">Precio: Menor a Mayor</option>
-                <option value="price_desc">Precio: Mayor a Menor</option>
-                <option value="rating_desc">Mejor valorados</option>
-                <option value="newest">Más recientes</option>
-              </select>
+
+            {/* Selector de ordenamiento sobrio */}
+            <div className="w-full sm:w-56 flex-shrink-0">
+              <div className="relative">
+                <select
+                  value={sortBy}
+                  onChange={handleSortChange}
+                  className="w-full py-2.5 pl-3.5 pr-8 border border-gray-200 rounded-xl bg-gray-50/80 hover:bg-gray-50 text-gray-700 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none cursor-pointer transition"
+                >
+                  <option value="relevance">Ordenar: Relevancia</option>
+                  <option value="price_asc">Precio: Menor a Mayor</option>
+                  <option value="price_desc">Precio: Mayor a Menor</option>
+                  <option value="rating_desc">Mejor valorados</option>
+                  <option value="newest">Más recientes</option>
+                </select>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[10px]">
+                  ▼
+                </span>
+              </div>
             </div>
+
+            {/* Botón de filtros para móvil */}
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className="lg:hidden px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              className="lg:hidden w-full py-2 bg-gray-100 text-gray-700 font-semibold text-xs rounded-xl hover:bg-gray-200 transition"
             >
               {showFilters ? 'Ocultar filtros' : 'Mostrar filtros'}
             </button>
@@ -829,6 +845,9 @@ export default function MarketplacePage() {
           </main>
         </div>
       </div>
+
+      {/* Pie de página con créditos */}
+      <Footer />
 
       {/* Modal Profesional Estándar */}
       <Modal
