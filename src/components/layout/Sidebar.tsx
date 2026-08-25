@@ -145,6 +145,12 @@ function SidebarContent() {
               </span>
             </div>
             <div className="space-y-1">
+              <Link href="/dashboard" className={linkClass('/dashboard', undefined, 'bg-emerald-600')}>
+                <div className="flex items-center gap-2.5">
+                  <span className="text-sm">🏠</span>
+                  <span>Panel Principal</span>
+                </div>
+              </Link>
               <Link href="/dashboard/sales" className={linkClass('/dashboard/sales', undefined, 'bg-emerald-600')}>
                 <div className="flex items-center gap-2.5">
                   <span className="text-sm">📊</span>

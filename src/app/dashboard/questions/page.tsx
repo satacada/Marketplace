@@ -31,6 +31,10 @@ export default function QuestionsPage() {
   const [mutedIds, setMutedIds] = useState<string[]>([]);
 
   useEffect(() => {
+    document.title = 'Preguntas Recibidas | Marketplace SaaS';
+  }, []);
+
+  useEffect(() => {
     const savedMuted = localStorage.getItem('seller_muted_questions');
     if (savedMuted) {
       try {

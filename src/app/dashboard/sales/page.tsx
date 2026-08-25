@@ -138,6 +138,10 @@ export default function SalesAnalyticsPage() {
   ];
 
   useEffect(() => {
+    document.title = 'Panel de Ventas & Analítica | Marketplace SaaS';
+  }, []);
+
+  useEffect(() => {
     const savedGoal = localStorage.getItem('seller_monthly_goal');
     if (savedGoal) {
       const parsed = parseFloat(savedGoal);

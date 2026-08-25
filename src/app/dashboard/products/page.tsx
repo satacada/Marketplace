@@ -71,6 +71,10 @@ export default function ProductsPage() {
   } = useProducts(user?.id ? { sellerId: user.id, includeFavoriteCount: true } : { sellerId: 'loading-wait' });
 
   useEffect(() => {
+    document.title = 'Mis Productos | Marketplace SaaS';
+  }, []);
+
+  useEffect(() => {
     if (!authLoading && !user) {
       router.push('/auth');
     }
