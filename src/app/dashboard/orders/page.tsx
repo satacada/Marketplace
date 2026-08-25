@@ -87,42 +87,53 @@ export default function OrdersPage() {
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">
-          {view === 'sales' ? 'Historial de Ventas' : 'Mis Compras'}
+    <div className="p-6 sm:p-8 max-w-6xl mx-auto">
+      <div className="mb-6 bg-white p-6 rounded-3xl border border-gray-200/90 shadow-2xs">
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 flex items-center gap-2">
+          <span>{view === 'sales' ? '📋 Historial de Ventas' : '🛒 Mis Compras'}</span>
         </h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-xs sm:text-sm font-medium text-gray-500 mt-1">
           {view === 'sales' 
-            ? 'Productos que has vendido a otros compradores' 
-            : 'Productos que has comprado en el marketplace'}
+            ? 'Gestión de productos que has vendido a otros compradores en Marketplace' 
+            : 'Historial de productos que has comprado en el marketplace'}
         </p>
       </div>
 
       {loading ? (
-        <p className="text-gray-500">Cargando órdenes...</p>
+        <div className="py-12 text-center text-xs text-gray-400 font-medium">Cargando historial...</div>
       ) : orders.length === 0 ? (
-        <div className="bg-white p-12 rounded-lg shadow-md text-center border border-gray-100">
-          <p className="text-gray-500 text-lg mb-4">
+        <div className="bg-white p-12 rounded-3xl shadow-2xs text-center border border-gray-200/90">
+          <div className="text-5xl mb-3">🛍️</div>
+          <p className="text-gray-600 text-sm font-bold mb-4">
             {view === 'sales' 
               ? 'Aún no has realizado ninguna venta.' 
               : 'Aún no has realizado ninguna compra.'}
           </p>
           <Link 
-            href={view === 'sales' ? '/dashboard/products' : '/marketplace'} 
-            className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition inline-block"
+            href={view === 'sales' ? '/dashboard/products/new' : '/marketplace'} 
+            className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white px-6 py-2.5 rounded-xl text-xs font-bold transition inline-block shadow-xs"
           >
-            {view === 'sales' ? 'Crear tu primer producto' : 'Ir al Marketplace'}
+            {view === 'sales' ? '🚀 Publicar mi primer producto' : '🛒 Explorar Marketplace'}
           </Link>
         </div>
       ) : (
         <div className="space-y-4">
           {orders.map((order: any) => (
-            <div key={order.id} className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
-              <div className="flex justify-between items-start mb-4">
+            <div key={order.id} className="bg-white p-6 rounded-3xl shadow-2xs border border-gray-200/90 hover:shadow-xs transition">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 pb-4 border-b border-gray-100">
                 <div>
-                  <p className="text-sm text-gray-500">Pedido #{order.id.slice(0, 8)}</p>
-                  <p className="text-sm text-gray-500">
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-bold text-gray-900">Pedido #{order.id.slice(0, 8)}</p>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                      order.status === 'completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                      order.status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                      'bg-gray-50 text-gray-700 border-gray-200'
+                    }`}>
+                      {order.status === 'completed' ? '✓ Completado' :
+                       order.status === 'pending' ? '⏳ Pendiente' : order.status}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-gray-400 font-medium mt-0.5">
                     {new Date(order.created_at).toLocaleDateString('es-AR', {
                       year: 'numeric',
                       month: 'long',
@@ -132,33 +143,28 @@ export default function OrdersPage() {
                     })}
                   </p>
                 </div>
-                <div className="text-right">
-                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                    order.status === 'completed' ? 'bg-green-100 text-green-800' :
-                    order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
-                    {order.status === 'completed' ? 'Completado' :
-                     order.status === 'pending' ? 'Pendiente' : order.status}
-                  </span>
-                  <p className="text-xl font-bold text-indigo-600 mt-2">
+                <div className="text-left sm:text-right">
+                  <p className="text-xl font-black text-blue-600">
                     ${order.total_amount?.toFixed(2)}
                   </p>
                 </div>
               </div>
 
-              <div className="border-t border-gray-200 pt-4">
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">Productos:</h3>
+              <div>
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Productos comprados:</h3>
                 <div className="space-y-2">
                   {order.order_items?.map((item: any, index: number) => (
-                    <div key={index} className="flex justify-between items-center text-sm">
-                      <div className="flex-1">
-                        <p className="text-gray-900 font-medium">
-                          {item.products?.title || 'Producto eliminado'}
-                        </p>
-                        <p className="text-gray-500">Cantidad: {item.quantity}</p>
+                    <div key={index} className="flex justify-between items-center text-xs bg-gray-50/80 p-3 rounded-2xl border border-gray-200/70">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">📦</span>
+                        <div>
+                          <p className="text-gray-900 font-bold">
+                            {item.products?.title || 'Producto del catálogo'}
+                          </p>
+                          <p className="text-[10px] text-gray-500 font-medium">Cantidad: {item.quantity}</p>
+                        </div>
                       </div>
-                      <p className="text-gray-900 font-medium">
+                      <p className="text-gray-900 font-extrabold text-sm">
                         ${(item.price_at_purchase * item.quantity).toFixed(2)}
                       </p>
                     </div>
