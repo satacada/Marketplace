@@ -49,7 +49,7 @@ function SidebarContent() {
     `flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-all duration-150 ${
       isActiveLink(path, param)
         ? `${activeBg} text-white font-extrabold shadow-2xs`
-        : 'text-slate-700 hover:bg-white hover:text-blue-700 font-bold border border-transparent hover:border-slate-200/70 hover:shadow-2xs'
+        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-700 dark:hover:text-blue-400 font-bold border border-transparent hover:border-slate-200/70 dark:hover:border-slate-700 hover:shadow-2xs'
     }`;
 
   if (isLoading) return null;
@@ -61,30 +61,30 @@ function SidebarContent() {
   const storeName = profile.store_name || 'Mi Cuenta';
 
   return (
-    <aside className="w-64 bg-white text-gray-900 min-h-screen border-r border-gray-200/80 shadow-xs flex flex-col fixed left-0 top-0 bottom-0 overflow-y-auto z-40">
+    <aside className="w-64 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 min-h-screen border-r border-gray-200/80 dark:border-slate-800 shadow-xs flex flex-col fixed left-0 top-0 bottom-0 overflow-y-auto z-40">
       {/* Cabecera del Perfil estilo Marketplace */}
-      <div className="p-5 border-b border-gray-100 bg-slate-50/60">
+      <div className="p-5 border-b border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/60">
         <Link href="/marketplace" className="flex items-center gap-2 group mb-3">
           <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center text-lg shadow-xs group-hover:bg-blue-700 transition">
             🛍️
           </div>
           <div>
-            <h2 className="text-base font-black tracking-tight text-gray-900 group-hover:text-blue-600 transition">
+            <h2 className="text-base font-black tracking-tight text-gray-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
               Marketplace
             </h2>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">SaaS Platform</p>
+            <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">SaaS Platform</p>
           </div>
         </Link>
 
-        <div className="pt-2.5 border-t border-gray-200/60">
-          <p className="text-xs font-extrabold text-gray-900 truncate">{storeName}</p>
+        <div className="pt-2.5 border-t border-gray-200/60 dark:border-slate-800">
+          <p className="text-xs font-extrabold text-gray-900 dark:text-slate-100 truncate">{storeName}</p>
           <p className="text-[11px] text-gray-400 font-medium truncate mb-2">{email}</p>
 
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className={`inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border ${
               role === 'seller' 
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                : 'bg-blue-50 text-blue-700 border-blue-200'
+                ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900' 
+                : 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-900'
             }`}>
               <span>{role === 'seller' ? '✓ Vendedor' : '👤 Comprador'}</span>
             </span>

@@ -218,7 +218,7 @@ const ProductCard = memo(({
         <div className="p-3 flex-1 flex flex-col justify-between">
           <div>
             <div className="mb-1 flex items-center justify-between gap-1">
-              <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+              <span className="text-[10px] font-extrabold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 px-1.5 py-0.5 rounded border border-blue-100 dark:border-blue-900">
                 {product.categories?.name || 'Sin categoría'}
               </span>
               
@@ -236,7 +236,7 @@ const ProductCard = memo(({
             </div>
             
             <h3 
-              className="text-sm font-bold text-gray-900 mb-1 hover:text-blue-600 transition line-clamp-1 cursor-pointer"
+              className="text-sm font-bold text-gray-900 dark:text-slate-100 mb-1 hover:text-blue-600 dark:hover:text-blue-400 transition line-clamp-1 cursor-pointer"
               title={`Ver detalle de "${product.title}"`}
             >
               {product.title}
@@ -245,10 +245,10 @@ const ProductCard = memo(({
             {/* Precio, Stock y Botón de Carrito */}
             <div className="flex items-center justify-between my-1">
               <div title={`Ver detalle de "${product.title}"`} className="cursor-pointer">
-                <div className="text-base font-extrabold text-blue-600">
+                <div className="text-base font-extrabold text-blue-600 dark:text-blue-400">
                   ${product.price?.toLocaleString('es-CL')}
                 </div>
-                <div className={`text-[10px] font-medium ${product.stock > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                <div className={`text-[10px] font-bold ${product.stock > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                   {product.stock > 0 ? `Stock: ${product.stock}` : 'Sin stock'}
                 </div>
               </div>

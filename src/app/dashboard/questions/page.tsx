@@ -212,42 +212,50 @@ export default function QuestionsPage() {
   }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Preguntas Recibidas</h1>
-        <p className="text-gray-600 mt-1">Gestiona las preguntas de los compradores sobre tus productos</p>
+    <div className="p-6 sm:p-8 max-w-4xl mx-auto space-y-6">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-slate-100">Preguntas Recibidas</h1>
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 mt-1">Gestiona las preguntas de los compradores sobre tus productos</p>
       </div>
 
       {/* Filtros */}
-      <div className="flex gap-2 mb-6 flex-wrap">
+      <div className="flex gap-2 flex-wrap">
         <button
           onClick={() => setFilter('all')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-            filter === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition border ${
+            filter === 'all' 
+              ? 'bg-indigo-600 text-white border-indigo-700 shadow-2xs' 
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
           }`}
         >
           Todas ({questions.length})
         </button>
         <button
           onClick={() => setFilter('unread')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-            filter === 'unread' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition border ${
+            filter === 'unread' 
+              ? 'bg-red-600 text-white border-red-700 shadow-2xs' 
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
           }`}
         >
            Sin leer ({questions.filter(q => getStatus(q) === 'unread').length})
         </button>
         <button
           onClick={() => setFilter('pending')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-            filter === 'pending' ? 'bg-yellow-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition border ${
+            filter === 'pending' 
+              ? 'bg-amber-600 text-white border-amber-700 shadow-2xs' 
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
           }`}
         >
            Pendientes ({questions.filter(q => getStatus(q) === 'pending').length})
         </button>
         <button
           onClick={() => setFilter('answered')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-            filter === 'answered' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition border ${
+            filter === 'answered' 
+              ? 'bg-emerald-600 text-white border-emerald-700 shadow-2xs' 
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
           }`}
         >
           🟢 Respondidas ({questions.filter(q => getStatus(q) === 'answered').length})
@@ -271,13 +279,13 @@ export default function QuestionsPage() {
             return (
               <div 
                 key={q.id} 
-                className={`bg-white rounded-lg shadow-md border-2 transition ${
-                  status === 'unread' ? 'border-red-300' : 
-                  status === 'pending' ? 'border-yellow-300' : 'border-gray-200'
+                className={`bg-white dark:bg-slate-900 rounded-3xl shadow-2xs border-2 transition ${
+                  status === 'unread' ? 'border-red-300 dark:border-red-800' : 
+                  status === 'pending' ? 'border-amber-300 dark:border-amber-800' : 'border-gray-200 dark:border-slate-800'
                 }`}
               >
                 {/* Cabecera: Nombre del producto */}
-                <div className="w-full p-4 flex items-center justify-between gap-3 hover:bg-gray-50 transition border-b border-gray-100">
+                <div className="w-full p-4 flex items-center justify-between gap-3 hover:bg-gray-50 dark:hover:bg-slate-800/60 transition border-b border-gray-100 dark:border-slate-800">
                   <button
                     onClick={() => handleToggleExpand(q)}
                     className="flex-1 text-left flex items-center gap-3"
@@ -285,16 +293,16 @@ export default function QuestionsPage() {
                     <span className="text-2xl">{config.icon}</span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="font-semibold text-gray-900 line-clamp-1">
+                        <p className="font-extrabold text-gray-900 dark:text-slate-100 text-sm line-clamp-1">
                           {q.products?.title || 'Producto eliminado'}
                         </p>
                         {mutedIds.includes(q.id) && (
-                          <span className="bg-slate-100 text-slate-600 text-[10px] font-extrabold px-2 py-0.5 rounded border border-slate-300">
+                          <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-extrabold px-2 py-0.5 rounded border border-slate-300 dark:border-slate-700">
                             🔕 Notificación Silenciada
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-gray-500 mt-0.5">
+                      <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
                         {new Date(q.created_at).toLocaleDateString('es-AR', { 
                           year: 'numeric', month: 'short', day: 'numeric' 
                         })}
