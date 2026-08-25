@@ -110,6 +110,33 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     if (catData) setCategoryName(catData.name);
   };
 
+  // Función de geolocalización por GPS para el vendedor
+  const handleDetectGPS = () => {
+    if (!navigator.geolocation) {
+      alert('Tu navegador no soporta geolocalización por GPS.');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+          const data = await res.json();
+          const city = data.address?.city || data.address?.town || data.address?.suburb || data.address?.county || 'Buenos Aires';
+          const state = data.address?.state || 'BA';
+          const detectedName = `${city}, ${state}`;
+          setLocationName(detectedName);
+          alert(`Ubicación GPS detectada: ${detectedName}`);
+        } catch {
+          setLocationName('Palermo, CABA');
+        }
+      },
+      () => alert('No se pudo obtener la posición GPS. Escribe manualmente tu ubicación.')
+    );
+  };
+
   const handleUpdateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userId || !categoryId) return alert('Faltan datos requeridos');
@@ -133,6 +160,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
       const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(filePath);
       imageUrls.push(urlData.publicUrl);
+    }
+
+    if (!locationName || locationName.trim().length < 3) {
+      setLoading(false);
+      return alert('⚠️ Debes ingresar una ubicación válida (ej: Palermo, CABA) para poder guardar los cambios del producto.');
     }
 
     const { error: dbError } = await supabase
@@ -196,10 +228,52 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             <label className="block text-sm font-medium text-gray-700 mb-1">Descripción:</label>
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} required className="w-full p-3 border border-gray-300 rounded-lg h-32 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">📍 Barrio / Localidad de publicación *</label>
-            <input type="text" value={locationName} onChange={(e) => setLocationName(e.target.value)} required className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Ej: Barracas, Buenos Aires / Palermo, CABA / Quilmes, GBA" />
-            <p className="text-xs text-gray-400 mt-1">Especifica el barrio o localidad exacta (ej. Barracas, Palermo, Recoleta, Quilmes).</p>
+          {/* CAMPO DE UBICACIÓN VALIDADA CON GPS & GOOGLE MAPS */}
+          <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-2">
+            <div className="flex justify-between items-center">
+              <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700">
+                📍 Ubicación de la Publicación (Barrio / Ciudad) *
+              </label>
+              <span className="text-[10px] font-extrabold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
+                Obligatorio
+              </span>
+            </div>
+
+            <div className="flex gap-2">
+              <input
+                type="text"
+                required
+                value={locationName}
+                onChange={(e) => setLocationName(e.target.value)}
+                className="flex-1 p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium bg-white"
+                placeholder="Ej: Palermo, CABA o Barracas, BA"
+              />
+              <button
+                type="button"
+                onClick={handleDetectGPS}
+                className="px-3.5 py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5 flex-shrink-0 cursor-pointer shadow-2xs"
+                title="Detectar ubicación por GPS"
+              >
+                <span>📍 Usar mi GPS</span>
+              </button>
+            </div>
+
+            {locationName && locationName.trim().length >= 3 && (
+              <div className="flex items-center justify-between bg-white p-2.5 rounded-xl border border-gray-200 text-xs mt-1">
+                <span className="text-gray-700 font-medium truncate max-w-[240px] sm:max-w-xs">
+                  📍 Ubicación registrada: <strong className="text-gray-900 font-bold">{locationName}</strong>
+                </span>
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationName)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 font-extrabold flex items-center gap-1 hover:underline text-xs"
+                >
+                  <span>Ver en Google Maps</span>
+                  <span className="text-[10px]">↗</span>
+                </a>
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>

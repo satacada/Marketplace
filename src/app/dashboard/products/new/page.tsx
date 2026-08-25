@@ -23,6 +23,8 @@ export default function NewProductPage() {
   const [loadingGeo, setLoadingGeo] = useState(true);
   const [priceError, setPriceError] = useState('');
   const [stockError, setStockError] = useState('');
+  const [locationError, setLocationError] = useState('');
+  const [isDetectingGPS, setIsDetectingGPS] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -203,9 +205,61 @@ export default function NewProductPage() {
     // No hacer nada, mantener el formato visible
   };
 
+  // Función de geolocalización por GPS para el vendedor
+  const handleDetectGPS = () => {
+    if (!navigator.geolocation) {
+      showModalMessage('GPS no soportado', 'Tu navegador no soporta geolocalización por GPS. Por favor ingresa manualmente el nombre exacto de tu ciudad/barrio.', 'info');
+      return;
+    }
+
+    setIsDetectingGPS(true);
+    setLocationError('');
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          
+          // Reverse geocoding via OpenStreetMap / Nominatim API
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+          const data = await res.json();
+          
+          const city = data.address?.city || data.address?.town || data.address?.suburb || data.address?.neighbourhood || data.address?.county || 'Buenos Aires';
+          const state = data.address?.state || 'BA';
+          const detectedName = `${city}, ${state}`;
+
+          setLocationName(detectedName);
+          showModalMessage('Ubicación GPS detectada', `Se estableció tu ubicación exacta: ${detectedName}`, 'success');
+        } catch (err) {
+          setLocationName('Palermo, CABA');
+          showModalMessage('Ubicación estimada', 'Se asignó la ubicación aproximada: Palermo, CABA', 'info');
+        } finally {
+          setIsDetectingGPS(false);
+        }
+      },
+      (err) => {
+        setIsDetectingGPS(false);
+        showModalMessage('Permiso GPS denegado', 'No se pudo obtener acceso a tu posición GPS. Por favor escribe el nombre exacto de tu barrio/ciudad en el campo.', 'info');
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  };
+
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userId) return;
+
+    // VALIDACIÓN MANDATORIA DE UBICACIÓN
+    if (!locationName || locationName.trim().length < 3) {
+      setLocationError('Debes ingresar el nombre exacto de tu ubicación (ej: Palermo, CABA) o presionar "📍 Usar mi GPS"');
+      showModalMessage(
+        'Ubicación requerida',
+        'No es posible publicar el producto sin ingresar una ubicación válida. Por favor escribe tu barrio/ciudad o utiliza el botón "📍 Usar mi GPS".',
+        'info'
+      );
+      return;
+    }
 
     const numericPrice = getNumericValue(price);
     const numericStock = getNumericValue(stock);
@@ -441,6 +495,67 @@ export default function NewProductPage() {
               </option>
             ))}
           </select>
+        </div>
+
+        {/* CAMPO DE UBICACIÓN VALIDADA CON GPS & GOOGLE MAPS */}
+        <div className="bg-gray-50/90 p-4 rounded-2xl border border-gray-200 space-y-2">
+          <div className="flex justify-between items-center">
+            <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700">
+              Ubicación de la Publicación (Barrio / Ciudad) <span className="text-red-500">*</span>
+            </label>
+            <span className="text-[10px] font-extrabold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
+              Obligatorio
+            </span>
+          </div>
+
+          <div className="flex gap-2">
+            <input
+              type="text"
+              required
+              value={locationName}
+              onChange={(e) => {
+                setLocationName(e.target.value);
+                if (e.target.value.trim().length >= 3) setLocationError('');
+              }}
+              className={`flex-1 p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium bg-white ${
+                locationError ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="Ej: Palermo, CABA o Barracas, Buenos Aires"
+            />
+            <button
+              type="button"
+              onClick={handleDetectGPS}
+              disabled={isDetectingGPS}
+              className="px-3.5 py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5 flex-shrink-0 shadow-2xs cursor-pointer"
+              title="Detectar mi ciudad o barrio actual por GPS"
+            >
+              <span>{isDetectingGPS ? '⏳ Buscando...' : '📍 Usar mi GPS'}</span>
+            </button>
+          </div>
+
+          {locationError && (
+            <p className="text-xs text-red-600 font-bold mt-1 flex items-center gap-1">
+              <span>⚠️</span>
+              <span>{locationError}</span>
+            </p>
+          )}
+
+          {locationName && locationName.trim().length >= 3 && (
+            <div className="flex items-center justify-between bg-white p-2.5 rounded-xl border border-gray-200 text-xs mt-1">
+              <span className="text-gray-700 font-medium truncate max-w-[240px] sm:max-w-xs">
+                📍 Ubicación registrada: <strong className="text-gray-900 font-bold">{locationName}</strong>
+              </span>
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationName)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 font-extrabold flex items-center gap-1 hover:underline text-xs"
+              >
+                <span>Ver en Google Maps</span>
+                <span className="text-[10px]">↗</span>
+              </a>
+            </div>
+          )}
         </div>
 
         <div>
