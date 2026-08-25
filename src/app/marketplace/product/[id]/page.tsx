@@ -258,7 +258,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   }).format(product.price);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 transition-colors duration-200">
       {/* Header estandarizado con Widget de Carrito ($monto total y cantidad) */}
       <Header 
         cartItemCount={cart.itemCount} 
@@ -269,39 +269,39 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       <div className="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <div className="mb-6">
-          <Link href="/marketplace" className="text-blue-600 hover:text-blue-700 text-sm font-medium transition flex items-center gap-1">
+          <Link href="/marketplace" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 font-extrabold text-sm transition flex items-center gap-1">
             <span>←</span> Volver al Marketplace
           </Link>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* Galería de imágenes */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-2xs border border-gray-200/90 dark:border-slate-800">
             <ImageGallery images={product.image_urls || []} />
           </div>
 
           {/* Información del producto */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-2xs border border-gray-200/90 dark:border-slate-800 flex flex-col justify-between text-gray-900 dark:text-slate-100">
             <div>
               <div className="mb-4">
                 {product.categories?.name && (
-                  <span className="inline-block text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full mb-2 border border-blue-100">
+                  <span className="inline-block text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 px-3 py-1 rounded-full mb-2 border border-blue-100 dark:border-blue-900">
                     {product.categories.name}
                   </span>
                 )}
-                <h1 className="text-3xl font-bold text-gray-900 leading-tight">{product.title}</h1>
+                <h1 className="text-3xl font-extrabold text-gray-900 dark:text-slate-100 leading-tight">{product.title}</h1>
               </div>
 
               <div className="flex items-baseline gap-4 mb-6">
-                <span className="text-4xl font-extrabold text-blue-600 tracking-tight">{formattedPrice}</span>
-                <span className={`text-sm font-semibold px-2.5 py-1 rounded-full ${product.stock > 0 ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                <span className="text-4xl font-black text-blue-600 dark:text-blue-400 tracking-tight">{formattedPrice}</span>
+                <span className={`text-sm font-extrabold px-3 py-1 rounded-full border ${product.stock > 0 ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900' : 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-900'}`}>
                   {product.stock > 0 ? `Stock: ${product.stock} disponibles` : 'Sin stock'}
                 </span>
               </div>
 
               <div className="prose prose-gray mb-6">
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Descripción</h3>
-                <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{product.description}</p>
+                <h3 className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Descripción</h3>
+                <p className="text-gray-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed text-sm font-medium">{product.description}</p>
               </div>
 
               {(() => {
@@ -520,19 +520,19 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         </div>
 
         {/* Sección de Preguntas */}
-        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Preguntas y Respuestas</h2>
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-2xs border border-gray-200/90 dark:border-slate-800 text-gray-900 dark:text-slate-100">
+          <h2 className="text-2xl font-extrabold text-gray-900 dark:text-slate-100 mb-6">Preguntas y Respuestas</h2>
 
           {/* Lista de preguntas existentes */}
           {questions.length > 0 ? (
             <div className="space-y-4 mb-8">
               {questions.map((q) => (
-                <div key={q.id} className="border-b border-gray-200 pb-4 last:border-b-0">
+                <div key={q.id} className="border-b border-gray-200 dark:border-slate-800 pb-4 last:border-b-0">
                   <div className="flex gap-3 mb-2">
                     <span className="text-2xl">❓</span>
                     <div className="flex-1">
-                      <p className="text-gray-900 font-medium">{q.question}</p>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-gray-900 dark:text-slate-100 font-extrabold text-sm">{q.question}</p>
+                      <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
                         {new Date(q.created_at).toLocaleDateString('es-AR')}
                       </p>
                     </div>
@@ -541,9 +541,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   {q.answer && (
                     <div className="flex gap-3 ml-8">
                       <span className="text-2xl">✅</span>
-                      <div className="flex-1 bg-green-50 p-3 rounded">
-                        <p className="text-gray-900">{q.answer}</p>
-                        <p className="text-xs text-gray-500 mt-1">
+                      <div className="flex-1 bg-emerald-50 dark:bg-emerald-950/60 p-3.5 rounded-2xl border border-emerald-200 dark:border-emerald-900">
+                        <p className="text-gray-900 dark:text-emerald-200 font-bold text-sm">{q.answer}</p>
+                        <p className="text-xs text-gray-500 dark:text-emerald-400 mt-1">
                           Respondido por: {q.profiles?.store_name || 'Vendedor'}
                         </p>
                       </div>
@@ -553,15 +553,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-4 mb-8">
+            <p className="text-gray-500 dark:text-slate-400 text-center py-4 mb-8 font-medium text-sm">
               Aún no hay preguntas sobre este producto. ¡Sé el primero!
             </p>
           )}
 
           {/* Formulario para hacer pregunta */}
           {userId && product.seller_id !== userId && (
-            <form onSubmit={handleAskQuestion} className="border-t border-gray-200 pt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Haz una pregunta sobre este producto</h3>
+            <form onSubmit={handleAskQuestion} className="border-t border-gray-200 dark:border-slate-800 pt-6">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-slate-100 mb-3">Haz una pregunta sobre este producto</h3>
               <textarea
                 value={newQuestion}
                 onChange={(e) => setNewQuestion(e.target.value)}

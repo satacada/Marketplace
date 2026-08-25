@@ -47,7 +47,6 @@ export default function ProfilePage() {
       return;
     }
 
-    // Actualizar rol a 'seller' y guardar el nombre de la tienda
     const { error } = await supabase
       .from('profiles')
       .update({
@@ -81,84 +80,84 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-2xl font-bold">Mi Perfil</h1>
+    <div className="max-w-2xl mx-auto space-y-6 p-4 sm:p-6">
+      <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-slate-100 tracking-tight">Mi Perfil</h1>
 
-        {message && (
-          <div className="bg-blue-100 text-blue-700 p-3 rounded">{message}</div>
-        )}
-
-        {/* Información básica */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Información de la cuenta</h2>
-          <p className="text-gray-600"><strong>Email:</strong> {email}</p>
-          <p className="text-gray-600 mt-2">
-            <strong>Rol actual:</strong>{' '}
-            <span className={role === 'seller' ? 'text-green-600 font-bold' : 'text-gray-500'}>
-              {role === 'seller' ? 'Vendedor' : 'Comprador'}
-            </span>
-          </p>
+      {message && (
+        <div className="bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800 p-4 rounded-2xl font-bold text-xs shadow-2xs">
+          {message}
         </div>
+      )}
 
-        {/* Si es buyer: activarse como seller */}
-        {role === 'buyer' && (
-          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
-            <h2 className="text-xl font-semibold mb-2">¿Quieres vender en el marketplace?</h2>
-            <p className="text-gray-600 mb-4">
-              Activa tu cuenta de vendedor y configura el nombre de tu tienda.
-            </p>
-            <form onSubmit={handleActivateSeller} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre de tu tienda:
-                </label>
-                <input
-                  type="text"
-                  value={storeName}
-                  onChange={(e) => setStoreName(e.target.value)}
-                  placeholder="Ej: Tienda de David"
-                  required
-                  className="w-full p-2 border rounded"
-                />
-              </div>
-              <button
-                type="submit"
-                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-              >
-                Activar cuenta de vendedor
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* Si ya es seller: editar nombre de tienda */}
-        {role === 'seller' && (
-          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-indigo-500">
-            <h2 className="text-xl font-semibold mb-4">Configuración de tu tienda</h2>
-            <form onSubmit={handleUpdateStoreName} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre de tu tienda:
-                </label>
-                <input
-                  type="text"
-                  value={storeName}
-                  onChange={(e) => setStoreName(e.target.value)}
-                  required
-                  className="w-full p-2 border rounded"
-                />
-              </div>
-              <button
-                type="submit"
-                className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
-              >
-                Guardar cambios
-              </button>
-            </form>
-          </div>
-        )}
+      {/* Información básica */}
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-2xs border border-gray-200/90 dark:border-slate-800">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100 mb-4">Información de la cuenta</h2>
+        <p className="text-gray-600 dark:text-slate-300 text-sm"><strong>Email:</strong> {email}</p>
+        <p className="text-gray-600 dark:text-slate-300 text-sm mt-2">
+          <strong>Rol actual:</strong>{' '}
+          <span className={role === 'seller' ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' : 'text-gray-500 dark:text-slate-400 font-bold'}>
+            {role === 'seller' ? '✓ Vendedor' : '👤 Comprador'}
+          </span>
+        </p>
       </div>
+
+      {/* Si es buyer: activarse como seller */}
+      {role === 'buyer' && (
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-2xs border-l-4 border-l-emerald-600 border-y border-r border-gray-200/90 dark:border-slate-800">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100 mb-2">¿Quieres vender en el marketplace?</h2>
+          <p className="text-gray-600 dark:text-slate-300 text-xs mb-4">
+            Activa tu cuenta de vendedor y configura el nombre de tu tienda.
+          </p>
+          <form onSubmit={handleActivateSeller} className="space-y-4">
+            <div>
+              <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300 mb-1.5">
+                Nombre de tu tienda:
+              </label>
+              <input
+                type="text"
+                value={storeName}
+                onChange={(e) => setStoreName(e.target.value)}
+                placeholder="Ej: Tienda de David"
+                required
+                className="w-full p-3 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-semibold"
+              />
+            </div>
+            <button
+              type="submit"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition shadow-xs"
+            >
+              Activar cuenta de vendedor
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Si ya es seller: editar nombre de tienda */}
+      {role === 'seller' && (
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-2xs border-l-4 border-l-indigo-600 border-y border-r border-gray-200/90 dark:border-slate-800">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100 mb-4">Configuración de tu tienda</h2>
+          <form onSubmit={handleUpdateStoreName} className="space-y-4">
+            <div>
+              <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300 mb-1.5">
+                Nombre de tu tienda:
+              </label>
+              <input
+                type="text"
+                value={storeName}
+                onChange={(e) => setStoreName(e.target.value)}
+                required
+                className="w-full p-3 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-semibold"
+              />
+            </div>
+            <button
+              type="submit"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition shadow-xs"
+            >
+              Guardar cambios
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

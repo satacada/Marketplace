@@ -130,11 +130,11 @@ export default function ProductsPage() {
   if (!user) return null;
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
+    <div className="p-6 sm:p-8 max-w-6xl mx-auto space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Mis Productos</h1>
-          <p className="text-gray-600 mt-1">Gestiona tu catálogo de productos</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-slate-100">Mis Productos</h1>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 mt-1">Gestiona tu catálogo de productos</p>
         </div>
         <Link href="/dashboard/products/new">
           <Button variant="primary">+ Nuevo Producto</Button>
@@ -142,8 +142,8 @@ export default function ProductsPage() {
       </div>
 
       {products.length === 0 ? (
-        <div className="bg-white p-12 rounded-lg shadow-md text-center border border-gray-100">
-          <p className="text-gray-500 text-lg mb-4">Aún no tienes productos publicados.</p>
+        <div className="bg-white dark:bg-slate-900 p-12 rounded-3xl shadow-2xs text-center border border-gray-200/90 dark:border-slate-800">
+          <p className="text-gray-600 dark:text-slate-300 text-base font-extrabold mb-4">Aún no tienes productos publicados.</p>
           <Link href="/dashboard/products/new">
             <Button variant="primary">Crear tu primer producto</Button>
           </Link>
@@ -151,8 +151,8 @@ export default function ProductsPage() {
       ) : (
         <div className="space-y-4">
           {products.map((product) => (
-            <div key={product.id} className="bg-white p-6 rounded-lg shadow-md border border-gray-100 flex gap-6">
-              <div className="w-48 flex-shrink-0">
+            <div key={product.id} className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-2xs border border-gray-200/90 dark:border-slate-800 flex flex-col sm:flex-row gap-6">
+              <div className="w-full sm:w-48 flex-shrink-0">
                 <ImageGallery images={product.image_urls || []} thumbnailMode={true} />
               </div>
               

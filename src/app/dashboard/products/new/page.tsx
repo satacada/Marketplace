@@ -363,24 +363,24 @@ export default function NewProductPage() {
   };
 
   return (
-    <div className="p-8 max-w-2xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Nuevo Producto</h1>
-        <p className="text-gray-600 mt-1">
+    <div className="p-6 sm:p-8 max-w-2xl mx-auto space-y-6">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-slate-100">Nuevo Producto</h1>
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 mt-1">
           {!isTrustedSeller && 'Tu producto será revisado por nuestro equipo antes de publicarse.'}
         </p>
         {loadingGeo ? (
-          <p className="text-xs text-gray-400 mt-2">🌍 Detectando tu ubicación y moneda...</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500 mt-2">🌍 Detectando tu ubicación y moneda...</p>
         ) : (
-          <p className="text-xs text-green-600 mt-2 font-medium">
+          <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2 font-extrabold">
             ✓ Moneda configurada: {currencySymbol} (separador: {thousandsSep === '.' ? 'punto' : 'coma'})
           </p>
         )}
       </div>
 
-      <form onSubmit={handleAddProduct} className="space-y-6 bg-white p-6 rounded-lg shadow-md">
+      <form onSubmit={handleAddProduct} className="space-y-6 bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-2xs border border-gray-200/90 dark:border-slate-800 text-gray-900 dark:text-slate-100">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300 mb-1.5">
             Título del producto *
           </label>
           <input
@@ -481,12 +481,12 @@ export default function NewProductPage() {
         </div>
 
         {/* CAMPO DE UBICACIÓN VALIDADA CON GPS & GOOGLE MAPS */}
-        <div className="bg-gray-50/90 p-4 rounded-2xl border border-gray-200 space-y-2">
+        <div className="bg-slate-50/90 dark:bg-slate-800/80 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
           <div className="flex justify-between items-center">
-            <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700">
+            <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300">
               Ubicación de la Publicación (Barrio / Ciudad) <span className="text-red-500">*</span>
             </label>
-            <span className="text-[10px] font-extrabold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
+            <span className="text-[10px] font-extrabold text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-900">
               Obligatorio
             </span>
           </div>
@@ -500,8 +500,8 @@ export default function NewProductPage() {
                 setLocationName(e.target.value);
                 if (e.target.value.trim().length >= 3) setLocationError('');
               }}
-              className={`flex-1 p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium bg-white ${
-                locationError ? 'border-red-500' : 'border-gray-300'
+              className={`flex-1 p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 ${
+                locationError ? 'border-red-500' : 'border-gray-300 dark:border-slate-700'
               }`}
               placeholder="Ej: Palermo, CABA o Barracas, Buenos Aires"
             />
@@ -509,7 +509,7 @@ export default function NewProductPage() {
               type="button"
               onClick={handleDetectGPS}
               disabled={isDetectingGPS}
-              className="px-3.5 py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5 flex-shrink-0 shadow-2xs cursor-pointer"
+              className="px-3.5 py-3 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/80 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800 rounded-xl text-xs font-bold transition flex items-center gap-1.5 flex-shrink-0 shadow-2xs cursor-pointer"
               title="Detectar mi ciudad o barrio actual por GPS"
             >
               <span>{isDetectingGPS ? '⏳ Buscando...' : '📍 Usar mi GPS'}</span>
@@ -517,22 +517,22 @@ export default function NewProductPage() {
           </div>
 
           {locationError && (
-            <p className="text-xs text-red-600 font-bold mt-1 flex items-center gap-1">
+            <p className="text-xs text-red-600 dark:text-red-400 font-bold mt-1 flex items-center gap-1">
               <span>⚠️</span>
               <span>{locationError}</span>
             </p>
           )}
 
           {locationName && locationName.trim().length >= 3 && (
-            <div className="flex items-center justify-between bg-white p-2.5 rounded-xl border border-gray-200 text-xs mt-1">
-              <span className="text-gray-700 font-medium truncate max-w-[240px] sm:max-w-xs">
-                📍 Ubicación registrada: <strong className="text-gray-900 font-bold">{locationName}</strong>
+            <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-xs mt-1">
+              <span className="text-gray-700 dark:text-slate-300 font-medium truncate max-w-[240px] sm:max-w-xs">
+                📍 Ubicación registrada: <strong className="text-gray-900 dark:text-slate-100 font-bold">{locationName}</strong>
               </span>
               <a
                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationName)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 font-extrabold flex items-center gap-1 hover:underline text-xs"
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 font-extrabold flex items-center gap-1 hover:underline text-xs"
               >
                 <span>Ver en Google Maps</span>
                 <span className="text-[10px]">↗</span>
@@ -543,11 +543,11 @@ export default function NewProductPage() {
 
         {/* SECTOR DE SELECCIÓN DE IMÁGENES EN CASTELLANO */}
         <div>
-          <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 mb-1.5">
+          <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300 mb-1.5">
             Imágenes del Producto (PNG, JPG, WEBP)
           </label>
           
-          <div className="border-2 border-dashed border-gray-300 hover:border-blue-500 rounded-2xl p-6 text-center bg-gray-50/80 transition-all cursor-pointer relative group">
+          <div className="border-2 border-dashed border-gray-300 dark:border-slate-700 hover:border-blue-500 rounded-2xl p-6 text-center bg-slate-50/80 dark:bg-slate-800/60 transition-all cursor-pointer relative group">
             <input
               type="file"
               multiple

@@ -62,7 +62,7 @@ export default function ImageGallery({
   // Si no hay imágenes, mostrar placeholder
   if (!images || images.length === 0) {
     return (
-      <div className={`w-full bg-slate-100 flex flex-col items-center justify-center text-gray-400 rounded-xl border border-dashed border-gray-200 ${thumbnailMode ? 'h-48' : 'h-[350px]'}`}>
+      <div className={`w-full bg-slate-100 dark:bg-slate-800 flex flex-col items-center justify-center text-gray-400 dark:text-slate-500 rounded-xl border border-dashed border-gray-200 dark:border-slate-700 ${thumbnailMode ? 'h-48' : 'h-[350px]'}`}>
         <span className="text-4xl mb-2">🖼️</span>
         <span className="text-sm font-medium">Sin imagen disponible</span>
       </div>
@@ -72,7 +72,7 @@ export default function ImageGallery({
   // MODO THUMBNAIL (Para tarjetas de producto pequeñas)
   if (thumbnailMode) {
     return (
-      <div className="relative w-full h-48 bg-slate-100 overflow-hidden rounded-t-xl group cursor-pointer" onClick={openModal}>
+      <div className="relative w-full h-48 bg-slate-100 dark:bg-slate-800 overflow-hidden rounded-t-xl group cursor-pointer" onClick={openModal}>
         <img 
           src={images[currentIndex]} 
           alt={`Imagen ${currentIndex + 1}`}
@@ -107,7 +107,7 @@ export default function ImageGallery({
     <div className="flex flex-col gap-4">
       {/* Contenedor principal de la foto */}
       <div 
-        className="relative w-full h-[360px] sm:h-[420px] bg-slate-50 rounded-2xl overflow-hidden flex items-center justify-center border border-gray-200 group cursor-zoom-in shadow-inner"
+        className="relative w-full h-[360px] sm:h-[420px] bg-slate-50 dark:bg-slate-950 rounded-2xl overflow-hidden flex items-center justify-center border border-gray-200 dark:border-slate-800 group cursor-zoom-in shadow-inner"
         onClick={openModal}
       >
         <img 
@@ -117,7 +117,7 @@ export default function ImageGallery({
         />
 
         {/* Badge para indicar zoom */}
-        <div className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm px-2.5 py-1 rounded-full text-xs font-medium text-gray-700 shadow-sm opacity-0 group-hover:opacity-100 transition">
+        <div className="absolute top-3 right-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm px-2.5 py-1 rounded-full text-xs font-medium text-gray-700 dark:text-slate-200 shadow-sm opacity-0 group-hover:opacity-100 transition border border-transparent dark:border-slate-700">
           🔍 Haz clic para ampliar
         </div>
 
@@ -126,7 +126,7 @@ export default function ImageGallery({
           <>
             <button 
               onClick={prevImage}
-              className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full shadow-md hover:shadow-lg transition transform hover:scale-110"
+              className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-800 text-gray-800 dark:text-slate-100 p-2 rounded-full shadow-md hover:shadow-lg transition transform hover:scale-110 border border-transparent dark:border-slate-700"
               title="Anterior imagen"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -135,7 +135,7 @@ export default function ImageGallery({
             </button>
             <button 
               onClick={nextImage}
-              className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full shadow-md hover:shadow-lg transition transform hover:scale-110"
+              className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-800 text-gray-800 dark:text-slate-100 p-2 rounded-full shadow-md hover:shadow-lg transition transform hover:scale-110 border border-transparent dark:border-slate-700"
               title="Siguiente imagen"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
