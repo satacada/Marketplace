@@ -69,18 +69,15 @@ export default function AuthPage() {
     }
 
     const typeParam = searchParams.get('type');
-    if (typeParam === 'recovery') {
-      router.push(`/auth/reset?${searchParams.toString()}`);
-      return;
-    }
+    const codeParam = searchParams.get('code');
+    const hash = typeof window !== 'undefined' ? window.location.hash : '';
 
-    // Detectar si el hash de la URL incluye access_token o type=recovery
-    if (typeof window !== 'undefined') {
-      const hash = window.location.hash;
-      if (hash.includes('type=recovery') || hash.includes('access_token')) {
-        router.push(`/auth/reset${hash}`);
-        return;
-      }
+    // Si la URL trae un código PKCE (?code=...), type=recovery o hash de acceso, redirigir al formulario de reset
+    if (codeParam || typeParam === 'recovery' || hash.includes('type=recovery') || hash.includes('access_token')) {
+      const queryStr = searchParams.toString();
+      const redirectUrl = `/auth/reset${queryStr ? `?${queryStr}` : ''}${hash}`;
+      router.push(redirectUrl);
+      return;
     }
 
     // Escuchar eventos de sesión de Supabase (PASSWORD_RECOVERY)
