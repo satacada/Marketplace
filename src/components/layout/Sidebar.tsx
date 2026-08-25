@@ -12,11 +12,13 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useTheme } from '@/shared/theme/ThemeContext';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import THEME_CONFIG from '@/shared/theme/theme.config';
 
 function SidebarContent() {
   const { user, profile, logout, isLoading } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [unreadCount, setUnreadCount] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
   
@@ -237,11 +239,25 @@ function SidebarContent() {
           </div>
         </div>
 
-        {/* Botón Cerrar Sesión */}
-        <div className="pt-2 px-1">
+        {/* Conmutador Modo Nocturno & Cerrar Sesión */}
+        <div className="pt-2 px-1 space-y-2 border-t border-slate-200/80 dark:border-slate-800 mt-2">
+          <button
+            onClick={toggleTheme}
+            className="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold transition flex items-center justify-between shadow-2xs"
+            title="Cambiar entre Modo Claro y Modo Nocturno"
+          >
+            <span className="flex items-center gap-2">
+              <span>{theme === 'dark' ? '🌙' : '☀️'}</span>
+              <span>{theme === 'dark' ? 'Modo Nocturno' : 'Modo Claro'}</span>
+            </span>
+            <span className="text-[10px] bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-extrabold px-2 py-0.5 rounded-full">
+              {theme === 'dark' ? 'ON' : 'OFF'}
+            </span>
+          </button>
+
           <button
             onClick={handleLogout}
-            className="w-full bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200/80 rounded-xl px-3.5 py-2.5 text-xs font-bold transition flex items-center justify-center gap-2 shadow-2xs"
+            className="w-full bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-600 text-rose-700 dark:text-rose-300 hover:text-white border border-rose-200 dark:border-rose-900 rounded-xl px-3.5 py-2.5 text-xs font-bold transition flex items-center justify-center gap-2 shadow-2xs"
           >
             <span>🚪</span>
             <span>Cerrar Sesión</span>

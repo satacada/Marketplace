@@ -28,6 +28,26 @@ type QuestionStatus = 'unread' | 'pending' | 'answered';
 export default function QuestionsPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
+  const [mutedIds, setMutedIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    const savedMuted = localStorage.getItem('seller_muted_questions');
+    if (savedMuted) {
+      try {
+        setMutedIds(JSON.parse(savedMuted));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, []);
+
+  const toggleMuteQuestion = (questionId: string) => {
+    const newMuted = mutedIds.includes(questionId)
+      ? mutedIds.filter(id => id !== questionId)
+      : [...mutedIds, questionId];
+    setMutedIds(newMuted);
+    localStorage.setItem('seller_muted_questions', JSON.stringify(newMuted));
+  };
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [answerText, setAnswerText] = useState('');
@@ -253,28 +273,52 @@ export default function QuestionsPage() {
                 }`}
               >
                 {/* Cabecera: Nombre del producto */}
-                <button
-                  onClick={() => handleToggleExpand(q)}
-                  className="w-full p-4 text-left flex items-center gap-3 hover:bg-gray-50 transition"
-                >
-                  <span className="text-2xl">{config.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-gray-900 line-clamp-1">
-                      {q.products?.title || 'Producto eliminado'}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      {new Date(q.created_at).toLocaleDateString('es-AR', { 
-                        year: 'numeric', month: 'short', day: 'numeric' 
-                      })}
-                    </p>
+                <div className="w-full p-4 flex items-center justify-between gap-3 hover:bg-gray-50 transition border-b border-gray-100">
+                  <button
+                    onClick={() => handleToggleExpand(q)}
+                    className="flex-1 text-left flex items-center gap-3"
+                  >
+                    <span className="text-2xl">{config.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-gray-900 line-clamp-1">
+                          {q.products?.title || 'Producto eliminado'}
+                        </p>
+                        {mutedIds.includes(q.id) && (
+                          <span className="bg-slate-100 text-slate-600 text-[10px] font-extrabold px-2 py-0.5 rounded border border-slate-300">
+                            🔕 Notificación Silenciada
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {new Date(q.created_at).toLocaleDateString('es-AR', { 
+                          year: 'numeric', month: 'short', day: 'numeric' 
+                        })}
+                      </p>
+                    </div>
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => toggleMuteQuestion(q.id)}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition flex items-center gap-1 border ${
+                        mutedIds.includes(q.id)
+                          ? 'bg-slate-200 text-slate-700 border-slate-300'
+                          : 'bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100'
+                      }`}
+                      title="Permite evitar notificaciones recurrentes para esta consulta (Permanecerá visible para Auditoría en el Panel Admin)"
+                    >
+                      {mutedIds.includes(q.id) ? '🔔 Activar Alertas' : '🔕 Silenciar Alertas'}
+                    </button>
+
+                    <span className={`px-2 py-1 rounded text-xs font-medium border ${config.color}`}>
+                      {config.label}
+                    </span>
+                    <button onClick={() => handleToggleExpand(q)} className="text-gray-400 text-xl pl-1">
+                      {isExpanded ? '▼' : '▶'}
+                    </button>
                   </div>
-                  <span className={`px-2 py-1 rounded text-xs font-medium border ${config.color}`}>
-                    {config.label}
-                  </span>
-                  <span className="text-gray-400 text-xl">
-                    {isExpanded ? '▼' : '▶'}
-                  </span>
-                </button>
+                </div>
 
                 {/* Contenido expandible */}
                 {isExpanded && (

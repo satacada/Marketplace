@@ -30,10 +30,11 @@
 import { Suspense } from 'react';
 import { usePathname } from 'next/navigation';
 import Sidebar from './Sidebar';
+import { ThemeProvider } from '@/shared/theme/ThemeContext';
 
 function SidebarWrapper() {
   return (
-    <Suspense fallback={<div className="w-64 bg-white border-r border-gray-200 min-h-screen" />}>
+    <Suspense fallback={<div className="w-64 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-800 min-h-screen" />}>
       <Sidebar />
     </Suspense>
   );
@@ -56,17 +57,18 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     pathname.startsWith('/auth')
   );
 
-  if (isPublicNoSidebar) {
-    return <>{children}</>;
-  }
-
-  // Para el resto (Dashboard, Carrito, Favoritos, Pedidos, Perfil), mostrar sidebar + contenido
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <SidebarWrapper />
-      <main className="flex-1 w-full pl-64">
-        {children}
-      </main>
-    </div>
+    <ThemeProvider>
+      {isPublicNoSidebar ? (
+        <>{children}</>
+      ) : (
+        <div className="flex min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 transition-colors duration-300">
+          <SidebarWrapper />
+          <main className="flex-1 overflow-x-hidden">
+            {children}
+          </main>
+        </div>
+      )}
+    </ThemeProvider>
   );
 }
