@@ -4,8 +4,9 @@ import { useEffect, useState, use } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import ImageGallery from '@/components/marketplace/ImageGallery';
 import Header from '@/components/layout/Header';
+import ImageGallery from '@/components/marketplace/ImageGallery';
+import ShareModal from '@/components/marketplace/ShareModal';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { useCart } from '@/features/cart/hooks/useCart';
@@ -44,6 +45,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [newQuestion, setNewQuestion] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Estado para Modal estándar UI
   const [showModal, setShowModal] = useState(false);
@@ -213,6 +215,22 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     }
   };
 
+  const handleShareProduct = () => {
+    if (!product) return;
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: product.title,
+        text: `¡Mira este producto en Marketplace! 🛍️ ${product.title} - $${product.price.toLocaleString('es-AR')}`,
+        url: window.location.href
+      }).catch(() => {
+        setShowShareModal(true);
+      });
+    } else {
+      setShowShareModal(true);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -339,6 +357,19 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   <span className="text-base font-bold">{isFavorite ? 'Favorito' : 'Favorito'}</span>
                 </button>
               )}
+
+              {/* Botón de Compartir */}
+              <button
+                type="button"
+                onClick={handleShareProduct}
+                className="py-3.5 px-5 rounded-xl font-bold transition flex items-center justify-center gap-2 border border-gray-200 bg-gray-50 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 text-gray-700 shadow-2xs"
+                title="Compartir producto (WhatsApp, Telegram, Messenger, Facebook...)"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-500 hover:text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+                <span className="text-base font-bold">Compartir</span>
+              </button>
             </div>
           </div>
         </div>
@@ -479,6 +510,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
       </Modal>
+
+      {/* Modal de Compartir */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        product={product ? { id: product.id, title: product.title, price: product.price, image_url: product.image_urls?.[0] || null } : null}
+      />
     </div>
   );
 }

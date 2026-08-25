@@ -47,6 +47,7 @@ import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import ImageGallery from '@/components/marketplace/ImageGallery';
+import ShareModal from '@/components/marketplace/ShareModal';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { debounce } from '@/shared/utils/debounce';
@@ -77,7 +78,8 @@ const ProductCard = memo(({
   onAddToCart,
   onViewDetails,
   isFavorite,
-  onToggleFavorite
+  onToggleFavorite,
+  onShareProduct
 }: { 
   product: Product; 
   userId: string | null; 
@@ -86,6 +88,7 @@ const ProductCard = memo(({
   onViewDetails: (id: string) => void;
   isFavorite: boolean;
   onToggleFavorite: (productId: string) => void;
+  onShareProduct: (product: any) => void;
 }) => {
   const router = useRouter();
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -250,46 +253,63 @@ const ProductCard = memo(({
                 </div>
               </div>
 
-              {/* Botón de Añadir al Carrito con contador de unidades */}
-              {!isOwnProduct && (
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onAddToCart(product.id, {
-                        title: product.title,
-                        price: product.price,
-                        image_url: product.image_urls?.[0] || null,
-                        seller_id: product.seller_id
-                      });
-                    }}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110 flex-shrink-0 ${
-                      isInCart 
-                        ? 'bg-emerald-500 hover:bg-emerald-600 text-white ring-2 ring-emerald-200' 
-                        : 'bg-blue-600 hover:bg-blue-700 text-white'
-                    }`}
-                    title={cartQuantity > 0 ? `En el carrito: ${cartQuantity} unidad${cartQuantity > 1 ? 'es' : ''} (haz clic para sumar otra)` : 'Añadir al carrito'}
-                  >
-                    {isInCart ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                    )}
-                  </button>
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                {/* Botón de Compartir en redes sociales (WhatsApp, Messenger, Telegram...) */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onShareProduct(product);
+                  }}
+                  className="w-8 h-8 rounded-full bg-gray-100 hover:bg-blue-50 text-gray-600 hover:text-blue-600 border border-gray-200/80 flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-2xs"
+                  title="Compartir producto (WhatsApp, Telegram, Messenger, Facebook...)"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                  </svg>
+                </button>
 
-                  {/* Badge contador numérico en el botón verde */}
-                  {cartQuantity > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 bg-emerald-800 text-white text-[10px] font-extrabold w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-white shadow-xs pointer-events-none">
-                      {cartQuantity}
-                    </span>
-                  )}
-                </div>
-              )}
+                {/* Botón de Añadir al Carrito con contador de unidades */}
+                {!isOwnProduct && (
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAddToCart(product.id, {
+                          title: product.title,
+                          price: product.price,
+                          image_url: product.image_urls?.[0] || null,
+                          seller_id: product.seller_id
+                        });
+                      }}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110 flex-shrink-0 ${
+                        isInCart 
+                          ? 'bg-emerald-500 hover:bg-emerald-600 text-white ring-2 ring-emerald-200' 
+                          : 'bg-blue-600 hover:bg-blue-700 text-white'
+                      }`}
+                      title={cartQuantity > 0 ? `En el carrito: ${cartQuantity} unidad${cartQuantity > 1 ? 'es' : ''} (haz clic para sumar otra)` : 'Añadir al carrito'}
+                    >
+                      {isInCart ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                      )}
+                    </button>
+
+                    {/* Badge contador numérico en el botón verde */}
+                    {cartQuantity > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 bg-emerald-800 text-white text-[10px] font-extrabold w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-white shadow-xs pointer-events-none">
+                        {cartQuantity}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
             
             {/* Ubicación del producto */}
@@ -390,6 +410,7 @@ export default function MarketplacePage() {
   const [locationName, setLocationName] = useState('Buenos Aires');
   const [locationRadius, setLocationRadius] = useState(6);
   const [isGeolocating, setIsGeolocating] = useState(false);
+  const [shareProduct, setShareProduct] = useState<{ id: string; title: string; price: number; image_url?: string | null } | null>(null);
 
   // Productos vistos recientemente
   const [recentlyViewed, setRecentlyViewed] = useState<string[]>([]);
@@ -572,6 +593,25 @@ export default function MarketplacePage() {
       console.error('Error al manejar favoritos:', error);
     }
   }, [userId, favoriteProductIds, showModalMessage]);
+
+  const handleShareProduct = useCallback((productInfo: any) => {
+    const title = productInfo.title;
+    const price = productInfo.price;
+    const id = productInfo.id;
+    const imageUrl = productInfo.image_urls?.[0] || null;
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title,
+        text: `¡Mira este producto en Marketplace! 🛍️ ${title} - $${price.toLocaleString('es-AR')}`,
+        url: `${window.location.origin}/marketplace/product/${id}`
+      }).catch(() => {
+        setShareProduct({ id, title, price, image_url: imageUrl });
+      });
+    } else {
+      setShareProduct({ id, title, price, image_url: imageUrl });
+    }
+  }, []);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -846,6 +886,7 @@ export default function MarketplacePage() {
                       onViewDetails={handleViewDetails}
                       isFavorite={favoriteProductIds.has(product.id)}
                       onToggleFavorite={handleToggleFavorite}
+                      onShareProduct={handleShareProduct}
                     />
                   ))}
                 </div>
@@ -871,6 +912,13 @@ export default function MarketplacePage() {
           </main>
         </div>
       </div>
+
+      {/* Modal de Compartir Producto */}
+      <ShareModal
+        isOpen={!!shareProduct}
+        onClose={() => setShareProduct(null)}
+        product={shareProduct}
+      />
 
       {/* Pie de página con créditos */}
       <Footer />
