@@ -61,15 +61,14 @@ export default function ProductsPage() {
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const [actionId, setActionId] = useState<string | null>(null);
 
-  // Solo inicializar useProducts cuando el usuario esté disponible
-  const shouldLoadProducts = !!user?.id;
+  // Cargar productos del vendedor sólo cuando user.id esté disponible para evitar parpadeos
   const { 
     products, 
     loading: productsLoading, 
     deleteProduct, 
     toggleStock,
     refresh 
-  } = useProducts(shouldLoadProducts ? { sellerId: user?.id, includeFavoriteCount: true } : undefined);
+  } = useProducts(user?.id ? { sellerId: user.id, includeFavoriteCount: true } : { sellerId: 'loading-wait' });
 
   useEffect(() => {
     if (!authLoading && !user) {

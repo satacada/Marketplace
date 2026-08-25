@@ -59,6 +59,11 @@ export function useProducts(filters?: ProductFilters) {
       setError(null);
 
       if (memoizedFilters?.sellerId) {
+        if (memoizedFilters.sellerId === 'loading-wait') {
+          setProducts([]);
+          setLoading(true);
+          return;
+        }
         // Productos de un vendedor
         const data = await productService.getSellerProducts(
           memoizedFilters.sellerId, 
