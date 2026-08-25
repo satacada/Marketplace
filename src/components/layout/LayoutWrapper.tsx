@@ -42,19 +42,25 @@ function SidebarWrapper() {
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  // Rutas donde NO debe mostrarse el sidebar (rutas públicas)
-  const publicRoutes = ['/auth', '/marketplace'];
-
-  // Verificar si la ruta actual es pública (match exacto o empieza con /auth/)
-  const isPublicRoute = publicRoutes.some(route => 
+  // Rutas que SIEMPRE deben mostrar el Sidebar para navegación continua
+  const forceSidebarRoutes = ['/dashboard', '/marketplace/cart', '/marketplace/favorites'];
+  const isSidebarForced = forceSidebarRoutes.some(route => 
     pathname === route || pathname.startsWith(route + '/')
   );
 
-  if (isPublicRoute) {
+  // Rutas públicas de catálogo, producto y auth donde NO se muestra sidebar
+  const isPublicNoSidebar = !isSidebarForced && (
+    pathname === '/marketplace' || 
+    pathname.startsWith('/marketplace/product/') || 
+    pathname.startsWith('/marketplace/store/') || 
+    pathname.startsWith('/auth')
+  );
+
+  if (isPublicNoSidebar) {
     return <>{children}</>;
   }
 
-  // Para el resto, mostrar sidebar + contenido
+  // Para el resto (Dashboard, Carrito, Favoritos, Pedidos, Perfil), mostrar sidebar + contenido
   return (
     <div className="flex min-h-screen bg-gray-50">
       <SidebarWrapper />
