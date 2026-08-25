@@ -4,26 +4,13 @@
  * ============================================================================
  * 
  * @description Página de restablecimiento de contraseña desde enlace de correo.
- *              Maneja el token de Supabase para actualizar la contraseña.
+ *              Maneja el código PKCE / token de Supabase en el cliente.
  * 
  * @module Presentation/Pages/Auth/Reset
  * 
  * @author System
  * @created 2026-08-23
- * 
- * @dependencies
- * - react
- * - @/features/auth/hooks/useAuth
- * - @/components/ui/Button
- * - @/components/ui/Input
- * - @/components/ui/Modal
- * 
- * @related-files
- * - @/features/auth/hooks/useAuth.ts
- * - @/features/auth/services/auth.service.ts
- * 
- * @exports
- * - ResetPage (default)
+ * @modified 2026-08-25
  * 
  * ============================================================================
  */
@@ -49,6 +36,7 @@ export default function ResetPage() {
   });
   const [localError, setLocalError] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(true);
   
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -60,27 +48,48 @@ export default function ResetPage() {
       setUserEmail(emailParam);
     }
 
-    const checkSessionUser = async () => {
+    const verifyAndSetupSession = async () => {
       const { supabase } = await import('@/infrastructure/database/supabase.client');
+
+      // 1. Si viene código PKCE en la URL (?code=...)
+      const code = searchParams.get('code');
+      if (code) {
+        try {
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) {
+            console.error('Error al intercambiar código PKCE:', error);
+            setLocalError('El enlace de recuperación ha caducado o ya fue utilizado. Por favor solicita un nuevo correo de recuperación.');
+          } else if (data?.session?.user?.email) {
+            setUserEmail(data.session.user.email);
+            setLocalError('');
+          }
+        } catch (err: any) {
+          console.error('Excepción PKCE:', err);
+          setLocalError('No se pudo verificar el enlace. Solicita un nuevo correo de recuperación.');
+        }
+      }
+
+      // 2. Verificar si ya existe sesión activa
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user?.email) {
         setUserEmail(session.user.email);
+        setLocalError('');
       }
-    };
-    checkSessionUser();
 
-    const setupListener = async () => {
-      const { supabase } = await import('@/infrastructure/database/supabase.client');
+      // 3. Escuchar cambios de sesión de Supabase
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
         if (session?.user?.email) {
           setUserEmail(session.user.email);
+          setLocalError('');
         }
       });
+
+      setIsVerifying(false);
       return subscription;
     };
 
     let sub: any;
-    setupListener().then(s => { sub = s; });
+    verifyAndSetupSession().then(s => { sub = s; });
 
     return () => {
       if (sub) sub.unsubscribe();
@@ -101,12 +110,12 @@ export default function ResetPage() {
     setLocalError('');
 
     if (!validatePassword(newPassword)) {
-      setLocalError('La contraseña debe tener al menos 6 caracteres');
+      setLocalError('La contraseña debe tener al menos 6 caracteres.');
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setLocalError('Las contraseñas no coinciden');
+      setLocalError('Las contraseñas no coinciden. Por favor verifícalas.');
       return;
     }
 
@@ -117,18 +126,27 @@ export default function ResetPage() {
       if (result.success) {
         showModalMessage(
           '¡Contraseña restablecida!',
-          'Tu contraseña ha sido actualizada exitosamente.\n\nAhora puedes iniciar sesión con tu nueva contraseña.',
+          'Tu contraseña ha sido actualizada exitosamente.\n\nSerás redirigido a la pantalla de inicio de sesión para ingresar con tu nueva clave.',
           'success'
         );
-        // Redirigir al login después de un breve momento
         setTimeout(() => {
           router.push(`/auth?email=${encodeURIComponent(userEmail)}`);
-        }, 2000);
+        }, 2500);
       } else {
-        setLocalError(result.error || 'Error al restablecer contraseña');
+        const rawError = result.error || '';
+        if (rawError.toLowerCase().includes('auth session missing') || rawError.toLowerCase().includes('session')) {
+          setLocalError('El enlace de recuperación ha caducado o es inválido. Por favor solicita un nuevo correo de recuperación.');
+        } else {
+          setLocalError(rawError || 'Error al restablecer la contraseña.');
+        }
       }
     } catch (error: any) {
-      setLocalError(error.message || 'Error al restablecer contraseña');
+      const rawError = error.message || '';
+      if (rawError.toLowerCase().includes('auth session missing') || rawError.toLowerCase().includes('session')) {
+        setLocalError('El enlace de recuperación ha caducado o es inválido. Por favor solicita un nuevo correo de recuperación.');
+      } else {
+        setLocalError(rawError || 'Error al restablecer la contraseña.');
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -150,96 +168,105 @@ export default function ResetPage() {
 
           {/* Contenido del formulario */}
           <div className="px-8 py-6">
-            {userEmail && (
-              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800">
-                  <span className="font-medium">Usuario:</span> {userEmail}
+            {isVerifying ? (
+              <div className="text-center py-6">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3"></div>
+                <p className="text-sm text-gray-500">Verificando enlace de recuperación...</p>
+              </div>
+            ) : (
+              <>
+                {userEmail && (
+                  <div className="mb-6 p-3.5 bg-blue-50/80 border border-blue-200 rounded-xl">
+                    <p className="text-xs text-blue-800 font-medium">
+                      <span>Cuenta a actualizar:</span> <strong className="text-blue-900 font-bold">{userEmail}</strong>
+                    </p>
+                  </div>
+                )}
+
+                <p className="text-gray-600 mb-6 text-sm">
+                  Ingresa tu nueva contraseña para completar el restablecimiento.
                 </p>
-              </div>
+
+                <form onSubmit={handleResetPassword} className="space-y-5">
+                  {/* Nueva contraseña field */}
+                  <div>
+                    <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                      Nueva contraseña
+                    </label>
+                    <div className="relative">
+                      <Input
+                        id="newPassword"
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        fullWidth
+                        className="pl-10"
+                      />
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        🔒
+                      </div>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">Mínimo 6 caracteres</p>
+                  </div>
+
+                  {/* Confirmar contraseña field */}
+                  <div>
+                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                      Confirmar nueva contraseña
+                    </label>
+                    <div className="relative">
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        fullWidth
+                        className="pl-10"
+                      />
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        🔒
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Error message en español */}
+                  {localError && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-xs font-medium leading-relaxed">
+                      ⚠️ {localError}
+                    </div>
+                  )}
+
+                  {/* Submit button */}
+                  <Button
+                    type="submit"
+                    isLoading={isProcessing}
+                    fullWidth
+                    variant="primary"
+                    className="py-3 text-base font-medium"
+                  >
+                    {isProcessing ? 'Procesando...' : 'Restablecer Contraseña'}
+                  </Button>
+                </form>
+
+                {/* Additional info */}
+                <div className="mt-6 text-center text-sm text-gray-500">
+                  <p>
+                    ¿Recordaste tu contraseña?{' '}
+                    <button
+                      type="button"
+                      onClick={() => router.push('/auth')}
+                      className="text-blue-600 hover:text-blue-800 font-medium transition"
+                    >
+                      Volver al login
+                    </button>
+                  </p>
+                </div>
+              </>
             )}
-
-            <p className="text-gray-600 mb-6 text-sm">
-              Ingresa tu nueva contraseña para completar el restablecimiento.
-            </p>
-
-            <form onSubmit={handleResetPassword} className="space-y-5">
-              {/* Nueva contraseña field */}
-              <div>
-                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                  Nueva contraseña
-                </label>
-                <div className="relative">
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    fullWidth
-                    className="pl-10"
-                  />
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    🔒
-                  </div>
-                </div>
-                <p className="mt-1 text-xs text-gray-500">Mínimo 6 caracteres</p>
-              </div>
-
-              {/* Confirmar contraseña field */}
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirmar nueva contraseña
-                </label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    fullWidth
-                    className="pl-10"
-                  />
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    🔒
-                  </div>
-                </div>
-              </div>
-
-              {/* Error message */}
-              {localError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                  {localError}
-                </div>
-              )}
-
-              {/* Submit button */}
-              <Button
-                type="submit"
-                isLoading={isProcessing}
-                fullWidth
-                variant="primary"
-                className="py-3 text-base font-medium"
-              >
-                {isProcessing ? 'Procesando...' : 'Restablecer Contraseña'}
-              </Button>
-            </form>
-
-            {/* Additional info */}
-            <div className="mt-6 text-center text-sm text-gray-500">
-              <p>
-                ¿Recordaste tu contraseña?{' '}
-                <button
-                  type="button"
-                  onClick={() => router.push('/auth')}
-                  className="text-blue-600 hover:text-blue-800 font-medium transition"
-                >
-                  Volver al login
-                </button>
-              </p>
-            </div>
           </div>
         </div>
 
