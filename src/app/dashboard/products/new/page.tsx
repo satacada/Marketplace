@@ -9,6 +9,7 @@ export default function NewProductPage() {
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
+  const [locationName, setLocationName] = useState('Barracas, Buenos Aires');
   const [categoryId, setCategoryId] = useState('');
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -263,6 +264,7 @@ export default function NewProductPage() {
         image_urls: imageUrls,
         status: productStatus,
         is_deleted: false,
+        location_name: locationName || 'Barracas, Buenos Aires',
       })
       .select()
       .single();
@@ -349,6 +351,23 @@ export default function NewProductPage() {
             className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             placeholder="Describe tu producto..."
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            📍 Barrio / Localidad de publicación *
+          </label>
+          <input
+            type="text"
+            required
+            value={locationName}
+            onChange={(e) => setLocationName(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="Ej: Barracas, Buenos Aires / Palermo, CABA / Quilmes, GBA"
+          />
+          <p className="text-xs text-gray-400 mt-1">
+            Especifica el barrio o localidad exacta (ej. Barracas, Palermo, Recoleta, Quilmes).
+          </p>
         </div>
 
         <div className="grid grid-cols-2 gap-4">

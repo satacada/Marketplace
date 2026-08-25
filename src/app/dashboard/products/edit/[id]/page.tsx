@@ -33,6 +33,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
+  const [locationName, setLocationName] = useState('Barracas, Buenos Aires');
   const [categoryId, setCategoryId] = useState<string>('');
   const [categoryName, setCategoryName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,6 +97,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     setDescription(data.description || '');
     setPrice(data.price.toString());
     setStock(data.stock.toString());
+    setLocationName(data.location_name || 'Barracas, Buenos Aires');
     setCategoryId(data.category_id || '');
     setExistingImages(data.image_urls || []);
 
@@ -135,7 +137,15 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
     const { error: dbError } = await supabase
       .from('products')
-      .update({ title, description, price: parseFloat(price), stock: parseInt(stock), category_id: categoryId, image_urls: imageUrls })
+      .update({ 
+        title, 
+        description, 
+        price: parseFloat(price), 
+        stock: parseInt(stock), 
+        category_id: categoryId, 
+        image_urls: imageUrls,
+        location_name: locationName || 'Barracas, Buenos Aires' 
+      })
       .eq('id', productId)
       .eq('seller_id', userId);
 
@@ -185,6 +195,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Descripción:</label>
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} required className="w-full p-3 border border-gray-300 rounded-lg h-32 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">📍 Barrio / Localidad de publicación *</label>
+            <input type="text" value={locationName} onChange={(e) => setLocationName(e.target.value)} required className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Ej: Barracas, Buenos Aires / Palermo, CABA / Quilmes, GBA" />
+            <p className="text-xs text-gray-400 mt-1">Especifica el barrio o localidad exacta (ej. Barracas, Palermo, Recoleta, Quilmes).</p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>

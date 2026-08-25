@@ -35,7 +35,7 @@
 
 'use client';
 
-import { useState, useCallback, memo, useEffect, useRef } from 'react';
+import { useState, useCallback, memo, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdvancedProducts } from '@/features/products/hooks/useAdvancedProducts';
 import { useCart } from '@/features/cart/hooks/useCart';
@@ -73,7 +73,7 @@ type Product = {
 const ProductCard = memo(({ 
   product, 
   userId, 
-  cartItems, 
+  cartQuantity, 
   onAddToCart,
   onViewDetails,
   isFavorite,
@@ -81,7 +81,7 @@ const ProductCard = memo(({
 }: { 
   product: Product; 
   userId: string | null; 
-  cartItems: string[]; 
+  cartQuantity: number; 
   onAddToCart: (id: string, productInfo?: { title: string; price?: number; image_url: string | null; seller_id: string }) => void;
   onViewDetails: (id: string) => void;
   isFavorite: boolean;
@@ -91,7 +91,7 @@ const ProductCard = memo(({
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const images = product.image_urls || [];
-  const isInCart = cartItems.includes(product.id);
+  const isInCart = cartQuantity > 0;
   const isOwnProduct = userId && product.seller_id === userId;
 
   const openLightbox = useCallback((e: React.MouseEvent) => {
@@ -250,36 +250,45 @@ const ProductCard = memo(({
                 </div>
               </div>
 
-              {/* Botón de Añadir al Carrito con cambio de color verde al estar agregado */}
+              {/* Botón de Añadir al Carrito con contador de unidades */}
               {!isOwnProduct && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAddToCart(product.id, {
-                      title: product.title,
-                      price: product.price,
-                      image_url: product.image_urls?.[0] || null,
-                      seller_id: product.seller_id
-                    });
-                  }}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110 flex-shrink-0 ${
-                    isInCart 
-                      ? 'bg-emerald-500 hover:bg-emerald-600 text-white ring-2 ring-emerald-200' 
-                      : 'bg-blue-600 hover:bg-blue-700 text-white'
-                  }`}
-                  title={isInCart ? 'Agregado al carrito (haz clic para sumar otro)' : 'Añadir al carrito'}
-                >
-                  {isInCart ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAddToCart(product.id, {
+                        title: product.title,
+                        price: product.price,
+                        image_url: product.image_urls?.[0] || null,
+                        seller_id: product.seller_id
+                      });
+                    }}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110 flex-shrink-0 ${
+                      isInCart 
+                        ? 'bg-emerald-500 hover:bg-emerald-600 text-white ring-2 ring-emerald-200' 
+                        : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    }`}
+                    title={cartQuantity > 0 ? `En el carrito: ${cartQuantity} unidad${cartQuantity > 1 ? 'es' : ''} (haz clic para sumar otra)` : 'Añadir al carrito'}
+                  >
+                    {isInCart ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                    )}
+                  </button>
+
+                  {/* Badge contador numérico en el botón verde */}
+                  {cartQuantity > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 bg-emerald-800 text-white text-[10px] font-extrabold w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-white shadow-xs pointer-events-none">
+                      {cartQuantity}
+                    </span>
                   )}
-                </button>
+                </div>
               )}
             </div>
             
@@ -405,6 +414,13 @@ export default function MarketplacePage() {
 
   const userId = user?.id || null;
   const cartProductIds = cart.items.map(item => item.product_id);
+  const cartQuantities = useMemo(() => {
+    const map = new Map<string, number>();
+    cart.items.forEach(item => {
+      map.set(item.product_id, item.quantity);
+    });
+    return map;
+  }, [cart.items]);
 
   // Cargar productos vistos recientemente
   useEffect(() => {
@@ -815,7 +831,7 @@ export default function MarketplacePage() {
                       key={product.id} 
                       product={product as any} 
                       userId={userId}
-                      cartItems={cartProductIds}
+                      cartQuantity={cartQuantities.get(product.id) || 0}
                       onAddToCart={handleAddToCart}
                       onViewDetails={handleViewDetails}
                       isFavorite={favoriteProductIds.has(product.id)}
