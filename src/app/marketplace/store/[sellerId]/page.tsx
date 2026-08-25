@@ -217,7 +217,16 @@ export default function StoreShowcasePage({ params }: { params: Promise<{ seller
                   </div>
 
                   <p className="text-blue-100 text-xs sm:text-sm mt-1 flex items-center gap-2 flex-wrap font-medium">
-                    <span>📍 {sellerProfile?.city || 'Barracas, Buenos Aires'}</span>
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(sellerProfile?.city || 'Barracas, Buenos Aires')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:underline flex items-center gap-1 text-white font-bold"
+                      title="Abrir ubicación de tienda en Google Maps"
+                    >
+                      <span>📍 {sellerProfile?.city || 'Barracas, Buenos Aires'}</span>
+                      <span className="text-[10px]">↗</span>
+                    </a>
                     <span>•</span>
                     <span>📦 {total} producto{total !== 1 ? 's' : ''} en catálogo</span>
                   </p>
@@ -342,9 +351,16 @@ export default function StoreShowcasePage({ params }: { params: Promise<{ seller
                     </div>
 
                     <div className="flex items-center justify-between gap-1 mt-3 pt-2 border-t border-gray-100">
-                      <span className="text-[10px] text-gray-500 font-medium">
-                        📍 {product.location_name || 'Barracas, BA'}
-                      </span>
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(product.location_name || 'Barracas, Buenos Aires')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[10px] text-gray-500 hover:text-blue-600 font-medium truncate hover:underline flex items-center gap-0.5"
+                        title={`Abrir ${product.location_name || 'Barracas, BA'} en Google Maps`}
+                      >
+                        <span className="text-rose-500">📍</span>
+                        <span className="truncate">{product.location_name || 'Barracas, BA'}</span>
+                      </a>
 
                       <div className="flex items-center gap-1">
                         {/* Compartir */}

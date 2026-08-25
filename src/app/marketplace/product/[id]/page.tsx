@@ -323,22 +323,46 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   </Link>
                 </div>
 
-                {/* Ubicación granular del producto */}
-                <div className="flex items-center gap-1.5 text-xs text-gray-600 font-medium pt-1">
-                  <span className="text-rose-500">📍</span>
-                  <span>Ubicación de la publicación:</span>
-                  <strong className="text-gray-900 font-semibold">
-                    {product.location_name && product.location_name !== 'Buenos Aires'
-                      ? product.location_name
-                      : product.title.toLowerCase().includes('perita')
-                      ? 'Barracas, Buenos Aires'
-                      : product.title.toLowerCase().includes('pepito')
-                      ? 'Palermo, CABA'
-                      : product.title.toLowerCase().includes('gatito')
-                      ? 'Quilmes Oeste, BA'
-                      : 'Recoleta, CABA'}
-                  </strong>
-                </div>
+                {/* Ubicación granular del producto con enlace directo a Google Maps */}
+                {(() => {
+                  const displayLoc = product.location_name && product.location_name !== 'Buenos Aires'
+                    ? product.location_name
+                    : product.title.toLowerCase().includes('perita')
+                    ? 'Barracas, Buenos Aires'
+                    : product.title.toLowerCase().includes('pepito')
+                    ? 'Palermo, CABA'
+                    : product.title.toLowerCase().includes('gatito')
+                    ? 'Quilmes Oeste, BA'
+                    : 'Recoleta, CABA';
+                  const gMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayLoc)}`;
+
+                  return (
+                    <div className="bg-gray-50/90 p-3 rounded-2xl border border-gray-200/80 flex items-center justify-between gap-3 mt-2">
+                      <div className="flex items-center gap-2 text-xs text-gray-700 font-medium overflow-hidden">
+                        <span className="text-rose-500 text-xl flex-shrink-0">📍</span>
+                        <div className="overflow-hidden">
+                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Ubicación de la publicación</p>
+                          <p className="text-xs font-bold text-gray-900 truncate">{displayLoc}</p>
+                        </div>
+                      </div>
+
+                      <a
+                        href={gMapsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 bg-white hover:bg-blue-600 text-blue-600 hover:text-white border border-blue-200 hover:border-blue-600 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs flex-shrink-0 group"
+                        title={`Abrir ${displayLoc} en la app de Google Maps`}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-rose-500 group-hover:text-white transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span>Ver en Google Maps</span>
+                        <span className="text-[10px] opacity-70">↗</span>
+                      </a>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
 
