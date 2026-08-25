@@ -407,23 +407,6 @@ export default function NewProductPage() {
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            📍 Barrio / Localidad de publicación *
-          </label>
-          <input
-            type="text"
-            required
-            value={locationName}
-            onChange={(e) => setLocationName(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            placeholder="Ej: Barracas, Buenos Aires / Palermo, CABA / Quilmes, GBA"
-          />
-          <p className="text-xs text-gray-400 mt-1">
-            Especifica el barrio o localidad exacta (ej. Barracas, Palermo, Recoleta, Quilmes).
-          </p>
-        </div>
-
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
