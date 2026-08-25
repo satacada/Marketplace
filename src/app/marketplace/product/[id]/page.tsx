@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import ImageGallery from '@/components/marketplace/ImageGallery';
 import ShareModal from '@/components/marketplace/ShareModal';
+import ReportModal from '@/components/marketplace/ReportModal';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { useCart } from '@/features/cart/hooks/useCart';
@@ -47,6 +48,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [reportTarget, setReportTarget] = useState<{ type: 'product' | 'seller'; title: string } | null>(null);
 
   // Estado para Modal estándar UI
   const [showModal, setShowModal] = useState(false);
@@ -302,79 +304,135 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{product.description}</p>
               </div>
 
-              <div className="border-t border-gray-100 pt-4 mb-6 space-y-2.5">
-                <div>
-                  <p className="text-xs text-gray-400 mb-1 font-medium">Vendido por:</p>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <Link 
-                      href={`/marketplace/store/${product.seller_id}`}
-                      className="inline-flex items-center gap-2 text-base font-bold text-gray-900 hover:text-blue-600 transition group"
-                      title="Ver todos los productos de esta tienda"
-                    >
-                      <span className="text-xl">🏪</span>
-                      <span className="group-hover:underline">
-                        {product.profiles?.store_name && product.profiles.store_name !== 'DE TODO'
-                          ? product.profiles.store_name 
-                          : 'Tienda Oficial'}
-                      </span>
-                      <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100 group-hover:bg-blue-600 group-hover:text-white transition flex items-center gap-0.5">
-                        <span>Ver Tienda</span>
-                        <span>→</span>
-                      </span>
-                    </Link>
+              {(() => {
+                const storeName = product.profiles?.store_name && product.profiles.store_name !== 'DE TODO'
+                  ? product.profiles.store_name 
+                  : 'Tienda Oficial';
+                const displayLoc = product.location_name && product.location_name !== 'Buenos Aires'
+                  ? product.location_name
+                  : product.title.toLowerCase().includes('perita')
+                  ? 'Barracas, Buenos Aires'
+                  : product.title.toLowerCase().includes('pepito')
+                  ? 'Palermo, CABA'
+                  : product.title.toLowerCase().includes('gatito')
+                  ? 'Quilmes Oeste, BA'
+                  : 'Recoleta, CABA';
+                const gMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayLoc)}`;
 
-                    <Link
-                      href={`/marketplace/store/${product.seller_id}`}
-                      className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-0.5 rounded-full text-xs font-extrabold hover:bg-amber-100 transition"
-                      title="Ver reputación y opiniones de la tienda"
-                    >
-                      <span>★ 4.8</span>
-                      <span className="text-[10px] text-amber-600 font-semibold">(96% positivos 🟢)</span>
-                    </Link>
-                  </div>
-                </div>
+                return (
+                  <div className="border-t border-gray-100 pt-4 mb-5 space-y-4">
+                    {/* 1. Información del Vendedor Estilo Facebook Marketplace */}
+                    <div className="bg-gray-50/80 p-4 rounded-2xl border border-gray-200/90 shadow-2xs">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center text-xl font-bold shadow-xs flex-shrink-0">
+                            🏪
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Información del vendedor</p>
+                            <Link 
+                              href={`/marketplace/store/${product.seller_id}`}
+                              className="text-sm font-extrabold text-gray-900 hover:text-blue-600 transition flex items-center gap-1.5"
+                            >
+                              <span>{storeName}</span>
+                              <span className="text-emerald-600 text-xs font-bold" title="Vendedor Verificado">✓</span>
+                            </Link>
 
-                {/* Ubicación granular del producto con enlace directo a Google Maps */}
-                {(() => {
-                  const displayLoc = product.location_name && product.location_name !== 'Buenos Aires'
-                    ? product.location_name
-                    : product.title.toLowerCase().includes('perita')
-                    ? 'Barracas, Buenos Aires'
-                    : product.title.toLowerCase().includes('pepito')
-                    ? 'Palermo, CABA'
-                    : product.title.toLowerCase().includes('gatito')
-                    ? 'Quilmes Oeste, BA'
-                    : 'Recoleta, CABA';
-                  const gMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayLoc)}`;
+                            {/* Valoración por Estrellas Estilo Facebook Marketplace */}
+                            <div className="flex items-center gap-2 text-xs font-semibold mt-0.5">
+                              <Link
+                                href={`/marketplace/store/${product.seller_id}`}
+                                className="text-amber-500 font-extrabold flex items-center gap-0.5 hover:underline"
+                              >
+                                <span>★ 4.8</span>
+                              </Link>
+                              <span className="text-gray-300">•</span>
+                              <span className="text-gray-500 font-medium">(128 opiniones)</span>
+                            </div>
+                          </div>
+                        </div>
 
-                  return (
-                    <div className="bg-gray-50/90 p-3 rounded-2xl border border-gray-200/80 flex items-center justify-between gap-3 mt-2">
-                      <div className="flex items-center gap-2 text-xs text-gray-700 font-medium overflow-hidden">
-                        <span className="text-rose-500 text-xl flex-shrink-0">📍</span>
-                        <div className="overflow-hidden">
-                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Ubicación de la publicación</p>
-                          <p className="text-xs font-bold text-gray-900 truncate">{displayLoc}</p>
+                        <Link
+                          href={`/marketplace/store/${product.seller_id}`}
+                          className="px-3.5 py-1.5 bg-white hover:bg-blue-50 text-blue-600 border border-blue-200 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs flex-shrink-0"
+                        >
+                          <span>Ver Tienda</span>
+                          <span>→</span>
+                        </Link>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 mt-3 pt-3 border-t border-gray-200/70 text-[11px] text-gray-500 font-medium">
+                        <span>🗓️ Miembro desde 2024</span>
+                        <button
+                          type="button"
+                          onClick={() => setReportTarget({ type: 'seller', title: storeName })}
+                          className="text-rose-600 hover:text-rose-700 font-bold transition flex items-center gap-1"
+                        >
+                          <span>🚩 Reportar vendedor</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* 2. Mapa Incrustado Estilo Facebook Marketplace */}
+                    <div className="bg-white rounded-2xl border border-gray-200/90 overflow-hidden shadow-2xs">
+                      <div 
+                        onClick={() => window.open(gMapsUrl, '_blank')}
+                        className="relative h-28 bg-slate-100 cursor-pointer overflow-hidden group flex items-center justify-center"
+                        title={`Ver ${displayLoc} en Google Maps`}
+                      >
+                        {/* Malla visual de mapa */}
+                        <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:12px_12px] opacity-70"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent to-transparent"></div>
+                        
+                        {/* Pin flotante central */}
+                        <div className="relative z-10 flex flex-col items-center group-hover:scale-110 transition duration-300">
+                          <div className="w-9 h-9 bg-rose-500 text-white rounded-full flex items-center justify-center shadow-md ring-4 ring-rose-200/60 text-lg">
+                            📍
+                          </div>
+                          <span className="bg-slate-900/90 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 shadow-xs">
+                            {displayLoc}
+                          </span>
+                        </div>
+
+                        <div className="absolute bottom-2 right-2 z-10 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md text-[10px] font-bold text-slate-700 shadow-2xs group-hover:bg-blue-600 group-hover:text-white transition">
+                          Google Maps ↗
                         </div>
                       </div>
 
-                      <a
-                        href={gMapsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-3 py-1.5 bg-white hover:bg-blue-600 text-blue-600 hover:text-white border border-blue-200 hover:border-blue-600 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs flex-shrink-0 group"
-                        title={`Abrir ${displayLoc} en la app de Google Maps`}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-rose-500 group-hover:text-white transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Google Maps</span>
-                        <span className="text-[10px] opacity-70">↗</span>
-                      </a>
+                      <div className="p-3 bg-gray-50/90 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 text-xs text-gray-700 font-medium overflow-hidden">
+                          <span className="text-rose-500 text-lg flex-shrink-0">📍</span>
+                          <div className="overflow-hidden">
+                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Ubicación de la publicación</p>
+                            <p className="text-xs font-bold text-gray-900 truncate">{displayLoc}</p>
+                          </div>
+                        </div>
+
+                        <a
+                          href={gMapsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 bg-white hover:bg-blue-600 text-blue-600 hover:text-white border border-blue-200 hover:border-blue-600 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs flex-shrink-0 group"
+                        >
+                          <span>Google Maps</span>
+                          <span className="text-[10px] opacity-70">↗</span>
+                        </a>
+                      </div>
                     </div>
-                  );
-                })()}
-              </div>
+
+                    {/* 3. Botón de Reportar Publicación */}
+                    <div className="flex items-center justify-end pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setReportTarget({ type: 'product', title: product.title })}
+                        className="text-xs font-semibold text-gray-400 hover:text-rose-600 transition flex items-center gap-1"
+                      >
+                        <span>🚩 Reportar esta publicación</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Botones de acción equilibrados y proporcionales (Estándares UX & Design) */}
@@ -585,6 +643,19 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         onClose={() => setShowShareModal(false)}
         product={product ? { id: product.id, title: product.title, price: product.price, image_url: product.image_urls?.[0] || null } : null}
       />
+
+      {/* Modal de Moderación / Reportes Estilo Facebook Marketplace */}
+      {reportTarget && (
+        <ReportModal
+          isOpen={!!reportTarget}
+          onClose={() => setReportTarget(null)}
+          targetType={reportTarget.type}
+          targetTitle={reportTarget.title}
+          onSubmitReport={async (reason, details) => {
+            console.log('Reporte procesado:', { target: reportTarget, reason, details });
+          }}
+        />
+      )}
     </div>
   );
 }
