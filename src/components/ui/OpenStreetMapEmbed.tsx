@@ -4,9 +4,8 @@
  * ============================================================================
  * 
  * @description Componente centralizado y reutilizable para renderizar mapas
- *              interactivos en vivo limpios estilo Google Maps / CartoDB Positron (Imagen 2).
- *              Sin saturación visual, con carreteras suaves, agua celeste pastel
- *              y pin de ubicación nítido.
+ *              OpenStreetMap en vivo sin necesidad de API Key, sin marcas de agua,
+ *              y con filtro CSS suave estilo Google Maps para eliminar la saturación visual.
  * 
  * @module Presentation/Components/UI/OpenStreetMapEmbed
  * ============================================================================
@@ -29,10 +28,10 @@ export default function OpenStreetMapEmbed({
   height = 'h-56',
   markerColor = 'red',
 }: Props) {
-  // Color del pin
   const pinColor = markerColor === 'red' ? '#ea4335' : markerColor === 'blue' ? '#2563eb' : '#22c55e';
 
-  // HTML embebido con Leaflet.js y mosaico ultra-limpio CartoDB Positron (Estilo Google Maps)
+  // HTML embebido usando el servidor oficial 100% libre de OpenStreetMap (0 API Key, 0 Marcas de agua)
+  // con des-saturación por CSS para lograr el aspecto limpio estilo Google Maps.
   const mapHtml = `
     <!DOCTYPE html>
     <html>
@@ -50,9 +49,13 @@ export default function OpenStreetMapEmbed({
             background-color: #f8fafc;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
           }
+          /* Filtro suave des-saturador para que el mapa oficial se vea limpio como Google Maps */
+          .leaflet-tile-pane {
+            filter: contrast(92%) brightness(104%) saturate(75%);
+          }
           .leaflet-control-attribution {
             font-size: 9px !important;
-            background: rgba(255, 255, 255, 0.7) !important;
+            background: rgba(255, 255, 255, 0.75) !important;
             padding: 2px 6px !important;
           }
           .custom-pin {
@@ -71,14 +74,13 @@ export default function OpenStreetMapEmbed({
               attributionControl: true
             }).setView([${lat}, ${lng}], ${zoom});
 
-            // Mosaico Limpio Estilo Google Maps (CartoDB Positron)
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            // Servidor Oficial Libre de OpenStreetMap (0 API Key / 0 Marcas de agua)
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
               maxZoom: 19,
-              subdomains: 'abcd',
-              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             }).addTo(map);
 
-            // Icono Pin Limpio
+            // Icono Pin Limpio Centrado
             var customIcon = L.divIcon({
               className: 'custom-pin',
               html: \`<svg width="28" height="36" viewBox="0 0 24 32" fill="none">
@@ -105,7 +107,7 @@ export default function OpenStreetMapEmbed({
         frameBorder="0"
         scrolling="no"
         className="w-full h-full border-0"
-        title="Mapa de Ubicación Limpio Estilo Google Maps"
+        title="Mapa de Ubicación OpenStreetMap Oficial Limpio"
       />
     </div>
   );
