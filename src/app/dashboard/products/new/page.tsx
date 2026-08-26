@@ -23,7 +23,12 @@ export default function NewProductPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [isTrustedSeller, setIsTrustedSeller] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [modalData, setModalData] = useState({ title: '', message: '', type: 'success' as 'success' | 'info' });
+  const [modalData, setModalData] = useState<{
+    title: string;
+    message: string;
+    type: 'success' | 'info';
+    shouldRedirect?: boolean;
+  }>({ title: '', message: '', type: 'success', shouldRedirect: false });
   const [currencySymbol, setCurrencySymbol] = useState('$');
   const [thousandsSep, setThousandsSep] = useState('.');
   const [loadingGeo, setLoadingGeo] = useState(true);
@@ -168,8 +173,13 @@ export default function NewProductPage() {
     setCategories(cats || []);
   };
 
-  const showModalMessage = (title: string, message: string, type: 'success' | 'info' = 'success') => {
-    setModalData({ title, message, type });
+  const showModalMessage = (
+    title: string, 
+    message: string, 
+    type: 'success' | 'info' = 'success',
+    shouldRedirect: boolean = false
+  ) => {
+    setModalData({ title, message, type, shouldRedirect });
     setShowModal(true);
   };
 
@@ -464,12 +474,16 @@ export default function NewProductPage() {
       if (productStatus === 'pending') {
         showModalMessage(
           'Producto enviado a revisión',
-          'Nuestro equipo revisará tu producto en menos de 24 horas.\n\nRecibirás una notificación cuando sea aprobado y publicado en el marketplace.\n\nEstado actual: Pendiente de aprobación'
+          'Nuestro equipo revisará tu producto en menos de 24 horas.\n\nRecibirás una notificación cuando sea aprobado y publicado en el marketplace.\n\nEstado actual: Pendiente de aprobación',
+          'success',
+          true
         );
       } else {
         showModalMessage(
           'Producto publicado exitosamente',
-          `Tu producto ya está visible en el marketplace.\n\nPrecio: ${formattedPrice}\nEstado: Publicado`
+          `Tu producto ya está visible en el marketplace.\n\nPrecio: ${formattedPrice}\nEstado: Publicado`,
+          'success',
+          true
         );
       }
 
@@ -932,7 +946,9 @@ export default function NewProductPage() {
               <button
                 onClick={() => {
                   setShowModal(false);
-                  router.push('/dashboard/products');
+                  if (modalData.shouldRedirect) {
+                    router.push('/dashboard/products');
+                  }
                 }}
                 className={`w-full mt-6 py-3 rounded-lg font-semibold text-white transition ${
                   modalData.type === 'success'
