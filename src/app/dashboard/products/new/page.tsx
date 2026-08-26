@@ -53,6 +53,9 @@ export default function NewProductPage() {
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const router = useRouter();
 
+  // Estado para viñetas de Ficha Técnica por IA
+  const [aiSummaryBullets, setAiSummaryBullets] = useState<{ title: string; description: string }[]>([]);
+
   // Campos adaptativos para Vehículos y Propiedades
   const [vehicleYear, setVehicleYear] = useState('');
   const [vehicleMileage, setVehicleMileage] = useState('');
@@ -249,10 +252,10 @@ export default function NewProductPage() {
       return;
     }
 
-    if (!brand.trim() || !material.trim()) {
+    if (!brand.trim() && !model.trim()) {
       showModalMessage(
         '⚠️ Atributos Requeridos para Ficha de IA',
-        'Para que la Ficha Técnica sea 100% exacta y sin alucinaciones, debes ingresar la Marca y Material principal.',
+        'Ingresa al menos la Marca o el Modelo de tu producto para que la IA busque la información técnica en la web.',
         'info'
       );
       return;
@@ -267,9 +270,14 @@ export default function NewProductPage() {
         condition
       });
       
-      setTitle(aiData.optimizedTitle);
-      setDescription(aiData.enhancedDescription);
+      if (!title.trim() && aiData.optimizedTitle) {
+        setTitle(aiData.optimizedTitle);
+      }
 
+      // Guardar viñetas de IA de forma independiente sin tocar la descripción manual del usuario
+      setAiSummaryBullets(aiData.summaryBullets);
+
+      // Auto-seleccionar categoría detectada si existe en la base de datos
       if (categories.length > 0) {
         const matched = categories.find(c => 
           c.name.toLowerCase().includes(aiData.category.toLowerCase()) || 
@@ -283,7 +291,7 @@ export default function NewProductPage() {
       setIsGeneratingAI(false);
       showModalMessage(
         '✨ Resumen de IA del Artículo Generado',
-        `Se ha redactado la Ficha Técnica estructurada estilo AliExpress para "${brand} ${model || ''}" y se seleccionó la categoría "${aiData.category}".`,
+        `Se investigó las especificaciones técnicas estilo AliExpress para "${brand} ${model || ''}" y se seleccionó la categoría "${aiData.category}". Tu cuadro de descripción libre se mantiene independiente.`,
         'success'
       );
     }, 800);
@@ -549,7 +557,22 @@ export default function NewProductPage() {
             </div>
           </div>
 
-          {/* SECCIÓN 2: TARJETA UNIFICADA DE ASISTENTE DE IA & ATRIBUTOS */}
+          {/* SECCIÓN 2: TÍTULO DE LA PUBLICACIÓN (INMEDIATAMENTE DESPUÉS DE LAS FOTOS) */}
+          <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-slate-800">
+            <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300">
+              Título de la publicación *
+            </label>
+            <input
+              type="text"
+              required
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Ej: Zapatillas deportivas Nike Air Max talle 42"
+              className="w-full p-3 text-sm border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-bold"
+            />
+          </div>
+
+          {/* SECCIÓN 3: ASISTENTE DE IA & ATRIBUTOS DE IDENTIFICACIÓN */}
           <div className="bg-gradient-to-br from-purple-50/90 via-indigo-50/80 to-blue-50/90 dark:from-slate-800 dark:via-slate-800/90 dark:to-slate-800 p-5 rounded-3xl border border-purple-200/90 dark:border-slate-700 space-y-4">
             <div className="flex items-center justify-between border-b border-purple-200/60 dark:border-slate-700 pb-3">
               <div className="flex items-center gap-2">
@@ -559,16 +582,16 @@ export default function NewProductPage() {
                     Asistente de IA & Atributos de Identificación
                   </h4>
                   <p className="text-[11px] text-gray-600 dark:text-slate-400 font-medium">
-                    Completa los campos obligatorios para generar una Ficha Técnica 100% exacta.
+                    Ingresa la Marca o Modelo para que la IA investigue la Ficha Técnica exacta en la web.
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200 dark:border-amber-900/60 text-xs text-amber-900 dark:text-amber-200 font-medium flex items-start gap-2">
-              <span className="text-base leading-none">⚠️</span>
+              <span className="text-base leading-none">💡</span>
               <p>
-                <strong>Requisito para IA:</strong> Para que la IA redacte el detalle técnico exacto, debes ingresar <strong>Marca, Material y subir al menos 1 foto</strong>. Si prefieres redactar a tu manera, puedes escribir directamente en la descripción.
+                <strong>Información por IA:</strong> Al presionar <strong>Generar Ficha Técnica con IA</strong>, el sistema buscará las especificaciones detalladas estilo AliExpress y creará el Resumen de IA en vivo. Tu cuadro de descripción libre se mantiene 100% independiente.
               </p>
             </div>
 
@@ -588,26 +611,26 @@ export default function NewProductPage() {
 
               <div>
                 <label className="block text-[11px] font-extrabold text-gray-800 dark:text-slate-200 mb-1">
-                  Modelo / Serie
+                  Modelo / Serie *
                 </label>
                 <input
                   type="text"
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
-                  placeholder="Ej: Air Max, Civic, Galaxy"
+                  placeholder="Ej: Air Max Dn Roam, Civic, Galaxy S24"
                   className="w-full p-2.5 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium focus:ring-2 focus:ring-purple-500"
                 />
               </div>
 
               <div>
                 <label className="block text-[11px] font-extrabold text-gray-800 dark:text-slate-200 mb-1">
-                  Material Principal *
+                  Material Principal
                 </label>
                 <input
                   type="text"
                   value={material}
                   onChange={(e) => setMaterial(e.target.value)}
-                  placeholder="Ej: Algodón, Cuero, Aluminio"
+                  placeholder="Ej: Sintético, Algodón, Cuero, Aluminio"
                   className="w-full p-2.5 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium focus:ring-2 focus:ring-purple-500"
                 />
               </div>
@@ -631,7 +654,7 @@ export default function NewProductPage() {
 
             <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-purple-200/60 dark:border-slate-700">
               <p className="text-[11px] text-gray-500 dark:text-slate-400 font-medium">
-                Presiona el botón para que la IA redacte automáticamente el título y el resumen técnico.
+                Presiona para investigar en la web y generar las viñetas técnicas del producto.
               </p>
               <button
                 type="button"
@@ -645,42 +668,45 @@ export default function NewProductPage() {
             </div>
           </div>
 
-          {/* SECCIÓN 3: CAMPOS PRINCIPALES Y ADAPTATIVOS */}
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300 mb-1">
-                Título de la publicación *
-              </label>
-              <input
-                type="text"
-                required
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ej: Zapatillas deportivas Nike Air Max talle 42"
-                className="w-full p-3 text-sm border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium"
-              />
-            </div>
+          {/* SECCIÓN 4: DESCRIPCIÓN DEL PRODUCTO (CUADRO DE TEXTO LIBRE DEL VENDEDOR) */}
+          <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-slate-800">
+            <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300">
+              Descripción libre del vendedor
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+              className="w-full p-3 text-sm border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium"
+              placeholder="Escribe libremente cualquier información adicional que desees que vean los compradores (ej: entrega en persona, sin detalles, garantía propia)..."
+            />
+          </div>
 
-            {/* Selector de Categoría del producto */}
-            <div>
-              <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300 mb-1">
-                Categoría del producto *
-              </label>
-              <select
-                required
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full p-3 text-sm border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-bold"
-              >
-                <option value="">-- Seleccionar Categoría --</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* SECCIÓN 5: CATEGORÍA DEL PRODUCTO */}
+          <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-slate-800">
+            <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300">
+              Categoría del producto *
+            </label>
+            <p className="text-[11px] text-gray-500 dark:text-slate-400 font-medium">
+              Se auto-selecciona con el Asistente de IA. Si no se detecta automáticamente, por favor selecciona la categoría manualmente.
+            </p>
+            <select
+              required
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              className="w-full p-3 text-sm border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-bold"
+            >
+              <option value="">-- Seleccionar Categoría --</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
+          {/* SECCIÓN 6: PRECIO, STOCK / CAMPOS ADAPTATIVOS Y UBICACIÓN */}
+          <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-slate-800">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300 mb-1">
@@ -787,23 +813,9 @@ export default function NewProductPage() {
                 </div>
               </div>
             )}
-
-            <div>
-              <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300 mb-1">
-                Descripción del producto *
-              </label>
-              <textarea
-                required
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={5}
-                className="w-full p-3 text-sm border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium"
-                placeholder="Describe tu producto libremente o presiona 'Generar Ficha Técnica con IA' para autocompletar..."
-              />
-            </div>
           </div>
 
-          {/* SECCIÓN 4: UBICACIÓN DEL VENDEDOR CON MAPA E INPUT INTELIGENTE */}
+          {/* UBICACIÓN DEL VENDEDOR CON MAPA E INPUT INTELIGENTE */}
           <div className="space-y-3 pt-4 border-t border-gray-100 dark:border-slate-800">
             <div className="flex items-center justify-between">
               <div>
@@ -925,6 +937,7 @@ export default function NewProductPage() {
             imageUrls={imagePreviews}
             publicationType={publicationType}
             sellerName={userStoreName}
+            aiSummaryBullets={aiSummaryBullets}
           />
         </div>
       </div>

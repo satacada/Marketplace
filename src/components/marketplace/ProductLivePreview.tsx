@@ -27,6 +27,7 @@ type Props = {
   imageUrls: string[];
   publicationType: 'article' | 'vehicle' | 'property';
   sellerName?: string;
+  aiSummaryBullets?: { title: string; description: string }[];
 };
 
 export default function ProductLivePreview({
@@ -42,6 +43,7 @@ export default function ProductLivePreview({
   imageUrls,
   publicationType,
   sellerName = 'Tu Perfil de Vendedor',
+  aiSummaryBullets = [],
 }: Props) {
   const mainImage = imageUrls.length > 0 ? imageUrls[0] : null;
 
@@ -60,33 +62,22 @@ export default function ProductLivePreview({
         </span>
       </div>
 
-      <div className="p-5 space-y-5 max-h-[calc(100vh-140px)] overflow-y-auto scrollbar-thin">
-        {/* Contenedor de Imagen Principal */}
-        <div className="relative aspect-4/3 w-full bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden border border-gray-200/60 dark:border-slate-700 flex items-center justify-center">
+      <div className="p-5 space-y-5">
+        {/* Imagen principal y miniaturas */}
+        <div className="relative h-60 w-full bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-slate-800 flex items-center justify-center">
           {mainImage ? (
-            <img
-              src={mainImage}
-              alt="Vista previa"
-              className="w-full h-full object-cover"
-            />
+            <img src={mainImage} alt={title} className="w-full h-full object-cover" />
           ) : (
-            <div className="text-center p-6 text-gray-400 dark:text-slate-500">
-              <span className="text-5xl block mb-2">📸</span>
-              <p className="text-xs font-bold">Vista previa de la publicación</p>
-              <p className="text-[11px] font-medium mt-0.5">Sube fotos a la izquierda para verlas aquí</p>
+            <div className="text-center p-6 text-gray-400">
+              <span className="text-4xl block mb-2">📸</span>
+              <span className="text-xs font-bold">Subes fotos para previsualizar</span>
             </div>
-          )}
-
-          {imageUrls.length > 1 && (
-            <span className="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-extrabold px-2.5 py-1 rounded-xl shadow-xs">
-              1 / {imageUrls.length}
-            </span>
           )}
         </div>
 
         {/* Título y Precio */}
-        <div className="space-y-1 pb-4 border-b border-gray-100 dark:border-slate-800">
-          <h2 className="text-xl font-extrabold text-gray-900 dark:text-slate-100 leading-snug">
+        <div className="space-y-1">
+          <h2 className="text-lg font-black text-gray-900 dark:text-slate-100 leading-tight">
             {title.trim() || 'Título del producto o artículo'}
           </h2>
           <div className="text-2xl font-black text-blue-600 dark:text-blue-400 tracking-tight">
@@ -120,28 +111,40 @@ export default function ProductLivePreview({
         </div>
 
         {/* Tarjeta de Resumen de IA en Vista Previa */}
-        {description && description.includes('✦ Resumen de IA') && (
+        {aiSummaryBullets && aiSummaryBullets.length > 0 && (
           <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 dark:from-slate-800/80 dark:to-slate-800 border border-purple-200 dark:border-slate-700 space-y-2">
-            <div className="flex items-center gap-1.5 text-xs font-extrabold text-purple-900 dark:text-purple-300">
-              <span className="text-sm">✦</span>
-              <span>Resumen de IA del artículo</span>
+            <div className="flex items-center justify-between text-xs font-extrabold text-purple-900 dark:text-purple-300">
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm">✦</span>
+                <span>Resumen de IA del artículo</span>
+              </div>
+              <span className="text-[9px] font-extrabold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-950 px-2 py-0.5 rounded-full border border-purple-300 dark:border-purple-800">
+                Ficha Técnica por IA
+              </span>
             </div>
             <p className="text-[10px] text-gray-500 dark:text-slate-400 font-medium">
               Aviso legal: Este contenido está generado por IA y no representa la opinión del vendedor.
             </p>
-            <div className="text-xs text-gray-700 dark:text-slate-300 leading-relaxed font-medium whitespace-pre-line pt-1">
-              {description}
-            </div>
+            <ul className="space-y-1.5 pt-1 text-xs">
+              {aiSummaryBullets.map((bullet, idx) => (
+                <li key={idx} className="flex items-start gap-1.5">
+                  <span className="text-purple-600 dark:text-purple-400 font-black">•</span>
+                  <div className="text-gray-700 dark:text-slate-300 font-medium">
+                    <strong className="font-extrabold text-gray-900 dark:text-slate-100">{bullet.title}:</strong> {bullet.description}
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
-        {/* Descripción general */}
+        {/* Descripción general ingresada manualmente por el vendedor */}
         <div className="space-y-1.5">
           <h4 className="text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-slate-400">
-            Descripción
+            Descripción del vendedor
           </h4>
           <p className="text-xs text-gray-700 dark:text-slate-300 leading-relaxed whitespace-pre-line font-medium bg-slate-50 dark:bg-slate-800/30 p-3 rounded-xl border border-gray-100 dark:border-slate-800">
-            {description.trim() || 'La descripción redactada aparecerá aquí...'}
+            {description.trim() || 'Los detalles adicionales que escribas manualmente aparecerán aquí...'}
           </p>
         </div>
 

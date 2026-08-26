@@ -490,8 +490,17 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               </div>
 
               <div className="prose prose-gray mb-6">
-                <h3 className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Descripción</h3>
-                <p className="text-gray-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed text-sm font-medium">{product.description}</p>
+                <h3 className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Descripción del Vendedor</h3>
+                <p className="text-gray-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed text-sm font-medium">
+                  {(() => {
+                    const desc = product.description || '';
+                    if (desc.includes('✦ Resumen de IA')) {
+                      const userPart = desc.split('✦ Resumen de IA')[0].trim();
+                      return userPart || 'El vendedor no ha agregado detalles adicionales en la descripción libre.';
+                    }
+                    return desc || 'El vendedor no ha agregado detalles adicionales en la descripción libre.';
+                  })()}
+                </p>
               </div>
 
               {(() => {
