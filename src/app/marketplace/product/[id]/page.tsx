@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/Button';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useOrders } from '@/features/orders/hooks/useOrders';
 import { calculateImageSimilarity } from '@/lib/visualSearch';
+import { generateAIProductSummary } from '@/lib/aiProductGenerator';
 
 type Product = {
   id: string;
@@ -430,6 +431,42 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 <h3 className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Descripción</h3>
                 <p className="text-gray-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed text-sm font-medium">{product.description}</p>
               </div>
+
+              {/* SECCIÓN ESTILO ALIEXPRESS: ✦ RESUMEN DE IA DEL ARTÍCULO */}
+              {(() => {
+                const aiData = generateAIProductSummary(product.title, product.description || '', product.image_urls || []);
+                return (
+                  <div className="mb-6 p-5 rounded-3xl bg-gradient-to-r from-purple-50/90 to-indigo-50/90 dark:from-slate-900 dark:to-slate-900/90 border border-purple-200/90 dark:border-slate-800 space-y-3 shadow-2xs">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl text-purple-600 dark:text-purple-400 font-black">✦</span>
+                        <h3 className="text-base font-extrabold text-gray-900 dark:text-slate-100">
+                          Resumen de IA del artículo
+                        </h3>
+                      </div>
+                      <span className="text-[10px] font-extrabold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-950/80 px-2.5 py-0.5 rounded-full border border-purple-300 dark:border-purple-800 self-start sm:self-auto">
+                        Inteligencia Artificial de Visión & Ficha Técnica
+                      </span>
+                    </div>
+
+                    <p className="text-[11px] text-gray-500 dark:text-slate-400 font-medium leading-relaxed">
+                      Aviso legal: Este contenido está generado por IA y no representa la opinión del vendedor. La plataforma y los vendedores no asumen ninguna responsabilidad legal al respecto.
+                    </p>
+
+                    <ul className="space-y-2.5 pt-1">
+                      {aiData.summaryBullets.map((bullet, bIdx) => (
+                        <li key={bIdx} className="flex items-start gap-2 text-xs">
+                          <span className="text-purple-600 dark:text-purple-400 font-black text-sm leading-none">•</span>
+                          <div>
+                            <strong className="font-extrabold text-gray-900 dark:text-slate-100">{bullet.title}</strong>{' '}
+                            <span className="text-gray-700 dark:text-slate-300 font-medium">{bullet.description}</span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })()}
 
               {(() => {
                 const storeName = product.profiles?.store_name && product.profiles.store_name !== 'DE TODO'

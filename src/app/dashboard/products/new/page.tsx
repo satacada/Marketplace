@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { Modal } from '@/components/ui/Modal';
+import { generateAIProductSummary } from '@/lib/aiProductGenerator';
 
 export default function NewProductPage() {
   const [title, setTitle] = useState('');
@@ -25,7 +27,30 @@ export default function NewProductPage() {
   const [stockError, setStockError] = useState('');
   const [locationError, setLocationError] = useState('');
   const [isDetectingGPS, setIsDetectingGPS] = useState(false);
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const router = useRouter();
+
+  const handleGenerateAISummary = () => {
+    if (!title.trim()) {
+      showModalMessage('Nombre requerido', 'Por favor ingresa primero el nombre de tu producto para que la IA genere el resumen.', 'info');
+      return;
+    }
+
+    setIsGeneratingAI(true);
+    setTimeout(() => {
+      const previewUrls = imageFiles.map(file => URL.createObjectURL(file));
+      const aiData = generateAIProductSummary(title, description, previewUrls);
+      
+      setTitle(aiData.optimizedTitle);
+      setDescription(aiData.enhancedDescription);
+      setIsGeneratingAI(false);
+      showModalMessage(
+        '✨ Resumen de IA generado',
+        'Se ha generado la Ficha Técnica y el "✦ Resumen de IA del artículo" estilo AliExpress con éxito en base a tus fotos y datos.',
+        'success'
+      );
+    }, 800);
+  };
 
   useEffect(() => {
     loadData();
@@ -465,17 +490,44 @@ export default function NewProductPage() {
           />
         </div>
 
+        {/* ASISTENTE DE IA ESTILO ALIEXPRESS */}
+        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800/80 p-4 rounded-2xl border border-purple-200 dark:border-slate-700 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-purple-600 dark:text-purple-400 text-lg font-black">✨</span>
+                <h4 className="text-sm font-extrabold text-gray-900 dark:text-slate-100">
+                  Asistente de IA para Ficha Técnica (Estilo AliExpress)
+                </h4>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 font-medium">
+                Genera automáticamente el <strong>✦ Resumen de IA del artículo</strong> y viñetas técnicas a partir de tus fotos (1 a 3 fotos) y nombre.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleGenerateAISummary}
+              disabled={isGeneratingAI}
+              className="py-2.5 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-extrabold transition shadow-sm flex items-center justify-center gap-2 cursor-pointer active:scale-95 flex-shrink-0"
+            >
+              <span>✨</span>
+              <span>{isGeneratingAI ? 'Analizando con IA...' : 'Generar Ficha Técnica con IA'}</span>
+            </button>
+          </div>
+        </div>
+
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
             Descripción *
           </label>
           <textarea
             required
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            rows={4}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            placeholder="Describe tu producto..."
+            rows={5}
+            className="w-full p-3 border border-gray-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 text-sm font-medium"
+            placeholder="Describe tu producto o presiona 'Generar Ficha Técnica con IA' para autocompletar..."
           />
         </div>
 
