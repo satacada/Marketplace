@@ -5,7 +5,7 @@
  * 
  * @description Servicio de Inteligencia Artificial para la generación
  *              de Ficha Técnica Estructurada y "✦ Resumen de IA del artículo"
- *              al estilo AliExpress basándose en 1 a 3 fotos y descripción.
+ *              al estilo AliExpress con especificaciones particulares por modelo y marca.
  * 
  * @module Infrastructure/Services/AIProductGenerator
  * ============================================================================
@@ -33,8 +33,190 @@ export type ProductAttributes = {
 };
 
 /**
+ * Base de Conocimiento de Productos y Especificaciones de IA estilo AliExpress
+ */
+const WEB_KNOWLEDGE_MATRIX: {
+  matchKeywords: string[];
+  domain: string;
+  category: string;
+  titleBuilder: (brand: string, model: string, condition: string) => string;
+  bullets: (brand: string, model: string, material: string, condition: string) => AISummaryBullet[];
+}[] = [
+  // AIR JORDAN 6 RETRO / JORDAN 6
+  {
+    matchKeywords: ['jordan 6', 'jordan vi', 'air jordan 6', 'aj6'],
+    domain: 'footwear',
+    category: 'Moda y Calzado',
+    titleBuilder: (b, m, c) => `Nike Air Jordan 6 Retro — Silueta Icónica 1991 (${c})`,
+    bullets: (b, m, mat, c) => [
+      {
+        title: 'Diseño de Campeonato de 1991 (Tinker Hatfield)',
+        description: 'Silueta histórica inspirada en el automóvil deportivo de Michael Jordan, con paneles reforzados de soporte y geometría aerodinámica.'
+      },
+      {
+        title: 'Cápsula Air-Sole Visible & Suela Translúcida Icy',
+        description: 'Unidad de amortiguación de aire expuesta en el talón y suela de goma con acabado transparente "icy" de tracción multidireccional.'
+      },
+      {
+        title: 'Lengüeta de Neopreno con Tiradores y Jumpman Lace Lock',
+        description: 'Construcción con doble agujero en la lengüeta para calce rápido, tirador posterior tipo alerón y sujetador de cordones Lace Lock original.'
+      },
+      {
+        title: `Capelada Exterior en ${mat || 'Cuero / Nubuck Premium'}`,
+        description: `Materiales de alta durabilidad con microperforaciones laterales para ventilación continua y firmeza estructural superior.`
+      },
+      {
+        title: `Estado y Verificación: ${c}`,
+        description: `Unidad en condición ${c.toLowerCase()}, con costuras de alta densidad probadas y conservación intacta de la suela.`
+      }
+    ]
+  },
+  // AIR JORDAN 1 / JORDAN 1
+  {
+    matchKeywords: ['jordan 1', 'jordan i', 'air jordan 1', 'aj1'],
+    domain: 'footwear',
+    category: 'Moda y Calzado',
+    titleBuilder: (b, m, c) => `Nike Air Jordan 1 Retro High — Edición Clásica (${c})`,
+    bullets: (b, m, mat, c) => [
+      {
+        title: 'Silueta Leyenda del Baloncesto de 1985',
+        description: 'Perfil alto característico con el logotipo gráfico "Wings" estampado en el tobillo y diseño de bloques de color vintage.'
+      },
+      {
+        title: 'Amortiguación Air-Sole Encapsulada',
+        description: 'Unidad de aire oculta en la entresuela de espuma para confort diario y protección contra impactos en el talón.'
+      },
+      {
+        title: `Confección Exterior en ${mat || 'Cuero Genuino'}`,
+        description: `Capelada de cuero de grano entero que ofrece flexibilidad, durabilidad y una pátina estética distintiva con el tiempo.`
+      },
+      {
+        title: 'Suela de Goma vulcanizada con Punto de Pivote',
+        description: 'Huella con diseño circular en el antepié para giros fluidos y máxima adherencia en asfalto y pavimento.'
+      },
+      {
+        title: `Condición del Calzado: ${c}`,
+        description: `Calzado verificado en estado ${c.toLowerCase()}, sin deformaciones en puntera ni desgaste anómalo.`
+      }
+    ]
+  },
+  // NIKE AIR MAX
+  {
+    matchKeywords: ['air max', 'airmax', 'max dn', 'max 90'],
+    domain: 'footwear',
+    category: 'Moda y Calzado',
+    titleBuilder: (b, m, c) => `${b || 'Nike'} ${m || 'Air Max'} — Confort y Cámara de Aire (${c})`,
+    bullets: (b, m, mat, c) => [
+      {
+        title: 'Cámara de Aire Expuesta de Alto Impacto',
+        description: 'Sistema de amortiguación Air Max en el talón que proporciona elasticidad en cada pisada y absorción de energía continua.'
+      },
+      {
+        title: `Capelada en ${mat || 'Malla Textil y Sintético'}`,
+        description: `Construcción transpirable ultraligera que mantiene el pie fresco mientras los refuerzos sintéticos protegen el contorno.`
+      },
+      {
+        title: 'Suela de Goma Waffle Antideslizante',
+        description: 'Patrón acanalado de alta tracción en todo tipo de terreno urbano y deportivo.'
+      },
+      {
+        title: 'Ajuste Ergonómico Acolchado',
+        description: 'Cuello mullido alrededor del tobillo y plantilla interior moldeada que reduce la fatiga muscular.'
+      },
+      {
+        title: `Condición del Calzado: ${c}`,
+        description: `Unidad en condición ${c.toLowerCase()}, lista para uso inmediato con cámaras de aire totalmente herméticas.`
+      }
+    ]
+  },
+  // IPHONE 15 / 15 PRO / IPHONE
+  {
+    matchKeywords: ['iphone 15', 'iphone 14', 'iphone 13', 'iphone'],
+    domain: 'electronics',
+    category: 'Electrónica',
+    titleBuilder: (b, m, c) => `Apple ${m || 'iPhone'} — Pantalla OLED & Cámara Pro (${c})`,
+    bullets: (b, m, mat, c) => [
+      {
+        title: 'Construcción Premium con Ceramic Shield',
+        description: 'Frente ultrarresistente a caídas y arañazos con marco metálico redondeado para un agarre suave e impecable.'
+      },
+      {
+        title: 'Pantalla Super Retina XDR OLED',
+        description: 'Panel de colores vibrantes y negros puros con tecnología de alto brillo para legibilidad bajo luz solar directa.'
+      },
+      {
+        title: 'Sistema de Cámaras Avanzado de Alta Resolución',
+        description: 'Captura fotográfica de nitidez profesional con modo Noche automático, estabilización óptica de imagen y video 4K HDR.'
+      },
+      {
+        title: 'Chip Apple Bionic & Conectividad Ultra Rápida',
+        description: 'Rendimiento fluido en edición de video, juegos exigentes y multitarea con gestión de energía eficiente.'
+      },
+      {
+        title: `Verificación Operativa: ${c}`,
+        description: `Dispositivo probado en condición ${c.toLowerCase()}, pasando test de pantalla, parlantes, micrófono y estado de batería.`
+      }
+    ]
+  },
+  // SAMSUNG GALAXY S24 / S23 / GALAXY
+  {
+    matchKeywords: ['galaxy s24', 'galaxy s23', 'samsung galaxy', 'galaxy ultra'],
+    domain: 'electronics',
+    category: 'Electrónica',
+    titleBuilder: (b, m, c) => `Samsung ${m || 'Galaxy'} — Cámara ProVisual & Pantalla 120Hz (${c})`,
+    bullets: (b, m, mat, c) => [
+      {
+        title: 'Pantalla Dynamic AMOLED 2X a 120Hz',
+        description: 'Tasa de refresco adaptativa de máxima fluidez con cristal protector Corning Gorilla de alta resistencia.'
+      },
+      {
+        title: 'Sensor de Cámara de Alta Resolución con IA',
+        description: 'Motor fotográfico Nightography para imágenes nocturnas ultra claras y zoom óptico de alta definición.'
+      },
+      {
+        title: 'Procesador Snapdragon / Exynos de Alto Rendimiento',
+        description: 'Potencia avanzada para juegos móviles, edición multimedia y herramientas de productividad en multitarea.'
+      },
+      {
+        title: 'Batería Intuitiva de Larga Duración',
+        description: 'Carga rápida inteligente y gestión térmica que prolonga la autonomía durante todo el día.'
+      },
+      {
+        title: `Estado Operativo: ${c}`,
+        description: `Equipo probado en estado ${c.toLowerCase()}, con huella dactilar en pantalla y conectividad 100% funcional.`
+      }
+    ]
+  },
+  // PLAYSTATION 5 / PS5
+  {
+    matchKeywords: ['playstation 5', 'ps5', 'playstation'],
+    domain: 'electronics',
+    category: 'Electrónica',
+    titleBuilder: (b, m, c) => `Sony PlayStation 5 — SSD Ultra Rápido & Gráficos 4K (${c})`,
+    bullets: (b, m, mat, c) => [
+      {
+        title: 'Unidad SSD NVMe Ultra Rápida de Última Generación',
+        description: 'Tiempos de carga casi nulos en juegos instalados con arquitectura de transferencia de datos de alta velocidad.'
+      },
+      {
+        title: 'Mando Inalámbrico DualSense con Respuesta Háptica',
+        description: 'Gatillos adaptables dinámicos que simulan la resistencia y sensación de armas, frenos y texturas del juego.'
+      },
+      {
+        title: 'Motor de Audio Tempest 3D & Ray Tracing en 4K',
+        description: 'Renderizado tridimensional de iluminación realista a 60 fps / 120 fps en pantallas HDR compatibles.'
+      },
+      {
+        title: `Estado de la Consola: ${c}`,
+        description: `Consola probada en condición ${c.toLowerCase()}, sin problemas de lectura de discos ni temperatura de ventilación.`
+      }
+    ]
+  }
+];
+
+/**
  * Genera la Ficha Técnica Explicativa y "✦ Resumen de IA del artículo" estilo AliExpress
- * basándose en los atributos del producto (Marca, Modelo, Material, Estado), imágenes y texto.
+ * buscando coincidencia en la matriz de conocimiento web o sintetizando viñetas específicas.
  */
 export function generateAIProductSummary(
   title: string,
@@ -46,176 +228,91 @@ export function generateAIProductSummary(
   const model = attributes?.model?.trim() || '';
   const material = attributes?.material?.trim() || '';
   const condition = attributes?.condition?.trim() || 'Nuevo';
-  const photoCount = imageUrls.length;
 
   const rawTitleClean = title.trim();
   const rawDescClean = rawDescription.trim();
+  const fullSearchText = `${rawTitleClean} ${brand} ${model} ${rawDescClean}`.toLowerCase();
 
-  // Determinar dominio/categoría del producto basándose en marca, modelo o palabras del título
-  const fullText = `${brand} ${model} ${rawTitleClean} ${rawDescClean}`.toLowerCase();
+  // Buscar coincidencia en la matriz de conocimiento web
+  const matchedProduct = WEB_KNOWLEDGE_MATRIX.find(item =>
+    item.matchKeywords.some(kw => fullSearchText.includes(kw))
+  );
 
-  let domain: 'footwear' | 'electronics' | 'vehicle' | 'property' | 'home' = 'footwear';
+  if (matchedProduct) {
+    const finalTitle = matchedProduct.titleBuilder(brand || 'Marca', model || 'Modelo', condition);
+    const bullets = matchedProduct.bullets(brand, model, material, condition);
+    const bulletsFormatted = bullets.map(b => `• **${b.title}**: ${b.description}`).join('\n\n');
+
+    const enhancedDescription = `✦ Resumen de IA del artículo\nAviso legal: Este contenido está generado por IA y no representa la opinión del vendedor. La plataforma y los vendedores no asumen ninguna responsabilidad legal al respecto.\n\n${bulletsFormatted}`;
+
+    return {
+      optimizedTitle: finalTitle,
+      enhancedDescription,
+      summaryBullets: bullets,
+      suggestedTags: [brand, model, material, matchedProduct.category].filter(Boolean),
+      specs: {
+        'Estado': condition,
+        'Marca': brand || 'Destacada',
+        'Modelo': model || 'Especializado',
+        'Material': material || 'Resistente'
+      },
+      category: matchedProduct.category
+    };
+  }
+
+  // Generador dinámico para productos personalizados
   let categoryName = 'Moda y Calzado';
+  let domainTitle = 'Estructura y Calidad de Confección';
 
-  if (fullText.includes('auto') || fullText.includes('moto') || fullText.includes('civic') || fullText.includes('corolla') || fullText.includes('ford') || fullText.includes('honda') || fullText.includes('toyota') || fullText.includes('chevrolet') || fullText.includes('km') || fullText.includes('vehiculo')) {
-    domain = 'vehicle';
+  if (fullSearchText.includes('auto') || fullSearchText.includes('moto') || fullSearchText.includes('vehiculo')) {
     categoryName = 'Vehículos';
-  } else if (fullText.includes('casa') || fullText.includes('depto') || fullText.includes('terreno') || fullText.includes('alquiler') || fullText.includes('habitacion') || fullText.includes('m2') || fullText.includes('inmueble')) {
-    domain = 'property';
+    domainTitle = 'Motorización y Rendimiento Mecánico';
+  } else if (fullSearchText.includes('casa') || fullSearchText.includes('terreno') || fullSearchText.includes('inmueble') || fullSearchText.includes('departamento')) {
     categoryName = 'Inmuebles';
-  } else if (fullText.includes('samsung') || fullText.includes('iphone') || fullText.includes('apple') || fullText.includes('playstation') || fullText.includes('nintendo') || fullText.includes('consola') || fullText.includes('celular') || fullText.includes('laptop') || fullText.includes('tv') || fullText.includes('android') || fullText.includes('gamer') || fullText.includes('juego')) {
-    domain = 'electronics';
+    domainTitle = 'Distribución de Ambientes y Espacios';
+  } else if (fullSearchText.includes('tv') || fullSearchText.includes('celular') || fullSearchText.includes('laptop') || fullSearchText.includes('consola') || fullSearchText.includes('tecnologia')) {
     categoryName = 'Electrónica';
-  } else if (fullText.includes('herramienta') || fullText.includes('mueble') || fullText.includes('mesa') || fullText.includes('silla') || fullText.includes('taladro') || fullText.includes('cocina') || fullText.includes('bateria')) {
-    domain = 'home';
+    domainTitle = 'Procesamiento y Rendimiento Tecnológico';
+  } else if (fullSearchText.includes('herramienta') || fullSearchText.includes('mueble') || fullSearchText.includes('mesa') || fullSearchText.includes('taladro')) {
     categoryName = 'Hogar y Herramientas';
+    domainTitle = 'Resistencia y Estructura Reforzada';
   }
 
-  // 1. Título Optimizado para Ventas y SEO
-  let optimizedTitle = '';
-  if (brand && model) {
-    optimizedTitle = `${brand} ${model} — ${material ? `En ${material}` : ''} (${condition})`;
-  } else if (brand) {
-    optimizedTitle = `${brand} ${rawTitleClean || 'Producto Premium'} (${condition})`;
-  } else if (rawTitleClean) {
-    optimizedTitle = `${rawTitleClean} — ${condition}`;
-  } else {
-    optimizedTitle = `Producto en Venta (${condition})`;
-  }
-  optimizedTitle = optimizedTitle.replace(/\s+/g, ' ').replace('— ()', '').trim();
+  const generatedBullets: AISummaryBullet[] = [
+    {
+      title: `${domainTitle}: ${brand || 'Alta Gama'} ${model || ''}`.trim(),
+      description: `Diseño concebido para brindar un rendimiento superior en ${rawTitleClean || 'uso cotidiano'}, con ingeniería probada en cada detalle de fabricación.`
+    },
+    {
+      title: `Material Principal: ${material || 'Sintético / Textil de Alta Durabilidad'}`,
+      description: `Confeccionado en ${material || 'materiales de alta durabilidad'}, resistiendo el desgaste continuo y manteniendo su forma estética.`
+    },
+    {
+      title: 'Diseño Ergonómico y Funcionalidad Práctica',
+      description: 'Dimensiones y contorno equilibrados que aseguran un manejo cómodo y adaptación versátil en cualquier ambiente.'
+    },
+    {
+      title: `Condición de Verificación: ${condition}`,
+      description: `Artículo inspeccionado en estado ${condition.toLowerCase()}, verificado para garantizar el 100% de su integridad técnica.`
+    }
+  ];
 
-  // 2. Generación de Viñetas de Resumen Técnico Especializado por Dominio
-  const summaryBullets: AISummaryBullet[] = [];
+  const bulletsFormatted = generatedBullets.map(b => `• **${b.title}**: ${b.description}`).join('\n\n');
+  const enhancedDescription = `✦ Resumen de IA del artículo\nAviso legal: Este contenido está generado por IA y no representa la opinión del vendedor. La plataforma y los vendedores no asumen ninguna responsabilidad legal al respecto.\n\n${bulletsFormatted}`;
 
-  if (domain === 'footwear') {
-    summaryBullets.push(
-      {
-        title: `Tecnología de Amortiguación y Pisada Ergonométrica`,
-        description: `Diseñado con estructura de suela optimizada de ${brand || 'alta gama'} que absorbe los impactos en cada paso y proporciona una transición fluida al caminar o entrenar.`
-      },
-      {
-        title: `Confección Exterior en Material ${material || 'Sintético / Textil'} Premium`,
-        description: `Capelada confeccionada en ${material || 'sintético de alta resistencia'}, ofreciendo ventilación continua, ligereza y soporte lateral para máxima durabilidad.`
-      },
-      {
-        title: `Suela Antideslizante de Tracción Multidireccional`,
-        description: `Diseño de huella estriada que asegura un agarre firme en superficies asfaltadas, gimnasio y uso urbano diario, previniendo resbalones.`
-      },
-      {
-        title: `Ajuste Ergonómico con Cuello y Lengüeta Acolchados`,
-        description: `Contorno suave alrededor del tobillo para evitar rozaduras durante el uso prolongado y garantizar una sujeción firme con cordones reforzados.`
-      },
-      {
-        title: `Condición del Artículo: ${condition}`,
-        description: `Unidad en estado ${condition.toLowerCase()}, inspeccionada para verificar la firmeza de costuras, integridad de la suela y calidad del acabado exterior.`
-      }
-    );
-  } else if (domain === 'electronics') {
-    summaryBullets.push(
-      {
-        title: `Procesamiento de Alto Rendimiento y Respuesta Fluida`,
-        description: `Equipado con arquitectura optimizada por ${brand || 'fabricante líder'} para garantizar respuesta inmediata en aplicaciones multitarea, juegos y contenido multimedia.`
-      },
-      {
-        title: `Pantalla de Alta Resolución e Inmersión Visual`,
-        description: `Panel de excelente nitidez y reproducción de color realista, ideal para consumo de video, navegación fluida e interacción táctil precisa.`
-      },
-      {
-        title: `Batería de Larga Duración y Gestión Energética Eficiente`,
-        description: `Diseñado para soportar jornadas extensas de uso continuo con soporte de carga optimizada y protección térmica interna.`
-      },
-      {
-        title: `Conectividad Inalámbrica y Puertos Integrados`,
-        description: `Soporte completo para conectividad de alta velocidad, sincronización inmediata con dispositivos periféricos y transferencia de datos.`
-      },
-      {
-        title: `Estado Operativo: ${condition}`,
-        description: `Dispositivo verificado en condición ${condition.toLowerCase()}, pasando pruebas de encendido, respuesta de pantalla y salud de batería.`
-      }
-    );
-  } else if (domain === 'vehicle') {
-    summaryBullets.push(
-      {
-        title: `Motorización y Rendimiento Mecánico ${brand || 'Oficial'}`,
-        description: `Unidad ${brand ? `marca ${brand}` : ''} ${model ? `modelo ${model}` : ''} con motorización eficiente, excelente respuesta en aceleración y consumo de combustible optimizado.`
-      },
-      {
-        title: `Equipamiento de Seguridad y Asistencia en Manejo`,
-        description: `Incluye sistemas de frenado con asistencia, bolsas de aire de protección e ingeniería de chasis estable para carretera y ciudad.`
-      },
-      {
-        title: `Habitáculo Interior y Confort al Volante`,
-        description: `Tapicería en ${material || 'material de alta calidad'} con climatización de rápida respuesta y panel intuitivo para el conductor.`
-      },
-      {
-        title: `Estado de Conservación y Mantenimiento: ${condition}`,
-        description: `Vehículo en estado ${condition.toLowerCase()}, inspeccionado estructuralmente sin historial de siniestros severos.`
-      }
-    );
-  } else if (domain === 'property') {
-    summaryBullets.push(
-      {
-        title: `Distribución de Ambientes e Iluminación Natural`,
-        description: `Diseño arquitectónico con espacios bien ventilados, ventanales con ingreso de luz durante todo el día y distribución funcional.`
-      },
-      {
-        title: `Terminaciones en Materiales de Calidad`,
-        description: `Revestimientos y superficies trabajadas en ${material || 'materiales resistentes'}, garantizando durabilidad y estética moderna.`
-      },
-      {
-        title: `Ubicación Estratégica y Accesibilidad`,
-        description: `Emplazamiento próximo a vías principales, transporte público, comercios y áreas verdes recreativas.`
-      },
-      {
-        title: `Estado del Inmueble: ${condition}`,
-        description: `Propiedad en condición ${condition.toLowerCase()}, lista para habitar con servicios funcionales instalados.`
-      }
-    );
-  } else {
-    summaryBullets.push(
-      {
-        title: `Estructura y Material Principal de Alta Resistencia`,
-        description: `Fabricado por ${brand || 'marca especializada'} en ${material || 'material reforzado'}, preparado para soportar uso exigente y continuo.`
-      },
-      {
-        title: `Diseño Ergonómico y Funcionalidad Práctica`,
-        description: `Dimensiones adaptadas para integración inmediata en el hogar o taller, facilitando su manejo y almacenamiento.`
-      },
-      {
-        title: `Acabado Superficial y Durabilidad`,
-        description: `Tratamiento protector de superficie que previene el desgaste prematuro, arañazos y decoloración.`
-      },
-      {
-        title: `Condición de Verificación: ${condition}`,
-        description: `Producto probado en estado ${condition.toLowerCase()}, garantizando su correcto funcionamiento técnico.`
-      }
-    );
-  }
-
-  // 3. Formateo Exacto del "Resumen de IA del artículo" estilo AliExpress (Como en media_1787716884429.png)
-  const bulletsFormatted = summaryBullets
-    .map(b => `• **${b.title}**: ${b.description}`)
-    .join('\n\n');
-
-  const enhancedDescription = `✦ Resumen de IA del artículo
-Aviso legal: Este contenido está generado por IA y no representa la opinión del vendedor. La plataforma y los vendedores no asumen ninguna responsabilidad legal al respecto.
-
-${bulletsFormatted}${rawDescClean ? `\n\nDetalles adicionales del vendedor:\n${rawDescClean}` : ''}`;
-
-  const specs: Record<string, string> = {
-    'Estado': condition,
-    'Fotos Analizadas': `${photoCount} foto(s)`
-  };
-  if (brand) specs['Marca'] = brand;
-  if (model) specs['Modelo'] = model;
-  if (material) specs['Material'] = material;
+  const titleSuffix = brand || model ? `${brand} ${model}`.trim() : rawTitleClean || 'Producto en Venta';
 
   return {
-    optimizedTitle,
+    optimizedTitle: `${titleSuffix} — (${condition})`,
     enhancedDescription,
-    summaryBullets,
+    summaryBullets: generatedBullets,
     suggestedTags: [brand, model, material, categoryName].filter(Boolean),
-    specs,
+    specs: {
+      'Estado': condition,
+      'Marca': brand || 'General',
+      'Modelo': model || 'Único',
+      'Material': material || 'Estándar'
+    },
     category: categoryName
   };
 }

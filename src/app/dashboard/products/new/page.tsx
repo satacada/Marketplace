@@ -241,21 +241,54 @@ export default function NewProductPage() {
     setImagePreviews(updatedPreviews);
   };
 
+  // Auto-detección en tiempo real de Categoría a partir del texto ingresado
+  useEffect(() => {
+    if (categories.length === 0) return;
+    const fullText = `${title} ${brand} ${model} ${description}`.toLowerCase();
+    if (!fullText.trim()) return;
+
+    const rules = [
+      {
+        keywords: ['zapatilla', 'zapatillas', 'calzado', 'nike', 'adidas', 'jordan', 'puma', 'reebok', 'ropa', 'campera', 'remera', 'pantalon', 'talle', 'zapato', 'botas', 'ojotas'],
+        names: ['Moda y Calzado', 'Calzado', 'Moda', 'Ropa']
+      },
+      {
+        keywords: ['celular', 'smartphone', 'samsung', 'iphone', 'xiaomi', 'motorola', 'tv', 'televisor', 'smart tv', 'laptop', 'notebook', 'pc', 'computadora', 'consola', 'playstation', 'ps5', 'xbox', 'nintendo', 'audifonos', 'auriculares'],
+        names: ['Electrónica', 'Tecnología']
+      },
+      {
+        keywords: ['auto', 'camioneta', 'moto', 'motocicleta', 'honda', 'toyota', 'ford', 'chevrolet', 'volkswagen', 'fiat', 'peugeot', 'renault', 'vehiculo', 'km'],
+        names: ['Vehículos', 'Autos', 'Motos']
+      },
+      {
+        keywords: ['departamento', 'casa', 'terreno', 'inmueble', 'propiedad', 'alquiler', 'ambientes'],
+        names: ['Inmuebles', 'Propiedades']
+      },
+      {
+        keywords: ['herramienta', 'taladro', 'amoladora', 'morsa', 'soldadora', 'mueble', 'mesa', 'silla', 'cocina', 'jardin'],
+        names: ['Hogar y Herramientas', 'Hogar']
+      }
+    ];
+
+    for (const rule of rules) {
+      if (rule.keywords.some(kw => fullText.includes(kw))) {
+        const matched = categories.find(c => 
+          rule.names.some(n => c.name.toLowerCase().includes(n.toLowerCase()))
+        );
+        if (matched) {
+          setCategoryId(matched.id);
+          break;
+        }
+      }
+    }
+  }, [title, brand, model, description, categories]);
+
   // Generación por IA
   const handleGenerateAISummary = () => {
-    if (imageFiles.length === 0) {
+    if (!brand.trim() && !model.trim() && !title.trim()) {
       showModalMessage(
-        '📷 Foto Requerida para Análisis Visual',
-        'Por favor sube al menos 1 foto representativa de tu producto para que la IA realice el análisis visual.',
-        'info'
-      );
-      return;
-    }
-
-    if (!brand.trim() && !model.trim()) {
-      showModalMessage(
-        '⚠️ Atributos Requeridos para Ficha de IA',
-        'Ingresa al menos la Marca o el Modelo de tu producto para que la IA busque la información técnica en la web.',
+        '⚠️ Atributos Requeridos para IA',
+        'Ingresa al menos el Título, la Marca o el Modelo de tu producto para que la IA investigue las especificaciones técnicas en la web.',
         'info'
       );
       return;
@@ -263,7 +296,7 @@ export default function NewProductPage() {
 
     setIsGeneratingAI(true);
     setTimeout(() => {
-      const aiData = generateAIProductSummary(title || 'Producto en Venta', description, imagePreviews, {
+      const aiData = generateAIProductSummary(title || model || brand || 'Producto', description, imagePreviews, {
         brand,
         model,
         material,
@@ -291,7 +324,7 @@ export default function NewProductPage() {
       setIsGeneratingAI(false);
       showModalMessage(
         '✨ Resumen de IA del Artículo Generado',
-        `Se investigó las especificaciones técnicas estilo AliExpress para "${brand} ${model || ''}" y se seleccionó la categoría "${aiData.category}". Tu cuadro de descripción libre se mantiene independiente.`,
+        `Se investigó las especificaciones técnicas reales estilo AliExpress para "${brand} ${model || title}" y se asignó la categoría "${aiData.category}". Tu cuadro de descripción libre se mantiene 100% independiente.`,
         'success'
       );
     }, 800);

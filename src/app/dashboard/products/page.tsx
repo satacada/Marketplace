@@ -159,15 +159,28 @@ export default function ProductsPage() {
               <div className="flex-1">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">{product.title}</h3>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-xl font-extrabold text-gray-900 dark:text-slate-100">{product.title}</h3>
+                      {product.status === 'pending' ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/80 px-2.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-800">
+                          <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                          🟡 En revisión
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                          🟢 Activo
+                        </span>
+                      )}
+                    </div>
                     {product.categories?.name && (
-                      <span className="inline-block mt-1 text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded">{product.categories.name}</span>
+                      <span className="inline-block mt-1 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/80 px-2.5 py-0.5 rounded-full border border-blue-200 dark:border-blue-800">{product.categories.name}</span>
                     )}
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-indigo-600">${product.price}</p>
-                    <p className={`text-sm font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {product.stock > 0 ? `Stock: ${product.stock}` : 'Sin stock (Oculto)'}
+                    <p className="text-2xl font-black text-blue-600 dark:text-blue-400">${product.price.toLocaleString()}</p>
+                    <p className={`text-xs font-extrabold ${product.stock > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                      {product.stock > 0 ? `Stock: ${product.stock} dispon.` : 'Sin stock (Oculto)'}
                     </p>
                   </div>
                 </div>
