@@ -20,9 +20,10 @@ import { useCart } from '@/features/cart/hooks/useCart';
 type Props = {
   userId?: string | null;
   onAddToCart?: (productId: string, productInfo: any) => void;
+  onClose?: () => void;
 };
 
-export default function PersonalizedRecommendationsSection({ userId, onAddToCart }: Props) {
+export default function PersonalizedRecommendationsSection({ userId, onAddToCart, onClose }: Props) {
   const [recommendations, setRecommendations] = useState<RecommendedProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -55,8 +56,8 @@ export default function PersonalizedRecommendationsSection({ userId, onAddToCart
   if (recommendations.length === 0) return null;
 
   return (
-    <div className="mb-10 p-6 rounded-3xl bg-gradient-to-r from-blue-50/90 via-indigo-50/90 to-purple-50/90 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-900 border border-blue-200/90 dark:border-slate-800 shadow-2xs text-gray-900 dark:text-slate-100">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+    <div className="mb-8 p-6 rounded-3xl bg-gradient-to-r from-blue-50/90 via-indigo-50/90 to-purple-50/90 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-900 border border-blue-200/90 dark:border-slate-800 shadow-2xs text-gray-900 dark:text-slate-100">
+      <div className="flex items-center justify-between gap-2 mb-6">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-xl text-blue-600 dark:text-blue-400 font-black">✨</span>
@@ -68,6 +69,16 @@ export default function PersonalizedRecommendationsSection({ userId, onAddToCart
             Selección de productos destacados y ofertas para ti
           </p>
         </div>
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 rounded-full hover:bg-gray-200/80 dark:hover:bg-slate-800 text-gray-500 hover:text-gray-900 dark:text-slate-400 dark:hover:text-slate-100 transition cursor-pointer font-bold text-sm"
+            title="Ocultar recomendaciones"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -520,6 +520,9 @@ export default function MarketplacePage() {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
+  // Estado para desplegar sección de recomendaciones a demanda
+  const [showRecommendations, setShowRecommendations] = useState(false);
+
   // Estado para Modal estándar UI
   const [showModal, setShowModal] = useState(false);
   const [modalData, setModalData] = useState<{
@@ -852,6 +855,32 @@ export default function MarketplacePage() {
                 </button>
               </div>
 
+              {/* Acceso Rápido a Recomendaciones Personalizadas */}
+              <button
+                type="button"
+                onClick={() => setShowRecommendations(!showRecommendations)}
+                className={`w-full mb-5 p-3 rounded-2xl border text-left flex items-center justify-between transition cursor-pointer shadow-2xs ${
+                  showRecommendations 
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm' 
+                    : 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-800 dark:to-slate-900 border-blue-200 dark:border-slate-700 text-gray-900 dark:text-slate-100 hover:border-blue-400'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-base">✨</span>
+                  <div>
+                    <span className="text-xs font-black block leading-tight">Recomendados para ti</span>
+                    <span className={`text-[10px] font-medium ${showRecommendations ? 'text-blue-100' : 'text-gray-500 dark:text-slate-400'}`}>
+                      {showRecommendations ? 'Ocultar sugerencias' : 'Ver productos sugeridos'}
+                    </span>
+                  </div>
+                </div>
+                <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
+                  showRecommendations ? 'bg-white text-blue-700' : 'bg-blue-600 text-white'
+                }`}>
+                  {showRecommendations ? 'Activo' : 'Ver ✨'}
+                </span>
+              </button>
+
               {/* Filtro de Ubicación Estilo Facebook Marketplace */}
               <div className="mb-5 border-b border-gray-100 dark:border-slate-800 pb-4">
                 <button
@@ -884,6 +913,9 @@ export default function MarketplacePage() {
                         onChange={() => {
                           setSortBy(opt.id as SortOption);
                           setHookSortBy(opt.id as SortOption);
+                          if (opt.id === 'relevance') {
+                            setShowRecommendations(true);
+                          }
                         }}
                         className="text-blue-600 focus:ring-blue-500 h-4 w-4 accent-blue-600"
                       />
@@ -954,8 +986,13 @@ export default function MarketplacePage() {
 
           {/* Grid de productos compacto estilo Facebook Marketplace */}
           <main className="flex-1">
-            {/* FASE 4: SECCIÓN DE RECOMENDADOS PERSONALIZADOS POR IA */}
-            <PersonalizedRecommendationsSection userId={user?.id || null} />
+            {/* FASE 4: SECCIÓN DE RECOMENDADOS PERSONALIZADOS POR IA (DESPLEGABLE A DEMANDA) */}
+            {showRecommendations && (
+              <PersonalizedRecommendationsSection 
+                userId={user?.id || null} 
+                onClose={() => setShowRecommendations(false)} 
+              />
+            )}
 
             {loading && products.length === 0 ? (
               <div className="flex items-center justify-center py-12">
