@@ -4,8 +4,7 @@
  * ============================================================================
  * 
  * @description Componente centralizado y reutilizable para renderizar mapas
- *              OpenStreetMap en vivo sin necesidad de API Key, sin marcas de agua,
- *              y con filtro CSS suave estilo Google Maps para eliminar la saturación visual.
+ *              OpenStreetMap en vivo. Control de Zoom ubicado a la IZQUIERDA (topleft).
  * 
  * @module Presentation/Components/UI/OpenStreetMapEmbed
  * ============================================================================
@@ -30,8 +29,6 @@ export default function OpenStreetMapEmbed({
 }: Props) {
   const pinColor = markerColor === 'red' ? '#ea4335' : markerColor === 'blue' ? '#2563eb' : '#22c55e';
 
-  // HTML embebido usando el servidor oficial 100% libre de OpenStreetMap (0 API Key, 0 Marcas de agua)
-  // con des-saturación por CSS para lograr el aspecto limpio estilo Google Maps.
   const mapHtml = `
     <!DOCTYPE html>
     <html>
@@ -49,7 +46,6 @@ export default function OpenStreetMapEmbed({
             background-color: #f8fafc;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
           }
-          /* Filtro suave des-saturador para que el mapa oficial se vea limpio como Google Maps */
           .leaflet-tile-pane {
             filter: contrast(92%) brightness(104%) saturate(75%);
           }
@@ -70,11 +66,14 @@ export default function OpenStreetMapEmbed({
         <script>
           document.addEventListener("DOMContentLoaded", function() {
             var map = L.map('map', {
-              zoomControl: true,
+              zoomControl: false,
               attributionControl: true
             }).setView([${lat}, ${lng}], ${zoom});
 
-            // Servidor Oficial Libre de OpenStreetMap (0 API Key / 0 Marcas de agua)
+            // Forzar Control de Zoom (+ / -) a la IZQUIERDA
+            L.control.zoom({ position: 'topleft' }).addTo(map);
+
+            // Servidor Oficial Libre de OpenStreetMap
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
               maxZoom: 19,
               attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'

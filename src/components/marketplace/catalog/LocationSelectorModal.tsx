@@ -130,12 +130,12 @@ export default function LocationSelectorModal({
             }}
           />
 
-          {/* Botón de Geolocalización GPS 🎯 Posicionado a la IZQUIERDA (Evita superposición con el zoom nativo de OpenStreetMap) */}
+          {/* Botón de Geolocalización GPS 🎯 Posicionado a la DERECHA (Evita superposición con el zoom ubicado a la izquierda) */}
           <button
             type="button"
             onClick={handleGPSClick}
             disabled={isLocatingGPS}
-            className="absolute top-3 left-3 py-1.5 px-3 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 shadow-md flex items-center justify-center gap-1.5 hover:bg-gray-50 transition border border-gray-200 dark:border-slate-700 cursor-pointer z-30 font-bold text-xs"
+            className="absolute top-3 right-3 py-1.5 px-3 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 shadow-md flex items-center justify-center gap-1.5 hover:bg-gray-50 transition border border-gray-200 dark:border-slate-700 cursor-pointer z-30 font-bold text-xs"
             title="Usar mi ubicación GPS actual"
           >
             {isLocatingGPS ? (
