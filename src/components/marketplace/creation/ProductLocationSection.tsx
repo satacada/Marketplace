@@ -10,6 +10,7 @@
  */
 
 import React from 'react';
+import OpenStreetMapEmbed from '@/components/ui/OpenStreetMapEmbed';
 
 type Props = {
   locationName: string;
@@ -83,20 +84,12 @@ export default function ProductLocationSection({
         💡 <strong>Ejemplo recomendado:</strong> "Barracas, Buenos Aires" o "Plaza Colombia, Barracas". Al tipear o presionar el botón de GPS, el mapa centrará la ubicación con un marcador azul en vivo.
       </p>
 
-      {/* Mapa interactivo OpenStreetMap */}
-      <div className="h-44 sm:h-52 w-full rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-700 relative shadow-inner">
-        <iframe
-          width="100%"
-          height="100%"
-          frameBorder="0"
-          scrolling="no"
-          marginHeight={0}
-          marginWidth={0}
-          src={mapCoords ? `https://www.openstreetmap.org/export/embed.html?bbox=${mapCoords.lng - 0.015}%2C${mapCoords.lat - 0.015}%2C${mapCoords.lng + 0.015}%2C${mapCoords.lat + 0.015}&layer=mapnik&marker=${mapCoords.lat}%2C${mapCoords.lng}` : `https://www.openstreetmap.org/export/embed.html?bbox=-58.39%2C-34.65%2C-58.36%2C-34.63&layer=mapnik&marker=-34.64%2C-58.37`}
-          className="w-full h-full border-0"
-          title="Mapa de Ubicación del Producto"
-        />
-      </div>
+      {/* Mapa interactivo OpenStreetMap Reutilizado */}
+      <OpenStreetMapEmbed
+        lat={mapCoords?.lat || -34.64}
+        lng={mapCoords?.lng || -58.37}
+        height="h-44 sm:h-52"
+      />
     </div>
   );
 }
