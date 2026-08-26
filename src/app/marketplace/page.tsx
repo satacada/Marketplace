@@ -855,30 +855,21 @@ export default function MarketplacePage() {
                 </button>
               </div>
 
-              {/* Acceso Rápido a Recomendaciones Personalizadas */}
+              {/* Botón Pequeño de Acceso a Recomendados para Ti */}
               <button
                 type="button"
                 onClick={() => setShowRecommendations(!showRecommendations)}
-                className={`w-full mb-5 p-3 rounded-2xl border text-left flex items-center justify-between transition cursor-pointer shadow-2xs ${
-                  showRecommendations 
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm' 
-                    : 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-800 dark:to-slate-900 border-blue-200 dark:border-slate-700 text-gray-900 dark:text-slate-100 hover:border-blue-400'
+                className={`w-full mb-4 py-2 px-3 rounded-xl text-xs font-bold transition duration-200 flex items-center justify-between cursor-pointer border ${
+                  showRecommendations
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-2xs'
+                    : 'bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-200 border-gray-200 dark:border-slate-800 hover:border-blue-500 hover:text-blue-600'
                 }`}
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-base">✨</span>
-                  <div>
-                    <span className="text-xs font-black block leading-tight">Recomendados para ti</span>
-                    <span className={`text-[10px] font-medium ${showRecommendations ? 'text-blue-100' : 'text-gray-500 dark:text-slate-400'}`}>
-                      {showRecommendations ? 'Ocultar sugerencias' : 'Ver productos sugeridos'}
-                    </span>
-                  </div>
-                </div>
-                <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
-                  showRecommendations ? 'bg-white text-blue-700' : 'bg-blue-600 text-white'
-                }`}>
-                  {showRecommendations ? 'Activo' : 'Ver ✨'}
+                <span className="flex items-center gap-1.5">
+                  <span className="text-sm">✨</span>
+                  <span>Recomendados para ti</span>
                 </span>
+                <span className="text-[10px] font-extrabold opacity-90">{showRecommendations ? '✕' : 'Ver'}</span>
               </button>
 
               {/* Filtro de Ubicación Estilo Facebook Marketplace */}
