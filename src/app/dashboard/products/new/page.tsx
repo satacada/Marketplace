@@ -269,10 +269,21 @@ export default function NewProductPage() {
       
       setTitle(aiData.optimizedTitle);
       setDescription(aiData.enhancedDescription);
+
+      if (categories.length > 0) {
+        const matched = categories.find(c => 
+          c.name.toLowerCase().includes(aiData.category.toLowerCase()) || 
+          aiData.category.toLowerCase().includes(c.name.toLowerCase())
+        );
+        if (matched) {
+          setCategoryId(matched.id);
+        }
+      }
+
       setIsGeneratingAI(false);
       showModalMessage(
-        '✨ Ficha Técnica de IA Generada',
-        'Se ha redactado el título optimizado y la Ficha Técnica con 100% de coincidencia exacta.',
+        '✨ Resumen de IA del Artículo Generado',
+        `Se ha redactado la Ficha Técnica estructurada estilo AliExpress para "${brand} ${model || ''}" y se seleccionó la categoría "${aiData.category}".`,
         'success'
       );
     }, 800);

@@ -121,14 +121,17 @@ export default function ProductLivePreview({
 
         {/* Tarjeta de Resumen de IA en Vista Previa */}
         {description && description.includes('✦ Resumen de IA') && (
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-slate-800/80 dark:to-slate-800 border border-purple-200 dark:border-slate-700 space-y-2">
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 dark:from-slate-800/80 dark:to-slate-800 border border-purple-200 dark:border-slate-700 space-y-2">
             <div className="flex items-center gap-1.5 text-xs font-extrabold text-purple-900 dark:text-purple-300">
-              <span>✨</span>
-              <span>✦ Resumen de IA del artículo (Ficha Técnica)</span>
+              <span className="text-sm">✦</span>
+              <span>Resumen de IA del artículo</span>
             </div>
-            <p className="text-xs text-gray-700 dark:text-slate-300 leading-relaxed font-medium line-clamp-4">
-              {description}
+            <p className="text-[10px] text-gray-500 dark:text-slate-400 font-medium">
+              Aviso legal: Este contenido está generado por IA y no representa la opinión del vendedor.
             </p>
+            <div className="text-xs text-gray-700 dark:text-slate-300 leading-relaxed font-medium whitespace-pre-line pt-1">
+              {description}
+            </div>
           </div>
         )}
 
