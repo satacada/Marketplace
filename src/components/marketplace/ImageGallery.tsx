@@ -105,9 +105,9 @@ export default function ImageGallery({
   // MODO DETALLE (Para la página de detalle de producto estilo AliExpress)
   return (
     <div className="flex flex-col sm:flex-row gap-4 w-full">
-      {/* Tira de miniaturas verticales a la izquierda (Estilo AliExpress media_1787708475209.png) */}
+      {/* Tira de miniaturas verticales a la izquierda centradas (Estilo AliExpress media_1787709104917.png) */}
       {images.length > 1 && (
-        <div className="flex sm:flex-col gap-2.5 overflow-x-auto sm:overflow-y-auto max-h-[420px] pr-1 flex-shrink-0 order-2 sm:order-1 scrollbar-thin">
+        <div className="flex sm:flex-col justify-center items-center gap-2.5 overflow-x-auto sm:overflow-y-auto max-h-[420px] pr-1 flex-shrink-0 order-2 sm:order-1 scrollbar-thin my-auto">
           {images.map((img, idx) => (
             <button
               key={idx}
