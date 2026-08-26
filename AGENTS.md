@@ -22,4 +22,11 @@ All AI agents (Antigravity, Cursor, Windsurf, Claude Code, GitHub Copilot, ChatG
 2. ZERO compilation errors: Always verify changes using `npx tsc --noEmit` and `npm run build`.
 3. PRESERVE guest cart & postponed registration flow.
 4. USE standard `<Modal>` component instead of browser native `alert()`.
+5. ALWAYS FOLLOW INCREMENTAL MODULAR PROTOTYPING ("CLEAN-BY-DESIGN"): Never write rough monolithic code. Every new feature or page MUST immediately be built with its dedicated Custom Hook (`src/features/<module>/hooks/`) and sub-components (< 100 lines) with JSDoc headers from line 1.
+
+## 🚀 MANDATORY METHODOLOGY: INCREMENTAL MODULAR PROTOTYPING ("CLEAN-BY-DESIGN")
+All AI agents MUST enforce this 3-step workflow on EVERY prompt:
+1. **Clean-by-Design Construction:** Build feature logic inside a Custom Hook and UI in sub-components (< 100 lines) right from prompt #1. No draft monoliths allowed.
+2. **Surgical Iteration:** If the user requests UI/UX visual adjustments, edit ONLY the specific sub-component without touching the Hook or database logic.
+3. **Instant Production Lock-In:** Always verify with `npx tsc --noEmit` and `npm run build` before completing.
 

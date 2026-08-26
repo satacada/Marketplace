@@ -47,10 +47,15 @@ Este documento define la norma obligatoria para el desarrollo de software en **M
 
 ---
 
-## 🧪 3. Verificación Rígida de Calidad
+---
 
-Cero errores en compilación TypeScript y build de producción:
-```bash
-npx tsc --noEmit
-npm run build
-```
+## 🚀 4. Metodología Oficial: Prototipado Modular Incremental ("Clean-by-Design")
+
+Todo agente de IA o desarrollador humano DEBE seguir este flujo de 3 pasos en cada iteración o cambio:
+
+1. **Construcción Limpia Inmediata (Sin Borradores Monolíticos):**
+   - Desde la primera respuesta o solicitud de cambio, el código se estructura directamente en su Custom Hook y subcomponentes modulares de menos de 100 líneas con JSDoc.
+2. **Ajustes Quirúrgicos Visuales:**
+   - Cuando el usuario solicita ajustes de UI/UX, el agente modifica únicamente el subcomponente atómico correspondiente, sin alterar la lógica de negocio ni el estado global.
+3. **Cierre de Calidad en Producción:**
+   - Se ejecuta inmediatamente `npx tsc --noEmit` y `npm run build` antes de finalizar.
