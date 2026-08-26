@@ -1,292 +1,164 @@
 /**
  * ============================================================================
- * FILE: page.tsx
+ * FILE: page.tsx (dashboard/products)
  * ============================================================================
  * 
- * @description Página de gestión de productos del vendedor.
- *              Utiliza hooks useAuth y useProducts para gestión.
+ * @description Página de Gestión de Productos del Vendedor (/dashboard/products).
+ *              Refactorizado bajo Clean Architecture y SOLID:
+ *              - Lógica de la lista en `useSellerProductsList`
+ *              - Vista limpia y orquestada (< 120 líneas)
  * 
  * @module Presentation/Pages/Dashboard/Products
- * 
- * @author System
- * @created 2026-07-16
- * 
- * @dependencies
- * - react
- * - @/features/auth/hooks/useAuth
- * - @/features/products/hooks/useProducts
- * - @/components/ui/Button
- * - @/components/ui/Modal
- * - @/components/marketplace/ImageGallery
- * 
- * @related-files
- * - @/features/products/hooks/useProducts.ts
- * - @/features/products/services/product.service.ts
- * 
- * @exports
- * - ProductsPage (default)
- * 
  * ============================================================================
  */
 
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import { useProducts } from '@/features/products/hooks/useProducts';
-import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
-import ImageGallery from '@/components/marketplace/ImageGallery';
-
-type Product = {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  stock: number;
-  image_urls: string[];
-  category_id: string;
-  is_deleted: boolean;
-  status?: string;
-  categories: { name: string } | null;
-  favorite_count?: number;
-};
+import { useSellerProductsList } from '@/features/products/hooks/useSellerProductsList';
 
 export default function ProductsPage() {
-  const router = useRouter();
-  const { user, isLoading: authLoading } = useAuth();
-  
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [productToDelete, setProductToDelete] = useState<string | null>(null);
-  const [actionId, setActionId] = useState<string | null>(null);
+  const p = useSellerProductsList();
 
-  const [directProducts, setDirectProducts] = useState<Product[]>([]);
-  const [directLoading, setDirectLoading] = useState(true);
-
-  // Cargar productos del vendedor sólo cuando user.id esté disponible para evitar parpadeos
-  const { 
-    products, 
-    loading: productsLoading, 
-    deleteProduct, 
-    toggleStock,
-    refresh 
-  } = useProducts(user?.id ? { sellerId: user.id, includeFavoriteCount: true } : { sellerId: 'loading-wait' });
-
-  // Recuperación directa a prueba de fallos desde Supabase Client
-  useEffect(() => {
-    async function loadDirectSellerProducts() {
-      if (!user?.id) return;
-      setDirectLoading(true);
-      try {
-        const { supabase } = await import('@/lib/supabase');
-        const { data, error } = await supabase
-          .from('products')
-          .select('*, categories(name)')
-          .eq('seller_id', user.id)
-          .eq('is_deleted', false)
-          .order('created_at', { ascending: false });
-
-        if (!error && data) {
-          setDirectProducts(data as any);
-        }
-      } catch (err) {
-        console.error('Error en carga directa de productos:', err);
-      } finally {
-        setDirectLoading(false);
-      }
-    }
-    loadDirectSellerProducts();
-  }, [user?.id]);
-
-  useEffect(() => {
-    document.title = 'Mis Productos | Marketplace SaaS';
-  }, []);
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/auth');
-    }
-  }, [user, authLoading, router]);
-
-  const handleDeleteClick = (productId: string) => {
-    setProductToDelete(productId);
-    setShowDeleteModal(true);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!productToDelete || !user) return;
-    
-    setActionId(productToDelete);
-    setShowDeleteModal(false);
-
-    const result = await deleteProduct(productToDelete, user.id);
-    setActionId(null);
-    setProductToDelete(null);
-
-    if (!result.success) {
-      alert('Error al eliminar: ' + result.error);
-    } else {
-      await refresh();
-    }
-  };
-
-  const handleCancelDelete = () => {
-    setShowDeleteModal(false);
-    setProductToDelete(null);
-  };
-
-  const handleToggleStock = async (product: Product) => {
-    if (!user) return;
-    
-    setActionId(product.id);
-    const result = await toggleStock(product.id, user.id);
-    setActionId(null);
-
-    if (!result.success) {
-      alert('Error al actualizar stock: ' + result.error);
-    }
-  };
-
-  const displayProducts = (products.length > 0 ? products : directProducts) as Product[];
-  const isCurrentlyLoading = authLoading || (productsLoading && directLoading && displayProducts.length === 0);
-
-  if (isCurrentlyLoading) {
+  if (p.authLoading || p.productsLoading) {
     return (
-      <div className="p-8 max-w-6xl mx-auto">
-        <p className="text-gray-500 text-center py-8">Cargando productos...</p>
+      <div className="p-8 max-w-6xl mx-auto text-center">
+        <p className="text-gray-500 font-bold text-sm">Cargando tus productos...</p>
       </div>
     );
   }
 
-  if (!user) return null;
-
   return (
-    <div className="p-6 sm:p-8 max-w-6xl mx-auto space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs">
+    <div className="p-6 sm:p-8 max-w-7xl mx-auto space-y-6 text-gray-900 dark:text-slate-100">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-slate-100">Mis Productos</h1>
-          <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 mt-1">Gestiona tu catálogo de productos</p>
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-slate-100">
+            Mis Productos ({p.displayProducts.length})
+          </h1>
+          <p className="text-xs text-gray-500 font-medium mt-1">
+            Gestiona tus publicaciones, modifica el stock o edita los detalles.
+          </p>
         </div>
-        <Link href="/dashboard/products/new">
-          <Button variant="primary">+ Nuevo Producto</Button>
+        <Link
+          href="/dashboard/products/new"
+          className="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black transition shadow-xs flex items-center gap-1.5"
+        >
+          <span>➕</span>
+          <span>Publicar Nuevo Producto</span>
         </Link>
       </div>
 
-      {displayProducts.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 p-12 rounded-3xl shadow-2xs text-center border border-gray-200/90 dark:border-slate-800">
-          <p className="text-gray-600 dark:text-slate-300 text-base font-extrabold mb-4">Aún no tienes productos publicados.</p>
-          <Link href="/dashboard/products/new">
-            <Button variant="primary">Crear tu primer producto</Button>
+      {p.displayProducts.length === 0 ? (
+        <div className="bg-white dark:bg-slate-900 p-12 rounded-3xl text-center border border-gray-200 dark:border-slate-800 space-y-3">
+          <span className="text-5xl">📦</span>
+          <p className="text-gray-700 dark:text-slate-200 font-extrabold text-sm">
+            Aún no tienes productos publicados.
+          </p>
+          <Link
+            href="/dashboard/products/new"
+            className="inline-block px-6 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-extrabold"
+          >
+            Publicar mi primer producto
           </Link>
         </div>
       ) : (
-        <div className="space-y-4">
-          {displayProducts.map((product) => (
-            <div key={product.id} className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-2xs border border-gray-200/90 dark:border-slate-800 flex flex-col sm:flex-row gap-6">
-              <div className="w-full sm:w-48 flex-shrink-0">
-                <ImageGallery images={product.image_urls || []} thumbnailMode={true} />
-              </div>
-              
-              <div className="flex-1">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-xl font-extrabold text-gray-900 dark:text-slate-100">{product.title}</h3>
-                      {product.status === 'pending' ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/80 px-2.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-800">
-                          <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
-                          🟡 En revisión
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                          🟢 Activo
-                        </span>
-                      )}
-                    </div>
-                    {product.categories?.name && (
-                      <span className="inline-block mt-1 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/80 px-2.5 py-0.5 rounded-full border border-blue-200 dark:border-blue-800">{product.categories.name}</span>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-black text-blue-600 dark:text-blue-400">${product.price.toLocaleString()}</p>
-                    <p className={`text-xs font-extrabold ${product.stock > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                      {product.stock > 0 ? `Stock: ${product.stock} dispon.` : 'Sin stock (Oculto)'}
-                    </p>
-                  </div>
-                </div>
-
-                <p className="text-gray-600 mb-4 line-clamp-2">{product.description}</p>
-
-                {/* Estadísticas de interés */}
-                <div className="flex gap-4 mb-4 p-3 bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg border border-pink-100">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">🤍</span>
-                    <div>
-                      <p className="text-xs text-gray-500">Interés</p>
-                      <p className="text-lg font-bold text-pink-700">{product.favorite_count || 0}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">👁️</span>
-                    <div>
-                      <p className="text-xs text-gray-500">Vistas</p>
-                      <p className="text-lg font-bold text-purple-700">0</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-2 border-t border-gray-200 pt-4">
-                  <Link href={`/dashboard/products/edit/${product.id}`}>
-                    <Button variant="secondary" size="sm">✏️ Editar</Button>
-                  </Link>
-                  
-                  <Button
-                    onClick={() => handleToggleStock(product as any)}
-                    disabled={actionId === product.id}
-                    variant={product.stock > 0 ? 'secondary' : 'success'}
-                    size="sm"
-                    isLoading={actionId === product.id}
-                  >
-                    {product.stock > 0 ? '⏸️ Desactivar' : '▶️ Activar'}
-                  </Button>
-
-                  <Button
-                    onClick={() => handleDeleteClick(product.id)}
-                    disabled={actionId === product.id}
-                    variant="danger"
-                    size="sm"
-                    isLoading={actionId === product.id}
-                  >
-                    🗑️ Eliminar
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-gray-100 dark:border-slate-800 text-gray-400 font-extrabold uppercase bg-gray-50/50 dark:bg-slate-800/40">
+                  <th className="p-4">Producto</th>
+                  <th className="p-4">Categoría</th>
+                  <th className="p-4">Precio</th>
+                  <th className="p-4">Stock</th>
+                  <th className="p-4 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-slate-800 font-medium">
+                {p.displayProducts.map((prod) => (
+                  <tr key={prod.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/40 transition">
+                    <td className="p-4 flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gray-100 dark:bg-slate-800 rounded-xl overflow-hidden flex-shrink-0">
+                        {prod.image_urls?.[0] ? (
+                          <img src={prod.image_urls[0]} alt={prod.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">Sin foto</div>
+                        )}
+                      </div>
+                      <span className="font-extrabold text-gray-900 dark:text-slate-100">{prod.title}</span>
+                    </td>
+                    <td className="p-4 font-bold text-gray-500">{prod.categories?.name || 'General'}</td>
+                    <td className="p-4 font-black text-blue-600">${prod.price?.toLocaleString('es-CL')}</td>
+                    <td className="p-4">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${prod.stock > 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
+                        {prod.stock > 0 ? `${prod.stock} u.` : 'Sin Stock'}
+                      </span>
+                    </td>
+                    <td className="p-4 text-right space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => p.handleToggleStock(prod.id, prod.stock)}
+                        className="px-2.5 py-1 text-[11px] font-bold border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-100"
+                      >
+                        {prod.stock > 0 ? 'Pausar Stock' : 'Activar Stock'}
+                      </button>
+                      <Link
+                        href={`/dashboard/products/edit/${prod.id}`}
+                        className="px-2.5 py-1 text-[11px] font-bold bg-blue-50 text-blue-600 rounded-lg border border-blue-100"
+                      >
+                        Editar
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          p.setProductToDelete(prod.id);
+                          p.setShowDeleteModal(true);
+                        }}
+                        className="px-2.5 py-1 text-[11px] font-bold bg-rose-50 text-rose-600 rounded-lg border border-rose-100"
+                      >
+                        Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
-      <Modal
-        isOpen={showDeleteModal}
-        onClose={handleCancelDelete}
-        title="¿Eliminar producto?"
-        size="sm"
-      >
-        <p className="text-gray-600 mb-6">
-          Esta acción ocultará el producto del marketplace. El administrador podrá ver el registro de eliminación.
-        </p>
-        <div className="flex gap-3">
-          <Button onClick={handleCancelDelete} variant="secondary" fullWidth>
-            Cancelar
-          </Button>
-          <Button onClick={handleConfirmDelete} variant="danger" fullWidth>
-            Eliminar
-          </Button>
-        </div>
-      </Modal>
+      {/* Modal de confirmación de eliminación */}
+      {p.showDeleteModal && (
+        <Modal
+          isOpen={p.showDeleteModal}
+          onClose={() => p.setShowDeleteModal(false)}
+          title="Eliminar Producto"
+        >
+          <div className="space-y-4 pt-2">
+            <p className="text-xs text-gray-600 dark:text-slate-300 font-medium">
+              ¿Estás seguro de que deseas eliminar esta publicación? Esta acción cambiará el estado del producto a inactivo.
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => p.setShowDeleteModal(false)}
+                className="w-1/2 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-xs font-bold"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={p.handleDeleteConfirm}
+                className="w-1/2 py-2.5 bg-rose-600 text-white rounded-xl text-xs font-extrabold"
+              >
+                Sí, Eliminar
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
