@@ -714,15 +714,16 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               </button>
             </div>
 
-            {/* BOTÓN DE BÚSQUEDA VISUAL POR ANÁLISIS DE FOTO (ESTILO LENS) */}
+            {/* BOTÓN PROMINENTE DE BÚSQUEDA VISUAL (MATCH POR IMAGEN) */}
             <div className="pt-3">
               <button
                 type="button"
                 onClick={handleVisualSearch}
-                className="w-full py-3 px-4 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 rounded-xl text-sm font-extrabold transition flex items-center justify-center gap-2 shadow-2xs cursor-pointer"
+                title="Buscar productos idénticos o similares a través del análisis de foto"
+                className="w-full py-3.5 px-5 bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-2xl text-sm font-extrabold transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2.5 cursor-pointer border border-indigo-300 dark:border-indigo-700 ring-2 ring-indigo-200 dark:ring-indigo-900/60"
               >
-                <span>📷</span>
-                <span>{isScanningPhoto ? 'Analizando foto del producto...' : 'Ver quién más vende este producto por foto'}</span>
+                <span className="text-base">📷</span>
+                <span>{isScanningPhoto ? 'Escaneando características de la foto...' : '📷 Match por Imagen — Buscar Similares'}</span>
               </button>
             </div>
           </div>

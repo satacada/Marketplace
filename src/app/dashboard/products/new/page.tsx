@@ -580,18 +580,18 @@ export default function NewProductPage() {
           </div>
         </div>
 
-        {/* ASISTENTE DE IA ESTILO ALIEXPRESS */}
-        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800/80 p-4 rounded-2xl border border-purple-200 dark:border-slate-700 space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        {/* ASISTENTE DE IA PARA FICHA TÉCNICA */}
+        <div className="bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 dark:from-slate-800 dark:via-slate-800/90 dark:to-slate-800 p-5 rounded-2xl border border-purple-200 dark:border-slate-700 shadow-2xs space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-purple-600 dark:text-purple-400 text-lg font-black">✨</span>
+              <div className="flex items-center gap-2">
+                <span className="text-purple-600 dark:text-purple-400 text-xl font-black">✨</span>
                 <h4 className="text-sm font-extrabold text-gray-900 dark:text-slate-100">
-                  Asistente de IA para Ficha Técnica (Estilo AliExpress)
+                  Asistente de IA para Ficha Técnica
                 </h4>
               </div>
-              <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 font-medium">
-                Genera automáticamente el <strong>✦ Resumen de IA del artículo</strong> y viñetas técnicas a partir de tus fotos (1 a 3 fotos), marca y datos clave.
+              <p className="text-xs text-gray-600 dark:text-slate-400 mt-1 font-medium leading-relaxed">
+                Genera automáticamente el <strong>✦ Resumen de IA del artículo</strong> y viñetas técnicas verificadas a partir de tus fotos (1 a 3 fotos), marca y datos clave.
               </p>
             </div>
 
@@ -599,10 +599,11 @@ export default function NewProductPage() {
               type="button"
               onClick={handleGenerateAISummary}
               disabled={isGeneratingAI}
-              className="py-2.5 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-extrabold transition shadow-sm flex items-center justify-center gap-2 cursor-pointer active:scale-95 flex-shrink-0"
+              className="py-3 px-5 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl text-xs font-extrabold transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center gap-2 cursor-pointer flex-shrink-0 border border-purple-400/30"
+              title="Generar Ficha Técnica y análisis visual automático con Inteligencia Artificial"
             >
-              <span>✨</span>
-              <span>{isGeneratingAI ? 'Analizando con IA...' : 'Generar Ficha Técnica con IA'}</span>
+              <span className="text-sm">✨</span>
+              <span>{isGeneratingAI ? 'Analizando datos...' : 'Generar Ficha Técnica con IA'}</span>
             </button>
           </div>
         </div>
