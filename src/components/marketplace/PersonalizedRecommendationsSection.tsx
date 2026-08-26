@@ -65,12 +65,9 @@ export default function PersonalizedRecommendationsSection({ userId, onAddToCart
             </h2>
           </div>
           <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 font-medium">
-            Selección personalizada basada en tus búsquedas, productos vistos e intereses
+            Selección de productos destacados y ofertas para ti
           </p>
         </div>
-        <span className="text-[11px] font-extrabold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-950/80 px-3 py-1 rounded-full border border-blue-300 dark:border-blue-800 self-start sm:self-auto shadow-2xs">
-          🎯 IA de Perfilamiento Personal
-        </span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -90,9 +87,6 @@ export default function PersonalizedRecommendationsSection({ userId, onAddToCart
                 ) : (
                   <div className="flex items-center justify-center h-full text-2xl">🛍️</div>
                 )}
-                <span className="absolute top-2 right-2 text-[10px] font-black bg-blue-600 text-white px-2 py-0.5 rounded-full shadow-xs">
-                  {item.matchScore}% Match
-                </span>
               </div>
 
               <div className="mb-2">
