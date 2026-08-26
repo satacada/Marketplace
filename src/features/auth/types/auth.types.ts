@@ -72,6 +72,8 @@ export interface LoginInput {
 export interface RegisterInput {
   email: string;
   password: string;
+  storeName?: string;
+  store_name?: string;
 }
 
 /**

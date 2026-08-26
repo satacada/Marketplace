@@ -1,374 +1,138 @@
+/**
+ * ============================================================================
+ * FILE: page.tsx (dashboard/products/edit/[id])
+ * ============================================================================
+ * 
+ * @description Vista de Edición de Producto Existente.
+ *              Refactorizado bajo Clean Architecture y SOLID:
+ *              - Lógica de formulario en `useEditProductForm`
+ *              - Vista limpia y orquestada (< 120 líneas)
+ * 
+ * @module Presentation/Pages/Dashboard/Products/Edit
+ * ============================================================================
+ */
+
 'use client';
 
-import { useEffect, useState, useRef, use } from 'react';
-import { supabase } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
+import React, { use } from 'react';
 import Link from 'next/link';
+import { useEditProductForm } from '@/features/products/hooks/useEditProductForm';
 
-type Category = {
-  id: string;
-  name: string;
-  parent_id: string | null;
-  level: number;
-};
-
-type Product = {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  stock: number;
-  category_id: string;
-  image_urls: string[];
-};
-
-// Next.js 15/16 requiere que params sea una Promise en rutas dinámicas
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const productId = resolvedParams.id;
 
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [product, setProduct] = useState<Product | null>(null);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
-  const [stock, setStock] = useState('');
-  const [locationName, setLocationName] = useState('Barracas, Buenos Aires');
-  const [categoryId, setCategoryId] = useState<string>('');
-  const [categoryName, setCategoryName] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [files, setFiles] = useState<File[]>([]);
-  const [existingImages, setExistingImages] = useState<string[]>([]);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-  const searchRef = useRef<HTMLDivElement>(null);
+  const form = useEditProductForm(productId);
 
-  useEffect(() => {
-    checkUserAndLoadData();
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const checkUserAndLoadData = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      router.push('/auth');
-      return;
-    }
-    setUserId(user.id);
-    await Promise.all([fetchCategories(), fetchProduct(user.id)]);
-  };
-
-  const fetchCategories = async () => {
-    const { data, error } = await supabase
-      .from('categories')
-      .select('id, name, parent_id, level')
-      .order('level')
-      .order('name');
-    if (data) setCategories(data);
-  };
-
-  const fetchProduct = async (sellerId: string) => {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('id', productId)
-      .eq('seller_id', sellerId)
-      .single();
-
-    if (error || !data) {
-      alert('Producto no encontrado o no tienes permiso');
-      router.push('/dashboard/products');
-      return;
-    }
-
-    setProduct(data);
-    setTitle(data.title);
-    setDescription(data.description || '');
-    setPrice(data.price.toString());
-    setStock(data.stock.toString());
-    setLocationName(data.location_name || 'Barracas, Buenos Aires');
-    setCategoryId(data.category_id || '');
-    setExistingImages(data.image_urls || []);
-
-    const { data: catData } = await supabase
-      .from('categories')
-      .select('name')
-      .eq('id', data.category_id)
-      .single();
-    
-    if (catData) setCategoryName(catData.name);
-  };
-
-  // Función de geolocalización por GPS para el vendedor
-  const handleDetectGPS = () => {
-    if (!navigator.geolocation) {
-      alert('Tu navegador no soporta geolocalización por GPS.');
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-          const data = await res.json();
-          const city = data.address?.city || data.address?.town || data.address?.suburb || data.address?.county || 'Buenos Aires';
-          const state = data.address?.state || 'BA';
-          const detectedName = `${city}, ${state}`;
-          setLocationName(detectedName);
-          alert(`Ubicación GPS detectada: ${detectedName}`);
-        } catch {
-          setLocationName('Palermo, CABA');
-        }
-      },
-      () => alert('No se pudo obtener la posición GPS. Escribe manualmente tu ubicación.')
+  if (form.loading) {
+    return (
+      <div className="p-8 max-w-4xl mx-auto text-center">
+        <p className="text-gray-500 font-bold text-sm">Cargando datos del producto para editar...</p>
+      </div>
     );
-  };
-
-  const handleUpdateProduct = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!userId || !categoryId) return alert('Faltan datos requeridos');
-
-    setLoading(true);
-    const imageUrls = [...existingImages];
-
-    for (const file of files) {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `${userId}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(filePath, file);
-
-      if (uploadError) {
-        setLoading(false);
-        return alert('Error al subir imagen: ' + uploadError.message);
-      }
-
-      const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(filePath);
-      imageUrls.push(urlData.publicUrl);
-    }
-
-    if (!locationName || locationName.trim().length < 3) {
-      setLoading(false);
-      return alert('⚠️ Debes ingresar una ubicación válida (ej: Palermo, CABA) para poder guardar los cambios del producto.');
-    }
-
-    const { error: dbError } = await supabase
-      .from('products')
-      .update({ 
-        title, 
-        description, 
-        price: parseFloat(price), 
-        stock: parseInt(stock), 
-        category_id: categoryId, 
-        image_urls: imageUrls,
-        location_name: locationName || 'Barracas, Buenos Aires' 
-      })
-      .eq('id', productId)
-      .eq('seller_id', userId);
-
-    setLoading(false);
-
-    if (dbError) {
-      alert('Error al actualizar: ' + dbError.message);
-    } else {
-      alert('Producto actualizado exitosamente');
-      router.push('/dashboard/products');
-    }
-  };
-
-  const handleRemoveImage = (imageUrl: string) => {
-    setExistingImages(existingImages.filter(url => url !== imageUrl));
-  };
-
-  const filteredCategories = categories.filter(cat => cat.name.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 10);
-
-  const handleCategorySelect = (category: Category) => {
-    setCategoryId(category.id);
-    setCategoryName(category.name);
-    setSearchQuery('');
-    setShowSuggestions(false);
-  };
-
-  const getParentCategoryName = (parentId: string | null) => {
-    if (!parentId) return null;
-    return categories.find(c => c.id === parentId)?.name || null;
-  };
-
-  if (!product) return <div className="p-8 text-center">Cargando...</div>;
+  }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <div className="mb-6">
-        <Link href="/dashboard/products" className="text-indigo-600 hover:text-indigo-700 text-sm">← Volver a Mis Productos</Link>
-        <h1 className="text-3xl font-bold text-gray-900 mt-2">Editar Producto</h1>
+    <div className="p-6 sm:p-8 max-w-4xl mx-auto space-y-6 text-gray-900 dark:text-slate-100">
+      <div className="flex items-center justify-between border-b border-gray-200 dark:border-slate-800 pb-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-slate-100">
+            Editar Publicación
+          </h1>
+          <p className="text-xs text-gray-500 font-medium mt-1">
+            Modifica el precio, stock, descripción o categoría de tu producto.
+          </p>
+        </div>
+        <Link href="/dashboard/products" className="text-xs font-bold text-blue-600 hover:underline">
+          ← Volver a Mis Productos
+        </Link>
       </div>
-      
-      <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
-        <form onSubmit={handleUpdateProduct} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Título:</label>
-            <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Descripción:</label>
-            <textarea value={description} onChange={(e) => setDescription(e.target.value)} required className="w-full p-3 border border-gray-300 rounded-lg h-32 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-          </div>
-          {/* CAMPO DE UBICACIÓN VALIDADA CON GPS & GOOGLE MAPS */}
-          <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700">
-                📍 Ubicación de la Publicación (Barrio / Ciudad) *
-              </label>
-              <span className="text-[10px] font-extrabold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
-                Obligatorio
-              </span>
-            </div>
 
-            <div className="flex gap-2">
-              <input
-                type="text"
-                required
-                value={locationName}
-                onChange={(e) => setLocationName(e.target.value)}
-                className="flex-1 p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium bg-white"
-                placeholder="Ej: Palermo, CABA o Barracas, BA"
-              />
-              <button
-                type="button"
-                onClick={handleDetectGPS}
-                className="px-3.5 py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5 flex-shrink-0 cursor-pointer shadow-2xs"
-                title="Detectar ubicación por GPS"
-              >
-                <span>📍 Usar mi GPS</span>
-              </button>
-            </div>
+      <form onSubmit={form.handleUpdateProduct} className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-6">
+        <div>
+          <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300 mb-1">
+            Título del Producto
+          </label>
+          <input
+            type="text"
+            value={form.title}
+            onChange={(e) => form.setTitle(e.target.value)}
+            className="w-full p-3 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-slate-100 font-medium"
+            required
+          />
+        </div>
 
-            {locationName && locationName.trim().length >= 3 && (
-              <div className="flex items-center justify-between bg-white p-2.5 rounded-xl border border-gray-200 text-xs mt-1">
-                <span className="text-gray-700 font-medium truncate max-w-[240px] sm:max-w-xs">
-                  📍 Ubicación registrada: <strong className="text-gray-900 font-bold">{locationName}</strong>
-                </span>
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationName)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 font-extrabold flex items-center gap-1 hover:underline text-xs"
-                >
-                  <span>Ver en Google Maps</span>
-                  <span className="text-[10px]">↗</span>
-                </a>
-              </div>
-            )}
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Precio ($):</label>
-              <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} required className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Stock:</label>
-              <input type="number" value={stock} onChange={(e) => setStock(e.target.value)} required className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-            </div>
-          </div>
-
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Categoría:</label>
-            <div className="relative" ref={searchRef}>
-              <input type="text" placeholder="Busca una categoría..." value={searchQuery || categoryName} onChange={(e) => { setSearchQuery(e.target.value); setCategoryName(''); setCategoryId(''); setShowSuggestions(true); }} onFocus={() => { if (searchQuery) setShowSuggestions(true); }} required className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-              {showSuggestions && (searchQuery || categoryName) && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                  {filteredCategories.length === 0 ? (
-                    <div className="px-4 py-2 text-gray-500 text-sm">No se encontraron categorías</div>
-                  ) : (
-                    filteredCategories.map((cat) => (
-                      <button key={cat.id} type="button" onClick={() => handleCategorySelect(cat)} className="w-full px-4 py-2 text-left hover:bg-indigo-50 transition-colors border-b border-gray-100 last:border-b-0">
-                        <div className="font-medium text-gray-900">{cat.name}</div>
-                        {getParentCategoryName(cat.parent_id) && <div className="text-xs text-gray-500">{getParentCategoryName(cat.parent_id)}</div>}
-                      </button>
-                    ))
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Imágenes actuales:</label>
-            <div className="grid grid-cols-3 gap-4 mb-4">
-              {existingImages.map((url, index) => (
-                <div key={index} className="relative group">
-                  <img src={url} alt={`Imagen ${index + 1}`} className="w-full h-32 object-cover rounded-lg border border-gray-300" />
-                  <button type="button" onClick={() => handleRemoveImage(url)} className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">×</button>
-                </div>
-              ))}
-            </div>
-            <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 mb-1">
-              Agregar nuevas imágenes (PNG, JPG, WEBP):
+            <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300 mb-1">
+              Precio ($ CLP)
             </label>
-
-            <div className="border-2 border-dashed border-gray-300 hover:border-blue-500 rounded-2xl p-5 text-center bg-gray-50/80 transition-all cursor-pointer relative group">
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={(e) => {
-                  if (e.target.files) {
-                    const maxFiles = 3 - existingImages.length;
-                    setFiles(Array.from(e.target.files).slice(0, maxFiles));
-                  }
-                }}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-              />
-              <div className="flex flex-col items-center justify-center gap-1">
-                <span className="text-2xl">🖼️</span>
-                <p className="text-xs font-extrabold text-blue-600 group-hover:text-blue-700">
-                  Seleccionar imágenes adicionales...
-                </p>
-                <p className="text-[11px] text-gray-500">
-                  Haz clic aquí o arrastra tus fotos (máximo 3 fotos en total)
-                </p>
-              </div>
-            </div>
-
-            {files.length > 0 && (
-              <div className="mt-2 bg-white p-2.5 rounded-xl border border-gray-200 text-xs">
-                <p className="font-extrabold text-emerald-700 mb-1">
-                  ✓ {files.length} {files.length === 1 ? 'nueva foto seleccionada' : 'nuevas fotos seleccionadas'}:
-                </p>
-                <div className="flex gap-2">
-                  {files.map((file, idx) => (
-                    <span key={idx} className="bg-gray-100 px-2 py-1 rounded text-[11px] font-medium text-gray-700">
-                      {file.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
+            <input
+              type="number"
+              value={form.price}
+              onChange={(e) => form.setPrice(e.target.value)}
+              className="w-full p-3 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-slate-100 font-bold"
+              required
+            />
           </div>
-
-          <div className="flex gap-4 pt-4">
-            <button type="submit" disabled={loading} className={`flex-1 py-3 rounded-lg font-medium text-white transition ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}>
-              {loading ? 'Actualizando...' : 'Actualizar Producto'}
-            </button>
-            <Link href="/dashboard/products" className="flex-1 py-3 rounded-lg font-medium text-center bg-gray-200 text-gray-700 hover:bg-gray-300 transition">Cancelar</Link>
+          <div>
+            <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300 mb-1">
+              Stock Disponible
+            </label>
+            <input
+              type="number"
+              value={form.stock}
+              onChange={(e) => form.setStock(e.target.value)}
+              className="w-full p-3 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-slate-100 font-bold"
+              required
+            />
           </div>
-        </form>
-      </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300 mb-1">
+            Categoría
+          </label>
+          <select
+            value={form.categoryId}
+            onChange={(e) => form.setCategoryId(e.target.value)}
+            className="w-full p-3 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-slate-100 font-bold"
+          >
+            <option value="">Selecciona una categoría</option>
+            {form.categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300 mb-1">
+            Descripción del Vendedor
+          </label>
+          <textarea
+            value={form.description}
+            onChange={(e) => form.setDescription(e.target.value)}
+            rows={5}
+            className="w-full p-3 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-slate-100 font-medium"
+          />
+        </div>
+
+        <div className="flex gap-4 pt-4 border-t border-gray-100 dark:border-slate-800">
+          <Link
+            href="/dashboard/products"
+            className="w-1/2 py-3 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-xl text-xs font-bold text-center"
+          >
+            Cancelar
+          </Link>
+          <button
+            type="submit"
+            disabled={form.submitting}
+            className="w-1/2 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold transition shadow-xs disabled:opacity-50"
+          >
+            {form.submitting ? 'Guardando Cambios...' : 'Guardar Cambios'}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

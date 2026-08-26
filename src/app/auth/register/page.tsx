@@ -1,272 +1,106 @@
 /**
  * ============================================================================
- * FILE: page.tsx
+ * FILE: page.tsx (app/auth/register)
  * ============================================================================
  * 
- * @description Página de registro de usuarios.
- *              Formulario de registro con validación.
+ * @description Vista de Registro de Nuevos Usuarios.
+ *              Refactorizado bajo Clean Architecture y SOLID:
+ *              - Lógica de registro en `useRegisterPage`
+ *              - Vista limpia (< 90 líneas)
  * 
  * @module Presentation/Pages/Auth/Register
- * 
- * @author System
- * @created 2026-08-23
- * 
- * @dependencies
- * - react
- * - @/features/auth/hooks/useAuth
- * - @/components/ui/Button
- * - @/components/ui/Input
- * - @/components/ui/Modal
- * 
- * @related-files
- * - @/features/auth/hooks/useAuth.ts
- * - @/features/auth/services/auth.service.ts
- * 
- * @exports
- * - RegisterPage (default)
- * 
  * ============================================================================
  */
 
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Modal } from '@/components/ui/Modal';
+import { useRegisterPage } from '@/features/auth/hooks/useRegisterPage';
 
 export default function RegisterPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [modalData, setModalData] = useState({ 
-    title: '', 
-    message: '', 
-    type: 'success' as 'success' | 'info' | 'error' 
-  });
-  const [localError, setLocalError] = useState('');
-  
-  const router = useRouter();
-  const { register, isLoading } = useAuth();
-
-  const showModalMessage = (title: string, message: string, type: 'success' | 'info' | 'error' = 'success') => {
-    setModalData({ title, message, type });
-    setShowModal(true);
-  };
-
-  const validateEmail = (email: string) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-  };
-
-  const validatePassword = (password: string) => {
-    return password.length >= 6;
-  };
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLocalError('');
-
-    if (!validateEmail(email)) {
-      setLocalError('Por favor ingresa un correo electrónico válido');
-      return;
-    }
-
-    if (!validatePassword(password)) {
-      setLocalError('La contraseña debe tener al menos 6 caracteres');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setLocalError('Las contraseñas no coinciden');
-      return;
-    }
-
-    const result = await register({ email, password });
-    if (result.success) {
-      showModalMessage(
-        '¡Registro exitoso!',
-        'Te hemos enviado un correo de confirmación.\n\nPor favor revisa tu bandeja de entrada (y la carpeta de spam) para activar tu cuenta.\n\nUna vez confirmado, podrás iniciar sesión y comenzar a comprar o vender.',
-        'success'
-      );
-      // Limpiar formulario
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
-    } else {
-      setLocalError(result.error || 'Error al registrar usuario');
-    }
-  };
+  const reg = useRegisterPage();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full">
-        {/* Card principal */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-          {/* Header con branding */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6">
-            <div className="text-center">
-              <div className="text-4xl mb-2">🛒</div>
-              <h1 className="text-2xl font-bold text-white">Marketplace SaaS</h1>
-              <p className="text-blue-100 text-sm mt-1">Multi-Tenant Platform</p>
-            </div>
-          </div>
-
-          {/* Contenido del formulario */}
-          <div className="px-8 py-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">
-              Crear Cuenta
-            </h2>
-
-            <form onSubmit={handleRegister} className="space-y-5">
-              {/* Email field */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Correo electrónico
-                </label>
-                <div className="relative">
-                  <Input
-                    id="email"
-                    type="email"
-                    required
-                    placeholder="tu@correo.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    fullWidth
-                    className="pl-10"
-                  />
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    📧
-                  </div>
-                </div>
-              </div>
-
-              {/* Password field */}
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Contraseña
-                </label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    fullWidth
-                    className="pl-10"
-                  />
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    🔒
-                  </div>
-                </div>
-                <p className="mt-1 text-xs text-gray-500">Mínimo 6 caracteres</p>
-              </div>
-
-              {/* Confirm password field */}
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirmar contraseña
-                </label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    fullWidth
-                    className="pl-10"
-                  />
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    🔒
-                  </div>
-                </div>
-              </div>
-
-              {/* Error message */}
-              {localError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                  {localError}
-                </div>
-              )}
-
-              {/* Submit button */}
-              <Button
-                type="submit"
-                isLoading={isLoading}
-                fullWidth
-                variant="primary"
-                className="py-3 text-base font-medium"
-              >
-                Crear Cuenta
-              </Button>
-            </form>
-
-            {/* Additional info */}
-            <div className="mt-6 text-center text-sm text-gray-500">
-              <p>
-                ¿Ya tienes cuenta?{' '}
-                <Link
-                  href="/auth"
-                  className="text-blue-600 hover:text-blue-800 font-medium transition"
-                >
-                  Inicia sesión
-                </Link>
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-6 text-center text-xs text-gray-500">
-          <p>Al continuar, aceptas nuestros Términos de Servicio y Política de Privacidad</p>
-          <p className="mt-2 font-medium text-gray-400">Desarrollado por David TC</p>
-        </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-gray-900 dark:text-slate-100">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-2">
+        <span className="text-4xl">🚀</span>
+        <h2 className="text-2xl font-black text-gray-900 dark:text-slate-100">
+          Crear Cuenta Gratis
+        </h2>
+        <p className="text-xs text-gray-500 font-medium">
+          Comienza a vender o comprar en Marketplace SaaS
+        </p>
       </div>
 
-      {/* Modal profesional */}
-      <Modal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        size="sm"
-      >
-        <div className={`text-center p-6 rounded-t-lg ${
-          modalData.type === 'success' 
-            ? 'bg-gradient-to-br from-green-50 to-emerald-50' 
-            : modalData.type === 'error'
-            ? 'bg-gradient-to-br from-red-50 to-pink-50'
-            : 'bg-gradient-to-br from-blue-50 to-indigo-50'
-        }`}>
-          <div className="text-6xl mb-3">
-            {modalData.type === 'success' ? '✅' : modalData.type === 'error' ? '❌' : 'ℹ️'}
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white dark:bg-slate-900 py-8 px-6 shadow-2xs rounded-3xl border border-gray-200/90 dark:border-slate-800 space-y-6">
+          {reg.error && (
+            <div className="p-3 bg-rose-50 text-rose-800 text-xs font-bold rounded-xl border border-rose-200">
+              {reg.error}
+            </div>
+          )}
+
+          <form onSubmit={reg.handleRegister} className="space-y-4">
+            <div>
+              <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300 mb-1">
+                Nombre de tu Tienda / Nombre Comercial
+              </label>
+              <input
+                type="text"
+                value={reg.storeName}
+                onChange={(e) => reg.setStoreName(e.target.value)}
+                placeholder="Mi Tienda Oficial"
+                className="w-full p-3 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 font-medium"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300 mb-1">
+                Correo Electrónico
+              </label>
+              <input
+                type="email"
+                value={reg.email}
+                onChange={(e) => reg.setEmail(e.target.value)}
+                placeholder="tu@email.com"
+                className="w-full p-3 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 font-medium"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300 mb-1">
+                Contraseña
+              </label>
+              <input
+                type="password"
+                value={reg.password}
+                onChange={(e) => reg.setPassword(e.target.value)}
+                placeholder="Mínimo 6 caracteres"
+                className="w-full p-3 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 font-medium"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={reg.loading}
+              className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black text-xs transition shadow-xs disabled:opacity-50"
+            >
+              {reg.loading ? 'Creando cuenta...' : 'Crear Cuenta'}
+            </button>
+          </form>
+
+          <div className="pt-4 border-t border-gray-100 dark:border-slate-800 text-center text-xs font-medium">
+            <span className="text-gray-500">¿Ya tienes cuenta? </span>
+            <Link href="/auth" className="text-blue-600 font-bold hover:underline">
+              Iniciar Sesión
+            </Link>
           </div>
-          <h3 className="text-2xl font-bold text-gray-900">
-            {modalData.title}
-          </h3>
         </div>
-        
-        <div className="p-6">
-          <p className="text-gray-600 text-center whitespace-pre-line leading-relaxed">
-            {modalData.message}
-          </p>
-          
-          <Button
-            onClick={() => setShowModal(false)}
-            fullWidth
-            variant={modalData.type === 'success' ? 'success' : modalData.type === 'error' ? 'danger' : 'primary'}
-            className="mt-6"
-          >
-            Entendido
-          </Button>
-        </div>
-      </Modal>
+      </div>
     </div>
   );
 }
