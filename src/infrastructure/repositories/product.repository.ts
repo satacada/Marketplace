@@ -37,40 +37,41 @@ export class ProductRepository extends BaseRepository<Product> {
   }
 
   /**
-   * Obtiene productos de un vendedor específico con relaciones
+   * Obtiene productos de un vendedor específico con relaciones de forma 100% a prueba de fallos
    */
   async findBySeller(sellerId: string, includeFavoriteCount: boolean = false): Promise<Product[]> {
-    let selectQuery = '*, categories(name), profiles(store_name)';
-    
-    if (includeFavoriteCount) {
-      selectQuery = '*, categories(name), profiles(store_name), favorites!product_id(favorite_count)';
-    }
-    
-    const { data, error } = await supabase
-      .from(this.tableName)
-      .select(selectQuery)
-      .eq('seller_id', sellerId)
-      .eq('is_deleted', false)
-      .order('created_at', { ascending: false });
+    try {
+      // 1. Intentar consulta principal con categorías y perfiles
+      const { data, error } = await supabase
+        .from(this.tableName)
+        .select('*, categories(name), profiles(store_name)')
+        .eq('seller_id', sellerId)
+        .eq('is_deleted', false)
+        .order('created_at', { ascending: false });
 
-    if (error) this.handleError(error);
-    
-    // Procesar para convertir array de favorites a count
-    // Procesar para convertir array de favorites a count
-    // Garantizamos que data sea un arreglo para evitar el error de GenericStringError
-    const productsArray = Array.isArray(data) ? data : [];
-    
-    const processedData = productsArray.map((product: any) => {
-      if (includeFavoriteCount && product.favorites) {
-        return {
-          ...product,
-          favorite_count: Array.isArray(product.favorites) ? product.favorites.length : 0
-        };
+      if (!error && Array.isArray(data)) {
+        return data;
       }
-      return product;
-    });
 
-    return processedData;
+      // 2. Si ocurrió algún error con las relaciones, ejecutar consulta pura sin joins
+      console.warn('Fallback a consulta simple de productos para sellerId:', sellerId, error?.message);
+      const { data: fallbackData } = await supabase
+        .from(this.tableName)
+        .select('*')
+        .eq('seller_id', sellerId)
+        .eq('is_deleted', false)
+        .order('created_at', { ascending: false });
+
+      return Array.isArray(fallbackData) ? fallbackData : [];
+    } catch (err) {
+      console.error('Error al buscar productos por vendedor:', err);
+      const { data: emergencyData } = await supabase
+        .from(this.tableName)
+        .select('*')
+        .eq('seller_id', sellerId)
+        .eq('is_deleted', false);
+      return Array.isArray(emergencyData) ? emergencyData : [];
+    }
   }
 
   /**

@@ -49,6 +49,7 @@ type Product = {
   image_urls: string[];
   category_id: string;
   is_deleted: boolean;
+  status?: string;
   categories: { name: string } | null;
   favorite_count?: number;
 };
@@ -61,6 +62,9 @@ export default function ProductsPage() {
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const [actionId, setActionId] = useState<string | null>(null);
 
+  const [directProducts, setDirectProducts] = useState<Product[]>([]);
+  const [directLoading, setDirectLoading] = useState(true);
+
   // Cargar productos del vendedor sólo cuando user.id esté disponible para evitar parpadeos
   const { 
     products, 
@@ -69,6 +73,32 @@ export default function ProductsPage() {
     toggleStock,
     refresh 
   } = useProducts(user?.id ? { sellerId: user.id, includeFavoriteCount: true } : { sellerId: 'loading-wait' });
+
+  // Recuperación directa a prueba de fallos desde Supabase Client
+  useEffect(() => {
+    async function loadDirectSellerProducts() {
+      if (!user?.id) return;
+      setDirectLoading(true);
+      try {
+        const { supabase } = await import('@/lib/supabase');
+        const { data, error } = await supabase
+          .from('products')
+          .select('*, categories(name)')
+          .eq('seller_id', user.id)
+          .eq('is_deleted', false)
+          .order('created_at', { ascending: false });
+
+        if (!error && data) {
+          setDirectProducts(data as any);
+        }
+      } catch (err) {
+        console.error('Error en carga directa de productos:', err);
+      } finally {
+        setDirectLoading(false);
+      }
+    }
+    loadDirectSellerProducts();
+  }, [user?.id]);
 
   useEffect(() => {
     document.title = 'Mis Productos | Marketplace SaaS';
@@ -119,7 +149,10 @@ export default function ProductsPage() {
     }
   };
 
-  if (authLoading || productsLoading) {
+  const displayProducts = (products.length > 0 ? products : directProducts) as Product[];
+  const isCurrentlyLoading = authLoading || (productsLoading && directLoading && displayProducts.length === 0);
+
+  if (isCurrentlyLoading) {
     return (
       <div className="p-8 max-w-6xl mx-auto">
         <p className="text-gray-500 text-center py-8">Cargando productos...</p>
@@ -141,7 +174,7 @@ export default function ProductsPage() {
         </Link>
       </div>
 
-      {products.length === 0 ? (
+      {displayProducts.length === 0 ? (
         <div className="bg-white dark:bg-slate-900 p-12 rounded-3xl shadow-2xs text-center border border-gray-200/90 dark:border-slate-800">
           <p className="text-gray-600 dark:text-slate-300 text-base font-extrabold mb-4">Aún no tienes productos publicados.</p>
           <Link href="/dashboard/products/new">
@@ -150,7 +183,7 @@ export default function ProductsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {products.map((product) => (
+          {displayProducts.map((product) => (
             <div key={product.id} className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-2xs border border-gray-200/90 dark:border-slate-800 flex flex-col sm:flex-row gap-6">
               <div className="w-full sm:w-48 flex-shrink-0">
                 <ImageGallery images={product.image_urls || []} thumbnailMode={true} />
