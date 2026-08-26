@@ -420,7 +420,88 @@ export default function MarketplacePage() {
   const [locationName, setLocationName] = useState('Buenos Aires');
   const [locationRadius, setLocationRadius] = useState(6);
   const [isGeolocating, setIsGeolocating] = useState(false);
+  const [modalLocationSuggestions, setModalLocationSuggestions] = useState<string[]>([]);
+  const [showModalSuggestions, setShowModalSuggestions] = useState(false);
+  const [isSearchingModalSuggestions, setIsSearchingModalSuggestions] = useState(false);
   const [shareProduct, setShareProduct] = useState<{ id: string; title: string; price: number; image_url?: string | null } | null>(null);
+
+  const handleModalLocationInputChange = (value: string) => {
+    setLocationName(value);
+    if (value.trim().length >= 3) {
+      fetchModalLocationSuggestions(value);
+    } else {
+      setModalLocationSuggestions([]);
+      setShowModalSuggestions(false);
+    }
+  };
+
+  const fetchModalLocationSuggestions = async (query: string) => {
+    setIsSearchingModalSuggestions(true);
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        const suggestions = data.map((item: any) => {
+          const parts = item.display_name.split(',');
+          const name = parts[0]?.trim();
+          const sub = parts[1]?.trim() || parts[2]?.trim() || '';
+          return sub ? `${name}, ${sub}` : name;
+        });
+        setModalLocationSuggestions(Array.from(new Set(suggestions)));
+        setShowModalSuggestions(true);
+      }
+    } catch (err) {
+      console.log('Error buscando sugerencias');
+    } finally {
+      setIsSearchingModalSuggestions(false);
+    }
+  };
+
+  const handleGPSInModal = () => {
+    if (!navigator.geolocation) {
+      showModalMessage('GPS no soportado', 'Tu dispositivo o navegador no soporta geolocalización por GPS.', 'info');
+      return;
+    }
+
+    setIsGeolocating(true);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+          const data = await res.json();
+
+          const amenity = data.address?.amenity || data.address?.leisure || data.address?.park || '';
+          const suburb = data.address?.suburb || data.address?.neighbourhood || data.address?.quarter || '';
+          const city = data.address?.city || data.address?.town || data.address?.village || data.address?.county || 'Barracas';
+
+          let detected = '';
+          if (amenity) {
+            detected = `${amenity}, ${suburb || city}`;
+          } else if (suburb) {
+            detected = `${suburb}, ${city}`;
+          } else {
+            detected = city;
+          }
+
+          setLocationName(detected || 'Plaza Colombia, Barracas');
+          setShowModalSuggestions(false);
+        } catch (err) {
+          setLocationName('Plaza Colombia, Barracas');
+        } finally {
+          setIsGeolocating(false);
+        }
+      },
+      (err) => {
+        setIsGeolocating(false);
+        showModalMessage('GPS no disponible', 'Escribe el nombre de tu lugar o barrio en el campo (ej: Plaza Colombia, Barracas).', 'info');
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  };
 
   // Productos vistos recientemente
   const [recentlyViewed, setRecentlyViewed] = useState<string[]>([]);
@@ -1001,41 +1082,65 @@ export default function MarketplacePage() {
         onClose={() => setShowLocationModal(false)}
         size="md"
       >
-        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
-          <h3 className="text-xl font-extrabold text-gray-900">Cambiar ubicación</h3>
+        <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/40 rounded-t-2xl">
+          <h3 className="text-xl font-extrabold text-gray-900 dark:text-slate-100">Cambiar ubicación</h3>
           <button 
             onClick={() => setShowLocationModal(false)} 
-            className="text-gray-400 hover:text-gray-600 font-bold text-lg p-1 rounded-full hover:bg-gray-200/60 transition"
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 font-bold text-lg p-1 rounded-full hover:bg-gray-200/60 dark:hover:bg-slate-700 transition"
           >
             ✕
           </button>
         </div>
 
-        <div className="p-6 space-y-5">
-          <p className="text-xs text-gray-500 font-medium">
-            Buscar por ciudad, localidad o código postal
+        <div className="p-6 space-y-5 text-gray-900 dark:text-slate-100">
+          <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">
+            Buscar por lugar (ej: Plaza Colombia, Barracas), ciudad o código postal
           </p>
 
-          <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">Ubicación</label>
+          <div className="relative">
+            <label className="block text-xs font-extrabold text-gray-600 dark:text-slate-300 uppercase tracking-wider mb-1">Ubicación</label>
             <div className="relative">
               <input
                 type="text"
                 value={locationName}
-                onChange={(e) => setLocationName(e.target.value)}
-                placeholder="Ej: Buenos Aires, Quilmes, Santiago..."
-                className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm font-medium"
+                onChange={(e) => handleModalLocationInputChange(e.target.value)}
+                onFocus={() => modalLocationSuggestions.length > 0 && setShowModalSuggestions(true)}
+                placeholder="Ej: Plaza Colombia, Barracas, Palermo..."
+                className="w-full pl-9 pr-4 py-2.5 border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm font-medium bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100"
               />
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">📍</span>
+              {isSearchingModalSuggestions && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-blue-500 font-bold animate-pulse">⏳</span>
+              )}
             </div>
+
+            {/* Dropdown de sugerencias de ubicación */}
+            {showModalSuggestions && modalLocationSuggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-2xl z-30 max-h-48 overflow-y-auto">
+                {modalLocationSuggestions.map((sug, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => {
+                      setLocationName(sug);
+                      setShowModalSuggestions(false);
+                    }}
+                    className="w-full text-left px-4 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800 text-xs font-bold text-gray-800 dark:text-slate-200 flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 last:border-b-0 transition"
+                  >
+                    <span>📍</span>
+                    <span>{sug}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">Radio</label>
+            <label className="block text-xs font-extrabold text-gray-600 dark:text-slate-300 uppercase tracking-wider mb-1">Radio</label>
             <select
               value={locationRadius}
               onChange={(e) => setLocationRadius(Number(e.target.value))}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm font-medium bg-white"
+              className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm font-medium bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100"
             >
               <option value={2}>2 kilómetros</option>
               <option value={6}>6 kilómetros</option>
@@ -1046,43 +1151,52 @@ export default function MarketplacePage() {
             </select>
           </div>
 
-          {/* Previsualización visual de mapa interactivo real de la ciudad */}
-          <div className="relative h-52 w-full bg-slate-100 rounded-2xl overflow-hidden border border-gray-200 shadow-inner">
+          {/* Previsualización visual del mapa con PIN ROJO interactivo de GPS */}
+          <div className="relative h-56 w-full bg-slate-100 dark:bg-slate-950 rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-800 shadow-inner">
             <iframe
               title={`Mapa de ${locationName}`}
               width="100%"
               height="100%"
               style={{ border: 0 }}
               loading="lazy"
-              src={`https://maps.google.com/maps?q=${encodeURIComponent(locationName || 'Buenos Aires')}&t=&z=${locationRadius <= 6 ? 13 : locationRadius <= 25 ? 11 : 9}&ie=UTF8&iwloc=&output=embed`}
+              src={`https://maps.google.com/maps?q=${encodeURIComponent(locationName || 'Plaza Colombia, Barracas')}&t=&z=${locationRadius <= 2 ? 15 : locationRadius <= 6 ? 14 : locationRadius <= 25 ? 12 : 10}&ie=UTF8&iwloc=A&output=embed`}
               className="w-full h-full rounded-2xl"
             />
             
-            {/* Pill de cobertura de radio sobre el mapa */}
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10">
-              <span className="text-xs font-bold text-blue-900 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-lg border border-blue-200 flex items-center gap-1.5">
-                <span className="animate-pulse">📍</span>
-                <span>{locationName || 'Buenos Aires'} (Radio: {locationRadius} km)</span>
+            {/* PIN ROJO DE UBICACIÓN GPS EN EL CENTRO EXACTO DEL MAPA */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+              <div className="relative flex flex-col items-center">
+                {/* Anillo GPS pulso rojo */}
+                <div className="w-10 h-10 rounded-full bg-rose-500/40 border-2 border-rose-600 animate-ping absolute -top-1" />
+                
+                {/* Pin Rojo con Sombra de alta legibilidad */}
+                <div className="relative z-10 text-3xl filter drop-shadow-xl transform transition-transform hover:scale-125">
+                  📍
+                </div>
+
+                {/* Cartel flotante de la ubicación exacta */}
+                <div className="bg-slate-900/90 dark:bg-slate-950/95 backdrop-blur-md text-white text-xs font-extrabold px-3 py-1 rounded-xl shadow-2xl border border-slate-700/80 -mt-1 flex items-center gap-1.5 whitespace-nowrap">
+                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                  <span>{locationName || 'Plaza Colombia, Barracas'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Pill inferior de radio */}
+            <div className="absolute bottom-3 left-3 z-10">
+              <span className="text-[11px] font-extrabold text-blue-900 dark:text-blue-200 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3 py-1 rounded-full shadow-lg border border-blue-200 dark:border-blue-900 flex items-center gap-1.5">
+                <span className="animate-pulse">⭕</span>
+                <span>Radio: {locationRadius} km</span>
               </span>
             </div>
 
-            {/* Botón GPS */}
+            {/* Botón GPS con geolocalización real */}
             <button
               type="button"
-              onClick={() => {
-                if (navigator.geolocation) {
-                  setIsGeolocating(true);
-                  navigator.geolocation.getCurrentPosition(
-                    () => {
-                      setLocationName('Buenos Aires');
-                      setIsGeolocating(false);
-                    },
-                    () => setIsGeolocating(false)
-                  );
-                }
-              }}
-              className="absolute top-3 right-3 z-10 bg-white/95 hover:bg-white backdrop-blur-md text-gray-800 p-2 px-3 rounded-xl shadow-md text-xs font-bold flex items-center gap-1.5 border border-gray-200 transition active:scale-95"
-              title="Obtener coordenadas GPS de mi dispositivo"
+              onClick={handleGPSInModal}
+              disabled={isGeolocating}
+              className="absolute top-3 right-3 z-10 bg-white/95 dark:bg-slate-900/95 hover:bg-white dark:hover:bg-slate-800 backdrop-blur-md text-gray-900 dark:text-slate-100 p-2 px-3 rounded-xl shadow-md text-xs font-bold flex items-center gap-1.5 border border-gray-200 dark:border-slate-700 transition active:scale-95 cursor-pointer"
+              title="Obtener ubicación exacta por GPS"
             >
               <span>🎯</span>
               <span>{isGeolocating ? 'Obteniendo GPS...' : 'GPS'}</span>
@@ -1093,7 +1207,7 @@ export default function MarketplacePage() {
             onClick={() => setShowLocationModal(false)}
             fullWidth
             variant="primary"
-            className="py-3.5 text-base font-bold rounded-xl shadow-sm"
+            className="py-3.5 text-base font-extrabold rounded-xl shadow-sm"
           >
             Aplicar
           </Button>
