@@ -3,10 +3,11 @@
  * FILE: page.tsx (app/marketplace)
  * ============================================================================
  * 
- * @description Catálogo Público del Marketplace al estilo Amazon / Mercado Libre.
+ * @description Catálogo Público del Marketplace al estilo Facebook Marketplace / Google.
  *              Refactorizado bajo Clean Architecture, SOLID y SRP:
  *              - Lógica de negocio y estado extraídos en `useMarketplaceCatalog`
- *              - Componentes modulares de interfaz (< 120 líneas)
+ *              - Barra de búsqueda Google Lens 📷 embebida
+ *              - Panel lateral de Filtros estilo Facebook con Ubicación y Categorías colapsables
  * 
  * @module Presentation/Pages/Marketplace
  * ============================================================================
@@ -19,6 +20,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import ShareModal from '@/components/marketplace/ShareModal';
 import PersonalizedRecommendationsSection from '@/components/marketplace/PersonalizedRecommendationsSection';
+import { Modal } from '@/components/ui/Modal';
 import { useMarketplaceCatalog } from '@/features/marketplace/hooks/useMarketplaceCatalog';
 import ProductCard from '@/components/marketplace/catalog/ProductCard';
 import CatalogHeaderBanner from '@/components/marketplace/catalog/CatalogHeaderBanner';
@@ -30,22 +32,23 @@ export default function MarketplacePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 transition-colors duration-200">
-      {/* Header global */}
+      {/* Header global único (Contiene Logo Marketplace y Carrito) */}
       <div className="p-4 sm:p-6 max-w-7xl mx-auto pb-0">
-        <Header title="Marketplace" />
+        <Header />
       </div>
 
       <main className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
-        {/* Banner superior con búsqueda y controles de ordenamiento */}
+        {/* Barra de Búsqueda Estilo Google con Icono de Foto 📷 Embebido */}
         <CatalogHeaderBanner
           searchQuery={catalog.searchQuery}
           onSearchChange={catalog.setSearchQuery}
           sortBy={catalog.sortBy}
           onSortChange={catalog.setSortBy}
-          showRecommendations={catalog.showRecommendations}
-          onToggleRecommendations={() => catalog.setShowRecommendations(!catalog.showRecommendations)}
           onOpenVisualSearch={() => catalog.setShowVisualSearchModal(true)}
           totalCount={catalog.totalCount}
+          categories={catalog.categories}
+          selectedCategory={catalog.selectedCategory}
+          onSelectCategory={catalog.setSelectedCategory}
         />
 
         {/* Sección opcional de Recomendaciones Personalizadas (a demanda) */}
@@ -59,9 +62,9 @@ export default function MarketplacePage() {
           </div>
         )}
 
-        {/* Layout Principal: Sidebar de Filtros + Grilla de Productos */}
+        {/* Layout Principal: Panel Lateral de Filtros (Estilo Facebook Marketplace) + Grilla de Productos */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Sidebar Izquierdo: Filtros */}
+          {/* Sidebar Izquierdo: Panel de Filtros Estilo Facebook */}
           <div className="lg:col-span-3 space-y-6">
             <CatalogFilterSidebar
               categories={catalog.categories}
@@ -72,6 +75,13 @@ export default function MarketplacePage() {
               onPriceChange={catalog.setPriceRange}
               inStockOnly={catalog.inStockOnly}
               onInStockChange={catalog.setInStockOnly}
+              sortBy={catalog.sortBy}
+              onSortChange={catalog.setSortBy}
+              showRecommendations={catalog.showRecommendations}
+              onToggleRecommendations={() => catalog.setShowRecommendations(!catalog.showRecommendations)}
+              locationName={catalog.locationName}
+              radiusKm={catalog.radiusKm}
+              onOpenLocationModal={() => catalog.setShowLocationModal(true)}
             />
           </div>
 
@@ -99,9 +109,9 @@ export default function MarketplacePage() {
                     catalog.setSelectedCategory(null);
                     catalog.setPriceRange({});
                   }}
-                  className="px-4 py-2 bg-blue-600 text-white font-bold text-xs rounded-xl shadow-xs hover:bg-blue-700 transition cursor-pointer"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold shadow-xs"
                 >
-                  Restablecer Filtros
+                  Limpiar Filtros
                 </button>
               </div>
             ) : (
@@ -112,36 +122,13 @@ export default function MarketplacePage() {
                     product={product as any}
                     userId={catalog.userId}
                     cartQuantity={catalog.cartQuantities[product.id] || 0}
-                    onAddToCart={catalog.handleAddToCart}
-                    onViewDetails={catalog.handleViewDetails}
+                    onAddToCart={(id, info) => catalog.handleAddToCart(id, info)}
+                    onViewDetails={(id) => catalog.handleViewDetails(id)}
                     isFavorite={catalog.favoriteProductIds.includes(product.id)}
-                    onToggleFavorite={catalog.handleToggleFavorite}
-                    onShareProduct={catalog.setShareProduct}
+                    onToggleFavorite={(id) => catalog.handleToggleFavorite(id)}
+                    onShareProduct={(p) => catalog.setShareProduct(p)}
                   />
                 ))}
-              </div>
-            )}
-
-            {/* Paginación */}
-            {catalog.totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2 pt-4">
-                <button
-                  disabled={catalog.currentPage === 1}
-                  onClick={() => catalog.setCurrentPage(p => p - 1)}
-                  className="px-3.5 py-1.5 rounded-xl border border-gray-300 dark:border-slate-700 text-xs font-bold disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-slate-800 transition"
-                >
-                  Anterior
-                </button>
-                <span className="text-xs font-extrabold px-3 text-gray-700 dark:text-slate-300">
-                  Página {catalog.currentPage} de {catalog.totalPages}
-                </span>
-                <button
-                  disabled={catalog.currentPage === catalog.totalPages}
-                  onClick={() => catalog.setCurrentPage(p => p + 1)}
-                  className="px-3.5 py-1.5 rounded-xl border border-gray-300 dark:border-slate-700 text-xs font-bold disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-slate-800 transition"
-                >
-                  Siguiente
-                </button>
               </div>
             )}
           </div>
@@ -151,28 +138,63 @@ export default function MarketplacePage() {
       {/* Footer Global */}
       <Footer />
 
-      {/* Modal de Búsqueda Visual por Foto */}
-      <VisualSearchModal
-        isOpen={catalog.showVisualSearchModal}
-        onClose={() => catalog.setShowVisualSearchModal(false)}
-        visualSearchImage={catalog.visualSearchImage}
-        onImageSelect={(e) => {
-          if (e.target.files && e.target.files[0]) {
-            catalog.setVisualSearchImage(URL.createObjectURL(e.target.files[0]));
-          }
-        }}
-        isProcessing={catalog.isProcessingVisualSearch}
-        onConfirmSearch={() => {
-          catalog.setIsProcessingVisualSearch(true);
-          setTimeout(() => {
-            catalog.setIsProcessingVisualSearch(false);
-            catalog.setShowVisualSearchModal(false);
-            catalog.setSearchQuery('Zapatillas');
-          }, 1000);
-        }}
-      />
+      {/* Modal de Ubicación GPS / Radio en km */}
+      {catalog.showLocationModal && (
+        <Modal
+          isOpen={catalog.showLocationModal}
+          onClose={() => catalog.setShowLocationModal(false)}
+          title="Configurar Ubicación de Búsqueda"
+        >
+          <div className="space-y-4 pt-2">
+            <div>
+              <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
+                Ciudad / Zona
+              </label>
+              <input
+                type="text"
+                value={catalog.locationName}
+                onChange={(e) => catalog.setLocationName(e.target.value)}
+                placeholder="Ej: Buenos Aires, Barracas, Palermo"
+                className="w-full p-2.5 text-xs border border-gray-300 dark:border-slate-700 rounded-xl font-medium"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
+                Radio de Búsqueda ({catalog.radiusKm} km)
+              </label>
+              <input
+                type="range"
+                min="1"
+                max="50"
+                value={catalog.radiusKm}
+                onChange={(e) => catalog.setRadiusKm(Number(e.target.value))}
+                className="w-full text-blue-600"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => catalog.setShowLocationModal(false)}
+              className="w-full py-2.5 bg-blue-600 text-white rounded-xl text-xs font-extrabold"
+            >
+              Aplicar Ubicación
+            </button>
+          </div>
+        </Modal>
+      )}
 
-      {/* Modal de Compartir en Redes Sociales */}
+      {/* Modal de Búsqueda Visual por Foto */}
+      {catalog.showVisualSearchModal && (
+        <VisualSearchModal
+          isOpen={catalog.showVisualSearchModal}
+          onClose={() => catalog.setShowVisualSearchModal(false)}
+          visualSearchImage={catalog.visualSearchImage}
+          onImageSelect={catalog.handleVisualSearchSelect}
+          isProcessing={catalog.isProcessingVisualSearch}
+          onConfirmSearch={catalog.handleConfirmVisualSearch}
+        />
+      )}
+
+      {/* Modal de Compartir */}
       {catalog.shareProduct && (
         <ShareModal
           isOpen={!!catalog.shareProduct}

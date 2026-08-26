@@ -41,6 +41,11 @@ export function useMarketplaceCatalog() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
+  // Estado de Ubicación y Radio GPS (Buenos Aires / Barracas · En un radio de 6 km)
+  const [locationName, setLocationName] = useState('Buenos Aires');
+  const [radiusKm, setRadiusKm] = useState(6);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+
   // Estado del recomendador por telemetría (A demanda)
   const [showRecommendations, setShowRecommendations] = useState(false);
 
@@ -48,6 +53,25 @@ export function useMarketplaceCatalog() {
   const [showVisualSearchModal, setShowVisualSearchModal] = useState(false);
   const [visualSearchImage, setVisualSearchImage] = useState<string | null>(null);
   const [isProcessingVisualSearch, setIsProcessingVisualSearch] = useState(false);
+
+  const handleVisualSearchSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setVisualSearchImage(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleConfirmVisualSearch = () => {
+    setIsProcessingVisualSearch(true);
+    setTimeout(() => {
+      setIsProcessingVisualSearch(false);
+      setShowVisualSearchModal(false);
+    }, 1000);
+  };
 
   // Estado de Compartir Producto en Redes
   const [shareProduct, setShareProduct] = useState<any | null>(null);
@@ -173,6 +197,8 @@ export function useMarketplaceCatalog() {
     visualSearchImage,
     setVisualSearchImage,
     isProcessingVisualSearch,
+    handleVisualSearchSelect,
+    handleConfirmVisualSearch,
     setIsProcessingVisualSearch,
     shareProduct,
     setShareProduct,
@@ -182,6 +208,12 @@ export function useMarketplaceCatalog() {
     handleToggleFavorite,
     handleAddToCart,
     handleViewDetails,
+    locationName,
+    setLocationName,
+    radiusKm,
+    setRadiusKm,
+    showLocationModal,
+    setShowLocationModal,
     cartQuantities,
     refresh,
     router,
