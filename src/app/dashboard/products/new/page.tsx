@@ -205,7 +205,8 @@ export default function NewProductPage() {
     // No hacer nada, mantener el formato visible
   };
 
-  const [locationSuggestions, setLocationSuggestions] = useState<string[]>([]);
+  const [mapCoords, setMapCoords] = useState<{ lat: number; lng: number; key: number } | null>(null);
+  const [locationSuggestions, setLocationSuggestions] = useState<{ label: string; lat: number; lng: number }[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearchingSuggestions, setIsSearchingSuggestions] = useState(false);
 
@@ -230,9 +231,14 @@ export default function NewProductPage() {
           const parts = item.display_name.split(',');
           const city = parts[0]?.trim();
           const state = parts[1]?.trim() || parts[2]?.trim() || '';
-          return state ? `${city}, ${state}` : city;
+          const label = state ? `${city}, ${state}` : city;
+          return {
+            label,
+            lat: parseFloat(item.lat),
+            lng: parseFloat(item.lon)
+          };
         });
-        setLocationSuggestions(Array.from(new Set(suggestions)));
+        setLocationSuggestions(suggestions);
         setShowSuggestions(true);
       }
     } catch (err) {
@@ -264,6 +270,9 @@ export default function NewProductPage() {
           const lat = position.coords.latitude;
           const lng = position.coords.longitude;
           
+          // Forzar re-centrado inmediato del mapa en las coordenadas exactas obtenidas por GPS
+          setMapCoords({ lat, lng, key: Date.now() });
+
           const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
           const data = await res.json();
           
@@ -284,7 +293,7 @@ export default function NewProductPage() {
           setLocationName(finalLocation);
           setShowSuggestions(false);
           if (!silent) {
-            showModalMessage('Ubicación GPS detectada', `Se estableció tu posición exacta sin ingresar dirección: ${finalLocation}`, 'success');
+            showModalMessage('Ubicación GPS detectada', `Se re-centró el mapa en tu posición exacta: ${finalLocation}`, 'success');
           }
         } catch (err) {
           if (!silent) {
@@ -594,14 +603,15 @@ export default function NewProductPage() {
                     key={i}
                     type="button"
                     onClick={() => {
-                      setLocationName(sug);
+                      setLocationName(sug.label);
+                      setMapCoords({ lat: sug.lat, lng: sug.lng, key: Date.now() });
                       setShowSuggestions(false);
                       setLocationError('');
                     }}
                     className="w-full text-left px-4 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800 text-xs font-bold text-gray-800 dark:text-slate-200 flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 last:border-b-0 transition"
                   >
                     <span>📍</span>
-                    <span>{sug}</span>
+                    <span>{sug.label}</span>
                   </button>
                 ))}
               </div>
@@ -620,12 +630,17 @@ export default function NewProductPage() {
             <div className="space-y-2 mt-2">
               <div className="relative h-44 w-full bg-slate-100 dark:bg-slate-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-700 shadow-inner">
                 <iframe
+                  key={mapCoords?.key || locationName}
                   title={`Mapa de ${locationName}`}
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
                   loading="lazy"
-                  src={`https://maps.google.com/maps?q=${encodeURIComponent(locationName)}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+                  src={
+                    mapCoords
+                      ? `https://maps.google.com/maps?q=${mapCoords.lat},${mapCoords.lng}&t=&z=16&ie=UTF8&iwloc=A&output=embed`
+                      : `https://maps.google.com/maps?q=${encodeURIComponent(locationName)}&t=&z=15&ie=UTF8&iwloc=A&output=embed`
+                  }
                   className="w-full h-full rounded-2xl"
                 />
                 <div className="absolute bottom-2.5 left-3 z-10 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-bold px-3 py-1 rounded-xl shadow-xs flex items-center gap-1.5">

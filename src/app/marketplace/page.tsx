@@ -419,8 +419,9 @@ export default function MarketplacePage() {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [locationName, setLocationName] = useState('Buenos Aires');
   const [locationRadius, setLocationRadius] = useState(6);
+  const [mapCoords, setMapCoords] = useState<{ lat: number; lng: number; key: number } | null>(null);
   const [isGeolocating, setIsGeolocating] = useState(false);
-  const [modalLocationSuggestions, setModalLocationSuggestions] = useState<string[]>([]);
+  const [modalLocationSuggestions, setModalLocationSuggestions] = useState<{ label: string; lat: number; lng: number }[]>([]);
   const [showModalSuggestions, setShowModalSuggestions] = useState(false);
   const [isSearchingModalSuggestions, setIsSearchingModalSuggestions] = useState(false);
   const [shareProduct, setShareProduct] = useState<{ id: string; title: string; price: number; image_url?: string | null } | null>(null);
@@ -445,9 +446,14 @@ export default function MarketplacePage() {
           const parts = item.display_name.split(',');
           const name = parts[0]?.trim();
           const sub = parts[1]?.trim() || parts[2]?.trim() || '';
-          return sub ? `${name}, ${sub}` : name;
+          const label = sub ? `${name}, ${sub}` : name;
+          return {
+            label,
+            lat: parseFloat(item.lat),
+            lng: parseFloat(item.lon)
+          };
         });
-        setModalLocationSuggestions(Array.from(new Set(suggestions)));
+        setModalLocationSuggestions(suggestions);
         setShowModalSuggestions(true);
       }
     } catch (err) {
@@ -470,6 +476,9 @@ export default function MarketplacePage() {
         try {
           const lat = position.coords.latitude;
           const lng = position.coords.longitude;
+
+          // Forzar re-centrado inmediato del iframe en las coordenadas exactas obtenidas
+          setMapCoords({ lat, lng, key: Date.now() });
 
           const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
           const data = await res.json();
@@ -1135,13 +1144,14 @@ export default function MarketplacePage() {
                     key={i}
                     type="button"
                     onClick={() => {
-                      setLocationName(sug);
+                      setLocationName(sug.label);
+                      setMapCoords({ lat: sug.lat, lng: sug.lng, key: Date.now() });
                       setShowModalSuggestions(false);
                     }}
                     className="w-full text-left px-4 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800 text-xs font-bold text-gray-800 dark:text-slate-200 flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 last:border-b-0 transition"
                   >
                     <span>📍</span>
-                    <span>{sug}</span>
+                    <span>{sug.label}</span>
                   </button>
                 ))}
               </div>
@@ -1167,12 +1177,17 @@ export default function MarketplacePage() {
           {/* Previsualización visual del mapa con PIN ROJO interactivo de GPS */}
           <div className="relative h-56 w-full bg-slate-100 dark:bg-slate-950 rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-800 shadow-inner">
             <iframe
+              key={mapCoords?.key || locationName}
               title={`Mapa de ${locationName}`}
               width="100%"
               height="100%"
               style={{ border: 0 }}
               loading="lazy"
-              src={`https://maps.google.com/maps?q=${encodeURIComponent(locationName || 'Plaza Colombia, Barracas')}&t=&z=${locationRadius <= 2 ? 15 : locationRadius <= 6 ? 14 : locationRadius <= 25 ? 12 : 10}&ie=UTF8&iwloc=A&output=embed`}
+              src={
+                mapCoords
+                  ? `https://maps.google.com/maps?q=${mapCoords.lat},${mapCoords.lng}&t=&z=${locationRadius <= 2 ? 16 : locationRadius <= 6 ? 14 : locationRadius <= 25 ? 12 : 10}&ie=UTF8&iwloc=A&output=embed`
+                  : `https://maps.google.com/maps?q=${encodeURIComponent(locationName || 'Plaza Colombia, Barracas')}&t=&z=${locationRadius <= 2 ? 16 : locationRadius <= 6 ? 14 : locationRadius <= 25 ? 12 : 10}&ie=UTF8&iwloc=A&output=embed`
+              }
               className="w-full h-full rounded-2xl"
             />
             
