@@ -12,6 +12,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useOrders } from '@/features/orders/hooks/useOrders';
+import { calculateImageSimilarity } from '@/lib/visualSearch';
 
 type Product = {
   id: string;
@@ -48,6 +49,7 @@ type SimilarSellerProduct = {
   location_name?: string;
   has_free_shipping?: boolean;
   rating?: number;
+  visual_match_score?: number;
 };
 
 type ComplementaryProduct = {
@@ -153,19 +155,29 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
       let mappedSimilar: SimilarSellerProduct[] = [];
       if (similarData && similarData.length > 0) {
-        mappedSimilar = similarData.map((item: any) => ({
-          id: item.id,
-          title: item.title,
-          price: item.price,
-          stock: item.stock,
-          image_url: item.image_urls?.[0] || null,
-          seller_id: item.seller_id,
-          seller_name: (Array.isArray(item.profiles) ? item.profiles[0]?.store_name : item.profiles?.store_name) || 'Vendedor Verificado',
-          is_trusted_seller: true,
-          location_name: item.location_name || 'Buenos Aires',
-          has_free_shipping: item.price > 15000,
-          rating: 4.8
-        }));
+        mappedSimilar = similarData.map((item: any) => {
+          const matchScore = calculateImageSimilarity(
+            productData.image_urls?.[0] || '',
+            productData.title,
+            item.image_urls?.[0] || '',
+            item.title
+          );
+
+          return {
+            id: item.id,
+            title: item.title,
+            price: item.price,
+            stock: item.stock,
+            image_url: item.image_urls?.[0] || null,
+            seller_id: item.seller_id,
+            seller_name: (Array.isArray(item.profiles) ? item.profiles[0]?.store_name : item.profiles?.store_name) || 'Vendedor Verificado',
+            is_trusted_seller: true,
+            location_name: item.location_name || 'Buenos Aires',
+            has_free_shipping: item.price > 15000,
+            rating: 4.8,
+            visual_match_score: matchScore
+          };
+        }).sort((a, b) => (b.visual_match_score || 0) - (a.visual_match_score || 0));
       }
 
       setSimilarSellers(mappedSimilar);
@@ -756,11 +768,16 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                       </div>
 
                       <div>
-                        <div className="flex items-center gap-1.5 mb-0.5">
+                        <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
                           <span className="text-xs font-extrabold text-gray-900 dark:text-slate-100">{sellerItem.seller_name}</span>
                           {sellerItem.is_trusted_seller && (
                             <span className="text-[10px] bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-1.5 py-0.2 rounded font-extrabold border border-blue-200 dark:border-blue-900">
                               ⭐ 4.9
+                            </span>
+                          )}
+                          {sellerItem.visual_match_score && (
+                            <span className="text-[10px] font-extrabold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/80 px-1.5 py-0.2 rounded border border-indigo-200 dark:border-indigo-800">
+                              📷 {sellerItem.visual_match_score}% Coincidencia
                             </span>
                           )}
                         </div>
