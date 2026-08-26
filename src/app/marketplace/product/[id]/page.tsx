@@ -3,11 +3,15 @@
  * FILE: page.tsx (app/marketplace/product/[id])
  * ============================================================================
  * 
- * @description Vista Detallada de Producto al estilo Amazon / AliExpress.
+ * @description Vista Detallada de Producto al estilo Amazon / AliExpress / Facebook.
  *              Refactorizado bajo Clean Architecture, SOLID y SRP:
  *              - Lógica de negocio y carga de datos en `useProductDetail`
  *              - Galería y Ficha Técnica de IA desacoplados en `ProductGalleryColumn`
  *              - Sidebar del Vendedor y Compras desacoplado en `ProductSellerSidebar`
+ *              - Pestañas AliExpress en `ProductAliExpressTabs`
+ *              - Combo "Este producto se compra frecuentemente con este otro" en `FrequentlyBoughtTogether`
+ *              - Sugerencias para el vendedor en `AISellerSuggestionsBox`
+ *              - Productos Relacionados en `RelatedProductsSection`
  * 
  * @module Presentation/Pages/Marketplace/ProductDetail
  * ============================================================================
@@ -26,6 +30,10 @@ import { useProductDetail } from '@/features/products/hooks/useProductDetail';
 import ProductGalleryColumn from '@/components/marketplace/detail/ProductGalleryColumn';
 import ProductSellerSidebar from '@/components/marketplace/detail/ProductSellerSidebar';
 import ProductQuestionsSection from '@/components/marketplace/detail/ProductQuestionsSection';
+import ProductAliExpressTabs from '@/components/marketplace/detail/ProductAliExpressTabs';
+import FrequentlyBoughtTogether from '@/components/marketplace/detail/FrequentlyBoughtTogether';
+import AISellerSuggestionsBox from '@/components/marketplace/detail/AISellerSuggestionsBox';
+import RelatedProductsSection from '@/components/marketplace/detail/RelatedProductsSection';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -82,18 +90,27 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           <span className="text-gray-800 dark:text-slate-200 truncate max-w-xs">{detail.product.title}</span>
         </div>
 
-        {/* Layout Principal a 2 Columnas (Galería + Ficha Técnica IA a la izq / Datos y Vendedor a la der) */}
+        {/* Layout Principal a 2 Columnas (Galería + IA a la izq / Vendedor a la der) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Columna Izquierda: Galería de Fotos + Resumen de IA en Tarjeta (lg:col-span-7) */}
-          <div className="lg:col-span-7">
+          {/* Columna Izquierda: Galería de Fotos + Resumen de IA */}
+          <div className="lg:col-span-7 space-y-6">
             <ProductGalleryColumn
               title={detail.product.title}
               imageUrls={detail.product.image_urls || []}
               aiSummary={detail.aiSummary}
             />
+
+            {/* Sugerencias de IA para mejorar la publicación (Orientado al Vendedor - Imagen 3) */}
+            <AISellerSuggestionsBox isOwnProduct={isOwnProduct} />
+
+            {/* Combo "Este producto se compra frecuentemente con este otro" (Imagen 3) */}
+            <FrequentlyBoughtTogether
+              mainProductTitle={detail.product.title}
+              mainProductPrice={detail.product.price}
+            />
           </div>
 
-          {/* Columna Derecha: Datos del Vendedor, Título, Precio y Compras (lg:col-span-5) */}
+          {/* Columna Derecha: Datos del Vendedor, Ubicación Mapa y Chat (lg:col-span-5) */}
           <div className="lg:col-span-5">
             <ProductSellerSidebar
               product={detail.product}
@@ -113,7 +130,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
 
-        {/* Sección de Preguntas y Respuestas */}
+        {/* Pestañas Estilo AliExpress (Valoraciones, Detalles, Descripción, Tienda - Imagen 3) */}
+        <ProductAliExpressTabs
+          productTitle={detail.product.title}
+          description={detail.product.description}
+        />
+
+        {/* Sección de Preguntas y Respuestas al Vendedor */}
         <ProductQuestionsSection
           questions={detail.questions}
           newQuestion={detail.newQuestion}
@@ -121,6 +144,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           onSubmitQuestion={detail.handlePostQuestion}
           submitting={detail.submitting}
           isOwnProduct={isOwnProduct}
+        />
+
+        {/* Productos Relacionados / Te podría interesar (Imagen 3) */}
+        <RelatedProductsSection
+          products={detail.similarSellers || []}
         />
       </main>
 
@@ -141,7 +169,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         />
       )}
 
-      {/* Modal de Reporte de Publicación o Vendedor */}
+      {/* Modal de Reporte */}
       {detail.reportTarget && (
         <ReportModal
           isOpen={!!detail.reportTarget}
