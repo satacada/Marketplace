@@ -5,8 +5,8 @@
  * 
  * @description Componente modular para el modal "Cambiar ubicación" al estilo
  *              Facebook Marketplace, reutilizando el mapa OpenStreetMap centralizado,
- *              con marcador pin rojo 📍 centrado, selector de radio en kilómetros
- *              y animación de 3 puntos plomos (...) al ubicar por GPS.
+ *              con marcador nativo del mapa sin superposiciones, círculo transparente de radio
+ *              y botón de GPS `▲` posicionado a la izquierda (evitando superposición con el zoom).
  * 
  * @module Presentation/Components/Marketplace/Catalog/LocationSelectorModal
  * ============================================================================
@@ -78,7 +78,7 @@ export default function LocationSelectorModal({
             Ubicación
           </label>
           <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-rose-500 text-base">📍</span>
+            <span className="text-blue-600 text-base">📍</span>
             <input
               type="text"
               value={cityInput}
@@ -108,7 +108,7 @@ export default function LocationSelectorModal({
           </select>
         </div>
 
-        {/* Mapa Real Reutilizado OpenStreetMap con Círculo Azul Transparente y Pin Rojo 📍 */}
+        {/* Mapa Real Reutilizado OpenStreetMap con Círculo Azul Transparente y Botón GPS a la Izquierda */}
         <div className="relative w-full h-56 rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-800 shadow-inner">
           <OpenStreetMapEmbed
             lat={mapCoords.lat}
@@ -129,20 +129,12 @@ export default function LocationSelectorModal({
             }}
           />
 
-          {/* Marcador Pin Rojo 📍 (Gota Roja Facebook Marketplace - Imagen 2) */}
-          <div className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-full z-20 pointer-events-none flex flex-col items-center">
-            <svg width="32" height="40" viewBox="0 0 24 32" fill="none" className="filter drop-shadow-md animate-bounce">
-              <path d="M12 0C5.37 0 0 5.37 0 12C0 21 12 32 12 32C12 32 24 21 24 12C24 5.37 18.63 0 12 0Z" fill="#ea4335" />
-              <circle cx="12" cy="12" r="4.5" fill="#ffffff" />
-            </svg>
-          </div>
-
-          {/* Botón de Geolocalización GPS 🎯 en la Esquina Superior Derecha */}
+          {/* Botón de Geolocalización GPS 🎯 Posicionado a la IZQUIERDA (Evita superposición con el zoom nativo de OpenStreetMap) */}
           <button
             type="button"
             onClick={handleGPSClick}
             disabled={isLocatingGPS}
-            className="absolute top-3 right-3 py-1.5 px-3 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 shadow-md flex items-center justify-center gap-1.5 hover:bg-gray-50 transition border border-gray-200 dark:border-slate-700 cursor-pointer z-30"
+            className="absolute top-3 left-3 py-1.5 px-3 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 shadow-md flex items-center justify-center gap-1.5 hover:bg-gray-50 transition border border-gray-200 dark:border-slate-700 cursor-pointer z-30 font-bold text-xs"
             title="Usar mi ubicación GPS actual"
           >
             {isLocatingGPS ? (
@@ -152,7 +144,10 @@ export default function LocationSelectorModal({
                 <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-pulse [animation-delay:0.4s]" />
               </div>
             ) : (
-              <span className="text-xs">▲</span>
+              <div className="flex items-center gap-1">
+                <span>▲</span>
+                <span>GPS</span>
+              </div>
             )}
           </button>
         </div>
