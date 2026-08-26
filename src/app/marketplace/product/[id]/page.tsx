@@ -576,20 +576,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                     {/* 2. INFORMACIÓN DEL VENDEDOR (Réplica Exacta de Facebook Marketplace) */}
                     <div className="pt-4 border-t border-gray-100">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-base font-extrabold text-gray-900">Información del vendedor</h3>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setActiveTab('seller_rating');
-                            const elem = document.getElementById('seller-rating-tab-section');
-                            if (elem) {
-                              elem.scrollIntoView({ behavior: 'smooth' });
-                            }
-                          }}
-                          className="text-xs font-bold text-blue-600 hover:underline cursor-pointer"
+                        <h3 className="text-base font-extrabold text-gray-900 dark:text-slate-100">Información del vendedor</h3>
+                        <Link
+                          href={`/marketplace/store/${product.seller_id}`}
+                          className="text-xs font-extrabold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer flex items-center gap-1"
+                          title="Ver perfil completo, reputación y valoraciones de la tienda"
                         >
-                          Detalles del vendedor
-                        </button>
+                          <span>⭐</span>
+                          <span>Ver Reputación y Detalles</span>
+                        </Link>
                       </div>
 
                       <div className="flex items-center gap-3.5 mb-4">
@@ -722,7 +717,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 title="Buscar productos idénticos o similares a través del análisis de foto"
                 className="w-full py-3.5 px-5 bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-2xl text-sm font-extrabold transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2.5 cursor-pointer border border-indigo-300 dark:border-indigo-700 ring-2 ring-indigo-200 dark:ring-indigo-900/60"
               >
-                <span className="text-base">📷</span>
                 <span>{isScanningPhoto ? 'Escaneando características de la foto...' : '📷 Match por Imagen — Buscar Similares'}</span>
               </button>
             </div>
@@ -772,19 +766,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             >
               <span>❓</span>
               <span>Preguntas y Respuestas ({questions.length})</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('seller_rating')}
-              className={`py-4 px-6 font-extrabold text-xs sm:text-sm transition border-b-2 flex items-center gap-2 flex-shrink-0 cursor-pointer ${
-                activeTab === 'seller_rating'
-                  ? 'border-blue-600 text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-900'
-                  : 'border-transparent text-gray-500 hover:text-gray-900 dark:text-slate-400 dark:hover:text-slate-200'
-              }`}
-            >
-              <span>⭐</span>
-              <span>Reputación y Valoraciones de la Tienda</span>
             </button>
           </div>
 
@@ -1041,147 +1022,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                     </div>
                   </div>
                 )}
-              </div>
-            )}
-
-            {/* PESTAÑA 4: REPUTACIÓN Y VALORACIONES DE LA TIENDA */}
-            {activeTab === 'seller_rating' && (
-              <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-200 dark:border-slate-800">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl text-amber-500">⭐</span>
-                      <h2 className="text-xl font-extrabold text-gray-900 dark:text-slate-100">
-                        Reputación y Valoraciones de la Tienda
-                      </h2>
-                    </div>
-                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 font-medium">
-                      Criterios de evaluación inspirados en Amazon, AliExpress y BestBuy
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => showModalMessage('Calificar Vendedor', 'Para enviar tu valoración debes haber comprado al menos un producto a esta tienda.', 'info')}
-                    className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold rounded-xl shadow-sm transition flex items-center gap-2 self-start sm:self-auto cursor-pointer"
-                  >
-                    <span>✍️</span>
-                    <span>Calificar Vendedor</span>
-                  </button>
-                </div>
-
-                {/* Resumen de Calificación General */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Promedio General */}
-                  <div className="bg-slate-50 dark:bg-slate-800/40 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 text-center flex flex-col items-center justify-center">
-                    <span className="text-4xl font-black text-gray-900 dark:text-slate-100 mb-1">5</span>
-                    <div className="flex items-center gap-1 text-amber-500 text-lg mb-1">
-                      ★★★★★
-                    </div>
-                    <span className="text-xs text-gray-500 dark:text-slate-400 font-medium">Basado en 1 opinión</span>
-                  </div>
-
-                  {/* Porcentaje Positivo */}
-                  <div className="bg-emerald-50/70 dark:bg-emerald-950/40 p-6 rounded-2xl border border-emerald-200 dark:border-emerald-900 text-center flex flex-col items-center justify-center">
-                    <span className="text-3xl font-black text-emerald-600 dark:text-emerald-400 mb-1">100%</span>
-                    <span className="text-xs font-extrabold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider mb-2">Comentarios Positivos 🟢</span>
-                    <div className="flex items-center gap-3 text-xs font-bold text-gray-700 dark:text-slate-300">
-                      <span>🔥 1 Positivos</span>
-                      <span>👎 0 Críticos</span>
-                    </div>
-                  </div>
-
-                  {/* Desglose por Estrellas Bar Chart */}
-                  <div className="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-2xl border border-gray-200 dark:border-slate-700 space-y-1.5 flex flex-col justify-center text-xs font-bold">
-                    {[5, 4, 3, 2, 1].map((stars) => (
-                      <div key={stars} className="flex items-center gap-2">
-                        <span className="w-6 text-gray-600 dark:text-slate-400">{stars}★</span>
-                        <div className="flex-1 h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                          <div className={`h-full bg-amber-400 rounded-full ${stars === 5 ? 'w-full' : 'w-0'}`}></div>
-                        </div>
-                        <span className="w-4 text-right text-gray-500 dark:text-slate-400">{stars === 5 ? '1' : '0'}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* DESGLOSE POR CRITERIOS DE CALIDAD E-COMMERCE */}
-                <div>
-                  <h3 className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-3">
-                    Desglose por Criterios de Calidad E-Commerce
-                  </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <div className="p-3.5 bg-amber-50/60 dark:bg-amber-950/30 rounded-2xl border border-amber-200 dark:border-amber-900/60 flex items-center justify-between">
-                      <div>
-                        <span className="text-xs font-extrabold text-gray-900 dark:text-slate-100 flex items-center gap-1">
-                          <span>📦</span> Descripción
-                        </span>
-                        <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-0.5">Fidelidad del producto</p>
-                      </div>
-                      <span className="text-xs font-black text-amber-600 dark:text-amber-400">★ 5</span>
-                    </div>
-
-                    <div className="p-3.5 bg-amber-50/60 dark:bg-amber-950/30 rounded-2xl border border-amber-200 dark:border-amber-900/60 flex items-center justify-between">
-                      <div>
-                        <span className="text-xs font-extrabold text-gray-900 dark:text-slate-100 flex items-center gap-1">
-                          <span>⚡</span> Envío
-                        </span>
-                        <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-0.5">Rapidez y puntualidad</p>
-                      </div>
-                      <span className="text-xs font-black text-amber-600 dark:text-amber-400">★ 5</span>
-                    </div>
-
-                    <div className="p-3.5 bg-emerald-50/60 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-900/60 flex items-center justify-between">
-                      <div>
-                        <span className="text-xs font-extrabold text-gray-900 dark:text-slate-100 flex items-center gap-1">
-                          <span>💬</span> Atención
-                        </span>
-                        <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-0.5">Cordialidad y soporte</p>
-                      </div>
-                      <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">★ 5</span>
-                    </div>
-
-                    <div className="p-3.5 bg-blue-50/60 dark:bg-blue-950/30 rounded-2xl border border-blue-200 dark:border-blue-900/60 flex items-center justify-between">
-                      <div>
-                        <span className="text-xs font-extrabold text-gray-900 dark:text-slate-100 flex items-center gap-1">
-                          <span>🛡️</span> Empaque
-                        </span>
-                        <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-0.5">Protección del envío</p>
-                      </div>
-                      <span className="text-xs font-black text-blue-600 dark:text-blue-400">★ 5</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Comentarios de Compradores */}
-                <div className="pt-2">
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="px-3 py-1 bg-slate-900 text-white rounded-xl text-xs font-extrabold">Todos (1)</span>
-                    <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-xl text-xs font-bold border border-emerald-200">Comentarios Positivos (1)</span>
-                    <span className="px-3 py-1 bg-rose-100 text-rose-800 rounded-xl text-xs font-bold border border-rose-200">Comentarios Críticos (0)</span>
-                  </div>
-
-                  <div className="p-4 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/40 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold flex items-center justify-center text-xs">
-                          👤
-                        </div>
-                        <div>
-                          <span className="text-xs font-extrabold text-gray-900 dark:text-slate-100">dasataca@gmail.com</span>
-                          <span className="text-[10px] text-gray-400 dark:text-slate-500 ml-2">23 de agosto de 2026</span>
-                        </div>
-                      </div>
-                      <span className="text-xs font-extrabold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-800">
-                        🟢 Positivo
-                      </span>
-                    </div>
-                    <div className="text-amber-500 text-xs">★★★★★</div>
-                    <p className="text-xs text-gray-700 dark:text-slate-300 font-medium">
-                      "Excelente atención y rapidez en la entrega! Producto 100% recomendado."
-                    </p>
-                  </div>
-                </div>
               </div>
             )}
           </div>
