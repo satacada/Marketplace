@@ -33,61 +33,54 @@ export function generateAIProductSummary(
   rawDescription: string,
   imageUrls: string[] = []
 ): AIGeneratedProductData {
-  const cleanTitle = title.trim() || 'Producto de Calidad Garantizada';
+  const cleanTitle = title.trim();
+  const cleanDesc = rawDescription.trim();
   const mainKeywords = cleanTitle.split(/\s+/).filter(w => w.length > 2);
   const photoCount = imageUrls.length;
 
-  // Generar título mejorado para ventas y SEO
-  const optimizedTitle = `${cleanTitle} — Edición Premium con Garantía de Satisfacción`;
+  // CRITERIO ESTRICTO: Si el producto NO tiene un nombre claro o detallado (menos de 2 palabras clave)
+  // o si no hay fotos/descripción representativas, NO inventar información ni poner viñetas vacías
+  const isGeneric = mainKeywords.length < 2 && cleanDesc.length < 10;
 
-  // Generar viñetas estructuradas al estilo AliExpress ("✦ Resumen de IA del artículo")
+  if (isGeneric) {
+    return {
+      optimizedTitle: cleanTitle || 'Producto',
+      enhancedDescription: cleanDesc || cleanTitle,
+      summaryBullets: [], // No poner nada si no está claramente identificado
+      suggestedTags: [],
+      specs: {}
+    };
+  }
+
+  // Generar título mejorado para ventas y SEO
+  const optimizedTitle = cleanTitle.length > 5 ? cleanTitle : `${cleanTitle} — Garantía Oficial`;
+
+  // Generar viñetas estructuradas exclusivamente si hay datos suficientes
   const summaryBullets: AISummaryBullet[] = [
     {
-      title: 'Diseño y Materiales de Alta Durabilidad',
-      description: `Fabricado con estándares de alta resistencia y acabados ergonómicos. Inspeccionado mediante análisis de imagen (${photoCount > 0 ? `${photoCount} foto(s) analizada(s)` : 'vista previa'}).`
+      title: `Especificaciones de ${mainKeywords[0]?.toUpperCase() || 'Producto'}`,
+      description: `Optimizado para la categoría de ${mainKeywords.join(' ')}. Verificado con ${photoCount > 0 ? `${photoCount} foto(s)` : 'vista previa'}.`
     },
     {
-      title: 'Rendimiento y Funcionalidad Optimizada',
-      description: `Diseñado para ofrecer máxima eficiencia en uso diario o profesional. Compatible con las exigencias actuales del mercado.`
+      title: 'Materiales y Construcción',
+      description: `Estructura ergonómica y duradera con inspección de calidad antes del despacho.`
     },
     {
-      title: 'Compatibilidad y Versatilidad de Uso',
-      description: `Ideal para múltiples entornos de trabajo y hogar. Incluye empaque protector para un transporte seguro y confiable.`
-    },
-    {
-      title: 'Control de Calidad y Respaldo de Fábrica',
-      description: `Verificado con prueba de funcionamiento previo al despacho. Cuenta con soporte al cliente y atención post-venta.`
+      title: 'Garantía y Soporte Oficial',
+      description: `Atención directa post-venta y respaldo de fábrica para un uso confiable.`
     }
   ];
 
-  // Si hay más detalles o palabras clave, agregar viñetas específicas
-  if (mainKeywords.length > 0) {
-    summaryBullets.unshift({
-      title: `Especificación Clave: ${mainKeywords[0].toUpperCase()}`,
-      description: `Optimizado específicamente para el segmento de ${mainKeywords.join(' ')}. Cumple con los requerimientos técnicos indicados por el fabricante.`
-    });
-  }
-
-  // Generar descripción mejorada
-  const enhancedDescription = `${rawDescription.trim() || cleanTitle}
-
-🌟 CARACTERÍSTICAS DESTACADAS:
-• ${summaryBullets.map(b => `${b.title}: ${b.description}`).join('\n• ')}
-
-🔒 GARANTÍA Y SOPORTE:
-• Envío seguro a todo el país.
-• Atención directa con el vendedor.`;
+  const enhancedDescription = cleanDesc || `${cleanTitle}\n\n• ${summaryBullets.map(b => `${b.title}: ${b.description}`).join('\n• ')}`;
 
   return {
     optimizedTitle,
     enhancedDescription,
-    summaryBullets: summaryBullets.slice(0, 5),
-    suggestedTags: [mainKeywords[0] || 'producto', 'calidad', 'oferta', 'envio-rapido'],
+    summaryBullets,
+    suggestedTags: mainKeywords,
     specs: {
       'Estado': 'Nuevo',
-      'Garantía': 'Oficial del Vendedor',
-      'Origen': 'Importado / Nacional',
-      'Fotos Analizadas': `${photoCount} imagen(es)`
+      'Fotos Analizadas': `${photoCount} foto(s)`
     }
   };
 }

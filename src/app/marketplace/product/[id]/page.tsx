@@ -80,6 +80,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [similarSellers, setSimilarSellers] = useState<SimilarSellerProduct[]>([]);
   const [complementaryProduct, setComplementaryProduct] = useState<ComplementaryProduct | null>(null);
   const [isScanningPhoto, setIsScanningPhoto] = useState(false);
+  const [activeTab, setActiveTab] = useState<'combos' | 'similar_sellers' | 'questions'>('combos');
 
   // Estado para Modal estándar UI
   const [showModal, setShowModal] = useState(false);
@@ -232,13 +233,14 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   const handleVisualSearch = () => {
     setIsScanningPhoto(true);
+    setActiveTab('similar_sellers');
     const elem = document.getElementById('visual-sellers-comparison');
     if (elem) {
       elem.scrollIntoView({ behavior: 'smooth' });
     }
     setTimeout(() => {
       setIsScanningPhoto(false);
-    }, 1000);
+    }, 800);
   };
 
   const handleAddComboToCart = async () => {
@@ -403,12 +405,52 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {/* Galería de imágenes */}
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-2xs border border-gray-200/90 dark:border-slate-800">
-            <ImageGallery images={product.image_urls || []} />
+          {/* Columna Izquierda: Galería de imágenes estilo AliExpress + Resumen de IA debajo */}
+          <div className="space-y-6">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-2xs border border-gray-200/90 dark:border-slate-800">
+              <ImageGallery images={product.image_urls || []} />
+            </div>
+
+            {/* SECCIÓN ESTILO ALIEXPRESS: ✦ RESUMEN DE IA DEL ARTÍCULO (DEBAJO DE LA FOTO) */}
+            {(() => {
+              const aiData = generateAIProductSummary(product.title, product.description || '', product.image_urls || []);
+              if (!aiData.summaryBullets || aiData.summaryBullets.length === 0) return null;
+
+              return (
+                <div className="p-6 rounded-3xl bg-gradient-to-r from-purple-50/90 to-indigo-50/90 dark:from-slate-900 dark:to-slate-900/90 border border-purple-200/90 dark:border-slate-800 space-y-3 shadow-2xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl text-purple-600 dark:text-purple-400 font-black">✦</span>
+                      <h3 className="text-base font-extrabold text-gray-900 dark:text-slate-100">
+                        Resumen de IA del artículo
+                      </h3>
+                    </div>
+                    <span className="text-[10px] font-extrabold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-950/80 px-2.5 py-0.5 rounded-full border border-purple-300 dark:border-purple-800 self-start sm:self-auto">
+                      Inteligencia Artificial de Visión & Ficha Técnica
+                    </span>
+                  </div>
+
+                  <p className="text-[11px] text-gray-500 dark:text-slate-400 font-medium leading-relaxed">
+                    Aviso legal: Este contenido está generado por IA y no representa la opinión del vendedor. La plataforma y los vendedores no asumen ninguna responsabilidad legal al respecto.
+                  </p>
+
+                  <ul className="space-y-2.5 pt-1">
+                    {aiData.summaryBullets.map((bullet, bIdx) => (
+                      <li key={bIdx} className="flex items-start gap-2 text-xs">
+                        <span className="text-purple-600 dark:text-purple-400 font-black text-sm leading-none">•</span>
+                        <div>
+                          <strong className="font-extrabold text-gray-900 dark:text-slate-100">{bullet.title}:</strong>{' '}
+                          <span className="text-gray-700 dark:text-slate-300 font-medium">{bullet.description}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })()}
           </div>
 
-          {/* Información del producto */}
+          {/* Columna Derecha: Información de Compra y Vendedor */}
           <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-2xs border border-gray-200/90 dark:border-slate-800 flex flex-col justify-between text-gray-900 dark:text-slate-100">
             <div>
               <div className="mb-4">
@@ -431,42 +473,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 <h3 className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Descripción</h3>
                 <p className="text-gray-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed text-sm font-medium">{product.description}</p>
               </div>
-
-              {/* SECCIÓN ESTILO ALIEXPRESS: ✦ RESUMEN DE IA DEL ARTÍCULO */}
-              {(() => {
-                const aiData = generateAIProductSummary(product.title, product.description || '', product.image_urls || []);
-                return (
-                  <div className="mb-6 p-5 rounded-3xl bg-gradient-to-r from-purple-50/90 to-indigo-50/90 dark:from-slate-900 dark:to-slate-900/90 border border-purple-200/90 dark:border-slate-800 space-y-3 shadow-2xs">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl text-purple-600 dark:text-purple-400 font-black">✦</span>
-                        <h3 className="text-base font-extrabold text-gray-900 dark:text-slate-100">
-                          Resumen de IA del artículo
-                        </h3>
-                      </div>
-                      <span className="text-[10px] font-extrabold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-950/80 px-2.5 py-0.5 rounded-full border border-purple-300 dark:border-purple-800 self-start sm:self-auto">
-                        Inteligencia Artificial de Visión & Ficha Técnica
-                      </span>
-                    </div>
-
-                    <p className="text-[11px] text-gray-500 dark:text-slate-400 font-medium leading-relaxed">
-                      Aviso legal: Este contenido está generado por IA y no representa la opinión del vendedor. La plataforma y los vendedores no asumen ninguna responsabilidad legal al respecto.
-                    </p>
-
-                    <ul className="space-y-2.5 pt-1">
-                      {aiData.summaryBullets.map((bullet, bIdx) => (
-                        <li key={bIdx} className="flex items-start gap-2 text-xs">
-                          <span className="text-purple-600 dark:text-purple-400 font-black text-sm leading-none">•</span>
-                          <div>
-                            <strong className="font-extrabold text-gray-900 dark:text-slate-100">{bullet.title}</strong>{' '}
-                            <span className="text-gray-700 dark:text-slate-300 font-medium">{bullet.description}</span>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })()}
 
               {(() => {
                 const storeName = product.profiles?.store_name && product.profiles.store_name !== 'DE TODO'
@@ -695,260 +701,308 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
 
-        {/* SECCIÓN 1: PRODUCTOS FRECUENTEMENTE COMPRADOS JUNTOS (COMBO PROMOCIONAL) */}
-        {complementaryProduct && (
-          <div className="bg-gradient-to-r from-blue-50/80 to-indigo-50/80 dark:from-slate-900 dark:to-slate-900/90 p-6 rounded-3xl shadow-2xs border border-blue-200/90 dark:border-slate-800 text-gray-900 dark:text-slate-100">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <span className="bg-blue-600 text-white text-[11px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                  🔥 Combo Promocional
-                </span>
-                <h2 className="text-xl font-extrabold text-gray-900 dark:text-slate-100 mt-2">
-                  Frecuentemente comprados juntos
-                </h2>
-              </div>
-              <span className="text-xs font-extrabold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/80 px-3 py-1.5 rounded-xl border border-emerald-300 dark:border-emerald-800">
-                🏷️ 10% OFF en el complemento
-              </span>
-            </div>
-
-            <div className="flex flex-col md:flex-row items-center gap-4 bg-white dark:bg-slate-950 p-4 rounded-2xl border border-gray-200/90 dark:border-slate-800 shadow-2xs">
-              {/* Producto Principal */}
-              <div className="flex items-center gap-3 flex-1">
-                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden relative flex-shrink-0 border border-gray-200 dark:border-slate-700">
-                  {product.image_urls?.[0] ? (
-                    <img src={product.image_urls[0]} alt={product.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-lg">📦</div>
-                  )}
-                </div>
-                <div>
-                  <h4 className="text-xs font-extrabold text-gray-900 dark:text-slate-100 line-clamp-1">{product.title}</h4>
-                  <div className="text-sm font-black text-blue-600 dark:text-blue-400">${product.price.toLocaleString('es-CL')}</div>
-                </div>
-              </div>
-
-              <span className="text-2xl font-black text-gray-400 dark:text-slate-600">+</span>
-
-              {/* Producto Complementario */}
-              <div className="flex items-center gap-3 flex-1">
-                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden relative flex-shrink-0 border border-gray-200 dark:border-slate-700">
-                  {complementaryProduct.image_url ? (
-                    <img src={complementaryProduct.image_url} alt={complementaryProduct.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-lg">🎁</div>
-                  )}
-                </div>
-                <div>
-                  <h4 className="text-xs font-extrabold text-gray-900 dark:text-slate-100 line-clamp-1">{complementaryProduct.title}</h4>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">${complementaryProduct.price.toLocaleString('es-CL')}</span>
-                    <span className="text-xs line-through text-gray-400 dark:text-slate-500">${complementaryProduct.original_price.toLocaleString('es-CL')}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Precio Total y Botón */}
-              <div className="flex flex-col items-end justify-center pt-3 md:pt-0 border-t md:border-t-0 md:border-l border-gray-200 dark:border-slate-800 md:pl-4 w-full md:w-auto">
-                <div className="text-xs text-gray-500 dark:text-slate-400 font-bold">Precio total del combo:</div>
-                <div className="text-xl font-black text-blue-700 dark:text-blue-300">
-                  ${(product.price + complementaryProduct.price).toLocaleString('es-CL')}
-                </div>
-                <button
-                  type="button"
-                  onClick={handleAddComboToCart}
-                  className="mt-2 w-full md:w-auto py-2.5 px-5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer active:scale-95"
-                >
-                  <span>🛒</span>
-                  <span>Agregar Combo al Carrito</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* SECCIÓN 2: COMPARATIVA DE VENDEDORES SIMILARES (ANÁLISIS DE FOTO) */}
-        <div id="visual-sellers-comparison" className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-2xs border border-gray-200/90 dark:border-slate-800 text-gray-900 dark:text-slate-100">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🔍</span>
-                <h2 className="text-xl font-extrabold text-gray-900 dark:text-slate-100">
-                  Vendedores que ofrecen este mismo producto
-                </h2>
-              </div>
-              <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 font-medium">
-                Resultado de coincidencia por análisis visual de imagen y catálogo
-              </p>
-            </div>
-            <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1 rounded-xl border border-indigo-200 dark:border-indigo-900 self-start sm:self-auto">
-              📷 Coincidencia de foto detectada
-            </span>
-          </div>
-
-          {similarSellers.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {similarSellers.map((sellerItem) => {
-                const isCheaper = sellerItem.price < product.price;
-                const priceDiff = Math.abs(product.price - sellerItem.price);
-                
-                return (
-                  <div 
-                    key={sellerItem.id}
-                    className="p-4 rounded-2xl border border-gray-200/90 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/40 hover:border-blue-300 dark:hover:border-blue-800 transition flex items-center justify-between gap-3 shadow-2xs"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 bg-slate-200 dark:bg-slate-700 rounded-xl overflow-hidden relative flex-shrink-0 border border-gray-200 dark:border-slate-700">
-                        {sellerItem.image_url ? (
-                          <img src={sellerItem.image_url} alt={sellerItem.title} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="flex items-center justify-center h-full text-base">📦</div>
-                        )}
-                      </div>
-
-                      <div>
-                        <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
-                          <span className="text-xs font-extrabold text-gray-900 dark:text-slate-100">{sellerItem.seller_name}</span>
-                          {sellerItem.is_trusted_seller && (
-                            <span className="text-[10px] bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-1.5 py-0.2 rounded font-extrabold border border-blue-200 dark:border-blue-900">
-                              ⭐ 4.9
-                            </span>
-                          )}
-                          {sellerItem.visual_match_score && (
-                            <span className="text-[10px] font-extrabold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/80 px-1.5 py-0.2 rounded border border-indigo-200 dark:border-indigo-800">
-                              📷 {sellerItem.visual_match_score}% Coincidencia
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-gray-500 dark:text-slate-400 line-clamp-1">{sellerItem.title}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-sm font-black text-gray-900 dark:text-slate-100">
-                            ${sellerItem.price.toLocaleString('es-CL')}
-                          </span>
-                          {isCheaper && (
-                            <span className="text-[10px] font-extrabold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-300 dark:border-emerald-800">
-                              🏷️ ${priceDiff.toLocaleString('es-CL')} más económico
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    <Link
-                      href={`/marketplace/product/${sellerItem.id}`}
-                      className="py-2 px-3 bg-white dark:bg-slate-900 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900 rounded-xl text-xs font-extrabold transition shadow-2xs text-center flex-shrink-0"
-                    >
-                      Ver opción
-                    </Link>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-8 px-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-dashed border-gray-200 dark:border-slate-700">
-              <span className="text-3xl mb-2 block">📷</span>
-              <h4 className="text-sm font-extrabold text-gray-900 dark:text-slate-100">No hay otros vendedores activos para este producto exacto</h4>
-              <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 max-w-md mx-auto font-medium">
-                Esta tienda es la única en la categoría <strong className="text-blue-600 dark:text-blue-400 font-bold">{product.categories?.name || 'general'}</strong> que lo tiene publicado actualmente.
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Sección de Preguntas */}
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-2xs border border-gray-200/90 dark:border-slate-800 text-gray-900 dark:text-slate-100">
-          <h2 className="text-2xl font-extrabold text-gray-900 dark:text-slate-100 mb-6">Preguntas y Respuestas</h2>
-
-          {/* Lista de preguntas existentes */}
-          {questions.length > 0 ? (
-            <div className="space-y-4 mb-8">
-              {questions.map((q) => (
-                <div key={q.id} className="border-b border-gray-200 dark:border-slate-800 pb-4 last:border-b-0">
-                  <div className="flex gap-3 mb-2">
-                    <span className="text-2xl">❓</span>
-                    <div className="flex-1">
-                      <p className="text-gray-900 dark:text-slate-100 font-extrabold text-sm">{q.question}</p>
-                      <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
-                        {new Date(q.created_at).toLocaleDateString('es-AR')}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {q.answer && (
-                    <div className="flex gap-3 ml-8">
-                      <span className="text-2xl">✅</span>
-                      <div className="flex-1 bg-emerald-50 dark:bg-emerald-950/60 p-3.5 rounded-2xl border border-emerald-200 dark:border-emerald-900">
-                        <p className="text-gray-900 dark:text-emerald-200 font-bold text-sm">{q.answer}</p>
-                        <p className="text-xs text-gray-500 dark:text-emerald-400 mt-1">
-                          Respondido por: {q.profiles?.store_name || 'Vendedor'}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500 dark:text-slate-400 text-center py-4 mb-8 font-medium text-sm">
-              Aún no hay preguntas sobre este producto. ¡Sé el primero!
-            </p>
-          )}
-
-          {/* Formulario para hacer pregunta (Usuario Autenticado) */}
-          {userId && product.seller_id !== userId && (
-            <form onSubmit={handleAskQuestion} className="border-t border-gray-200 dark:border-slate-800 pt-6">
-              <h3 className="text-lg font-extrabold text-gray-900 dark:text-slate-100 mb-3">Haz una pregunta sobre este producto</h3>
-              <textarea
-                value={newQuestion}
-                onChange={(e) => setNewQuestion(e.target.value)}
-                required
-                placeholder="Ej: ¿Tiene garantía? ¿Hacen envíos a todo el país?"
-                className="w-full p-3.5 border border-gray-300 dark:border-slate-700 rounded-xl h-24 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 text-sm font-medium"
-              />
+        {/* SECCIONES EN PESTAÑAS (TABS) - ESTÁNDAR UX & DESIGN */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xs border border-gray-200/90 dark:border-slate-800 overflow-hidden text-gray-900 dark:text-slate-100">
+          {/* Navegación por Pestañas */}
+          <div className="flex border-b border-gray-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 overflow-x-auto scrollbar-thin">
+            {complementaryProduct && (
               <button
-                type="submit"
-                disabled={submitting || !newQuestion.trim()}
-                className={`px-6 py-3 rounded-xl font-extrabold text-white transition flex items-center gap-2 shadow-xs ${
-                  submitting || !newQuestion.trim()
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-emerald-600 hover:bg-emerald-700 active:scale-95 cursor-pointer'
+                type="button"
+                onClick={() => setActiveTab('combos')}
+                className={`py-4 px-6 font-extrabold text-xs sm:text-sm transition border-b-2 flex items-center gap-2 flex-shrink-0 cursor-pointer ${
+                  activeTab === 'combos'
+                    ? 'border-blue-600 text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-900'
+                    : 'border-transparent text-gray-500 hover:text-gray-900 dark:text-slate-400 dark:hover:text-slate-200'
                 }`}
               >
-                <span>❓</span>
-                <span>{submitting ? 'Enviando...' : 'Realizar una pregunta'}</span>
+                <span>🔥</span>
+                <span>Combo Promocional</span>
               </button>
-            </form>
-          )}
+            )}
 
-          {/* Formulario para hacer pregunta (Usuario No Autenticado) */}
-          {!userId && (
-            <div className="border-t border-gray-200 dark:border-slate-800 pt-6">
-              <h3 className="text-lg font-extrabold text-gray-900 dark:text-slate-100 mb-3">Haz una pregunta sobre este producto</h3>
-              <div 
-                onClick={() => showModalMessage(
-                  'Registro / Inicio de Sesión Requerido',
-                  'Para enviar tu pregunta al vendedor debes estar registrado o iniciar sesión.',
-                  'info',
-                  '/auth',
-                  'Registrarse / Iniciar Sesión'
-                )}
-                className="cursor-pointer group"
-              >
-                <textarea
-                  readOnly
-                  placeholder="Escribe tu pregunta sobre el producto..."
-                  className="w-full p-3.5 border border-gray-300 dark:border-slate-700 rounded-xl h-24 focus:outline-none mb-3 bg-gray-50 dark:bg-slate-800/40 text-gray-400 dark:text-slate-500 text-sm font-medium cursor-pointer group-hover:border-blue-400 transition"
-                />
-                <button
-                  type="button"
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-xl transition flex items-center gap-2 shadow-sm cursor-pointer active:scale-95"
-                >
-                  <span>❓</span>
-                  <span>Realizar una pregunta</span>
-                </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('similar_sellers')}
+              className={`py-4 px-6 font-extrabold text-xs sm:text-sm transition border-b-2 flex items-center gap-2 flex-shrink-0 cursor-pointer ${
+                activeTab === 'similar_sellers'
+                  ? 'border-blue-600 text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-900'
+                  : 'border-transparent text-gray-500 hover:text-gray-900 dark:text-slate-400 dark:hover:text-slate-200'
+              }`}
+            >
+              <span>📷</span>
+              <span>Vendedores que ofrecen este mismo producto</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('questions')}
+              className={`py-4 px-6 font-extrabold text-xs sm:text-sm transition border-b-2 flex items-center gap-2 flex-shrink-0 cursor-pointer ${
+                activeTab === 'questions'
+                  ? 'border-blue-600 text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-900'
+                  : 'border-transparent text-gray-500 hover:text-gray-900 dark:text-slate-400 dark:hover:text-slate-200'
+              }`}
+            >
+              <span>❓</span>
+              <span>Preguntas y Respuestas ({questions.length})</span>
+            </button>
+          </div>
+
+          {/* Contenido de Pestañas */}
+          <div className="p-6">
+            {/* PESTAÑA 1: COMBO PROMOCIONAL */}
+            {activeTab === 'combos' && complementaryProduct && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-extrabold text-gray-900 dark:text-slate-100">
+                      Frecuentemente comprados juntos
+                    </h2>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 font-medium">Lleva el kit de protección y ahorra en el total</p>
+                  </div>
+                  <span className="text-xs font-extrabold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/80 px-3 py-1.5 rounded-xl border border-emerald-300 dark:border-emerald-800">
+                    🏷️ 10% OFF en el complemento
+                  </span>
+                </div>
+
+                <div className="flex flex-col md:flex-row items-center gap-4 bg-gray-50/60 dark:bg-slate-950 p-4 rounded-2xl border border-gray-200/90 dark:border-slate-800">
+                  {/* Producto Principal */}
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden relative flex-shrink-0 border border-gray-200 dark:border-slate-700">
+                      {product.image_urls?.[0] ? (
+                        <img src={product.image_urls[0]} alt={product.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-lg">📦</div>
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-extrabold text-gray-900 dark:text-slate-100 line-clamp-1">{product.title}</h4>
+                      <div className="text-sm font-black text-blue-600 dark:text-blue-400">${product.price.toLocaleString('es-CL')}</div>
+                    </div>
+                  </div>
+
+                  <span className="text-2xl font-black text-gray-400 dark:text-slate-600">+</span>
+
+                  {/* Producto Complementario */}
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden relative flex-shrink-0 border border-gray-200 dark:border-slate-700">
+                      {complementaryProduct.image_url ? (
+                        <img src={complementaryProduct.image_url} alt={complementaryProduct.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-lg">🎁</div>
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-extrabold text-gray-900 dark:text-slate-100 line-clamp-1">{complementaryProduct.title}</h4>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">${complementaryProduct.price.toLocaleString('es-CL')}</span>
+                        <span className="text-xs line-through text-gray-400 dark:text-slate-500">${complementaryProduct.original_price.toLocaleString('es-CL')}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Precio Total y Botón */}
+                  <div className="flex flex-col items-end justify-center pt-3 md:pt-0 border-t md:border-t-0 md:border-l border-gray-200 dark:border-slate-800 md:pl-4 w-full md:w-auto">
+                    <div className="text-xs text-gray-500 dark:text-slate-400 font-bold">Precio total del combo:</div>
+                    <div className="text-xl font-black text-blue-700 dark:text-blue-300">
+                      ${(product.price + complementaryProduct.price).toLocaleString('es-CL')}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddComboToCart}
+                      className="mt-2 w-full md:w-auto py-2.5 px-5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                    >
+                      <span>🛒</span>
+                      <span>Agregar Combo al Carrito</span>
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+
+            {/* PESTAÑA 2: VENDEDORES SIMILARES */}
+            {activeTab === 'similar_sellers' && (
+              <div id="visual-sellers-comparison" className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                  <div>
+                    <h2 className="text-xl font-extrabold text-gray-900 dark:text-slate-100">
+                      Vendedores que ofrecen este mismo producto
+                    </h2>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 font-medium">
+                      Resultado de coincidencia por análisis visual de imagen y catálogo
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1 rounded-xl border border-indigo-200 dark:border-indigo-900 self-start sm:self-auto">
+                    📷 Coincidencia de foto detectada
+                  </span>
+                </div>
+
+                {similarSellers.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {similarSellers.map((sellerItem) => {
+                      const isCheaper = sellerItem.price < product.price;
+                      const priceDiff = Math.abs(product.price - sellerItem.price);
+                      
+                      return (
+                        <div 
+                          key={sellerItem.id}
+                          className="p-4 rounded-2xl border border-gray-200/90 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/40 hover:border-blue-300 dark:hover:border-blue-800 transition flex items-center justify-between gap-3 shadow-2xs"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-14 h-14 bg-slate-200 dark:bg-slate-700 rounded-xl overflow-hidden relative flex-shrink-0 border border-gray-200 dark:border-slate-700">
+                              {sellerItem.image_url ? (
+                                <img src={sellerItem.image_url} alt={sellerItem.title} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="flex items-center justify-center h-full text-base">📦</div>
+                              )}
+                            </div>
+
+                            <div>
+                              <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
+                                <span className="text-xs font-extrabold text-gray-900 dark:text-slate-100">{sellerItem.seller_name}</span>
+                                {sellerItem.is_trusted_seller && (
+                                  <span className="text-[10px] bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-1.5 py-0.2 rounded font-extrabold border border-blue-200 dark:border-blue-900">
+                                    ⭐ 4.9
+                                  </span>
+                                )}
+                                {sellerItem.visual_match_score && (
+                                  <span className="text-[10px] font-extrabold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/80 px-1.5 py-0.2 rounded border border-indigo-200 dark:border-indigo-800">
+                                    📷 {sellerItem.visual_match_score}% Coincidencia
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[11px] text-gray-500 dark:text-slate-400 line-clamp-1">{sellerItem.title}</p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-sm font-black text-gray-900 dark:text-slate-100">
+                                  ${sellerItem.price.toLocaleString('es-CL')}
+                                </span>
+                                {isCheaper && (
+                                  <span className="text-[10px] font-extrabold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-300 dark:border-emerald-800">
+                                    🏷️ ${priceDiff.toLocaleString('es-CL')} más económico
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <Link
+                            href={`/marketplace/product/${sellerItem.id}`}
+                            className="py-2 px-3 bg-white dark:bg-slate-900 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900 rounded-xl text-xs font-extrabold transition shadow-2xs text-center flex-shrink-0"
+                          >
+                            Ver opción
+                          </Link>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 px-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-dashed border-gray-200 dark:border-slate-700">
+                    <span className="text-3xl mb-2 block">📷</span>
+                    <h4 className="text-sm font-extrabold text-gray-900 dark:text-slate-100">No hay otros vendedores activos para este producto exacto</h4>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 max-w-md mx-auto font-medium">
+                      Esta tienda es la única en la categoría <strong className="text-blue-600 dark:text-blue-400 font-bold">{product.categories?.name || 'general'}</strong> que lo tiene publicado actualmente.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* PESTAÑA 3: PREGUNTAS Y RESPUESTAS */}
+            {activeTab === 'questions' && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-extrabold text-gray-900 dark:text-slate-100">Preguntas y Respuestas</h2>
+
+                {questions.length > 0 ? (
+                  <div className="space-y-4 mb-8">
+                    {questions.map((q) => (
+                      <div key={q.id} className="border-b border-gray-200 dark:border-slate-800 pb-4 last:border-b-0">
+                        <div className="flex gap-3 mb-2">
+                          <span className="text-2xl">❓</span>
+                          <div className="flex-1">
+                            <p className="text-gray-900 dark:text-slate-100 font-extrabold text-sm">{q.question}</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                              {new Date(q.created_at).toLocaleDateString('es-AR')}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {q.answer && (
+                          <div className="flex gap-3 ml-8">
+                            <span className="text-2xl">✅</span>
+                            <div className="flex-1 bg-emerald-50 dark:bg-emerald-950/60 p-3.5 rounded-2xl border border-emerald-200 dark:border-emerald-900">
+                              <p className="text-gray-900 dark:text-emerald-200 font-bold text-sm">{q.answer}</p>
+                              <p className="text-xs text-gray-500 dark:text-emerald-400 mt-1">
+                                Respondido por: {q.profiles?.store_name || 'Vendedor'}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 dark:text-slate-400 text-center py-4 mb-4 font-medium text-sm">
+                    Aún no hay preguntas sobre este producto. ¡Sé el primero!
+                  </p>
+                )}
+
+                {/* Formulario para hacer pregunta (Usuario Autenticado) */}
+                {userId && product.seller_id !== userId && (
+                  <form onSubmit={handleAskQuestion} className="border-t border-gray-200 dark:border-slate-800 pt-6">
+                    <h3 className="text-lg font-extrabold text-gray-900 dark:text-slate-100 mb-3">Haz una pregunta sobre este producto</h3>
+                    <textarea
+                      value={newQuestion}
+                      onChange={(e) => setNewQuestion(e.target.value)}
+                      required
+                      placeholder="Ej: ¿Tiene garantía? ¿Hacen envíos a todo el país?"
+                      className="w-full p-3.5 border border-gray-300 dark:border-slate-700 rounded-xl h-24 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 text-sm font-medium"
+                    />
+                    <button
+                      type="submit"
+                      disabled={submitting || !newQuestion.trim()}
+                      className={`px-6 py-3 rounded-xl font-extrabold text-white transition flex items-center gap-2 shadow-xs ${
+                        submitting || !newQuestion.trim()
+                          ? 'bg-gray-400 cursor-not-allowed'
+                          : 'bg-emerald-600 hover:bg-emerald-700 active:scale-95 cursor-pointer'
+                      }`}
+                    >
+                      <span>❓</span>
+                      <span>{submitting ? 'Enviando...' : 'Realizar una pregunta'}</span>
+                    </button>
+                  </form>
+                )}
+
+                {/* Formulario para hacer pregunta (Usuario No Autenticado) */}
+                {!userId && (
+                  <div className="border-t border-gray-200 dark:border-slate-800 pt-6">
+                    <h3 className="text-lg font-extrabold text-gray-900 dark:text-slate-100 mb-3">Haz una pregunta sobre este producto</h3>
+                    <div 
+                      onClick={() => showModalMessage(
+                        'Registro / Inicio de Sesión Requerido',
+                        'Para enviar tu pregunta al vendedor debes estar registrado o iniciar sesión.',
+                        'info',
+                        '/auth',
+                        'Registrarse / Iniciar Sesión'
+                      )}
+                      className="cursor-pointer group"
+                    >
+                      <textarea
+                        readOnly
+                        placeholder="Escribe tu pregunta sobre el producto..."
+                        className="w-full p-3.5 border border-gray-300 dark:border-slate-700 rounded-xl h-24 focus:outline-none mb-3 bg-gray-50 dark:bg-slate-800/40 text-gray-400 dark:text-slate-500 text-sm font-medium cursor-pointer group-hover:border-blue-400 transition"
+                      />
+                      <button
+                        type="button"
+                        className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-xl transition flex items-center gap-2 shadow-sm cursor-pointer active:scale-95"
+                      >
+                        <span>❓</span>
+                        <span>Realizar una pregunta</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

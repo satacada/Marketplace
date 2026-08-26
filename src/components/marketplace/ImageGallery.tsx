@@ -102,12 +102,39 @@ export default function ImageGallery({
     );
   }
 
-  // MODO DETALLE (Para la página de detalle de producto)
+  // MODO DETALLE (Para la página de detalle de producto estilo AliExpress)
   return (
-    <div className="flex flex-col gap-4">
-      {/* Contenedor principal de la foto */}
+    <div className="flex flex-col sm:flex-row gap-4 w-full">
+      {/* Tira de miniaturas verticales a la izquierda (Estilo AliExpress media_1787708475209.png) */}
+      {images.length > 1 && (
+        <div className="flex sm:flex-col gap-2.5 overflow-x-auto sm:overflow-y-auto max-h-[420px] pr-1 flex-shrink-0 order-2 sm:order-1 scrollbar-thin">
+          {images.map((img, idx) => (
+            <button
+              key={idx}
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentIndex(idx);
+              }}
+              onMouseEnter={() => setCurrentIndex(idx)}
+              className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 bg-slate-50 dark:bg-slate-900 ${
+                idx === currentIndex
+                  ? 'border-blue-600 shadow-md ring-2 ring-blue-100 dark:ring-blue-900/60 scale-105'
+                  : 'border-gray-200 dark:border-slate-800 opacity-70 hover:opacity-100 hover:border-gray-300 dark:hover:border-slate-700'
+              }`}
+            >
+              <img 
+                src={img} 
+                alt={`Miniatura ${idx + 1}`} 
+                className="w-full h-full object-cover" 
+              />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Contenedor principal de la foto (order-1 en desktop) */}
       <div 
-        className="relative w-full h-[360px] sm:h-[420px] bg-slate-50 dark:bg-slate-950 rounded-2xl overflow-hidden flex items-center justify-center border border-gray-200 dark:border-slate-800 group cursor-zoom-in shadow-inner"
+        className="relative flex-1 h-[360px] sm:h-[420px] bg-slate-50 dark:bg-slate-950 rounded-2xl overflow-hidden flex items-center justify-center border border-gray-200 dark:border-slate-800 group cursor-zoom-in shadow-inner order-1 sm:order-2"
         onClick={openModal}
       >
         <img 
@@ -150,32 +177,6 @@ export default function ImageGallery({
           </>
         )}
       </div>
-
-      {/* Tira de miniatura (Thumbnails) para seleccionar imagen */}
-      {images.length > 1 && (
-        <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-thin">
-          {images.map((img, idx) => (
-            <button
-              key={idx}
-              onClick={(e) => {
-                e.stopPropagation();
-                setCurrentIndex(idx);
-              }}
-              className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 bg-slate-50 ${
-                idx === currentIndex
-                  ? 'border-blue-600 shadow-md ring-2 ring-blue-100 scale-105'
-                  : 'border-gray-200 opacity-70 hover:opacity-100 hover:border-gray-300'
-              }`}
-            >
-              <img 
-                src={img} 
-                alt={`Miniatura ${idx + 1}`} 
-                className="w-full h-full object-cover" 
-              />
-            </button>
-          ))}
-        </div>
-      )}
 
       {/* Modal / Lightbox Pantalla Completa */}
       {isModalOpen && (
