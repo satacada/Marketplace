@@ -1099,19 +1099,32 @@ export default function MarketplacePage() {
 
           <div className="relative">
             <label className="block text-xs font-extrabold text-gray-600 dark:text-slate-300 uppercase tracking-wider mb-1">Ubicación</label>
-            <div className="relative">
-              <input
-                type="text"
-                value={locationName}
-                onChange={(e) => handleModalLocationInputChange(e.target.value)}
-                onFocus={() => modalLocationSuggestions.length > 0 && setShowModalSuggestions(true)}
-                placeholder="Ej: Plaza Colombia, Barracas, Palermo..."
-                className="w-full pl-9 pr-4 py-2.5 border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm font-medium bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100"
-              />
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">📍</span>
-              {isSearchingModalSuggestions && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-blue-500 font-bold animate-pulse">⏳</span>
-              )}
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={locationName}
+                  onChange={(e) => handleModalLocationInputChange(e.target.value)}
+                  onFocus={() => modalLocationSuggestions.length > 0 && setShowModalSuggestions(true)}
+                  placeholder="Ej: Plaza Colombia, Barracas, Palermo..."
+                  className="w-full pl-9 pr-4 py-2.5 border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm font-medium bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100"
+                />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">📍</span>
+                {isSearchingModalSuggestions && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-blue-500 font-bold animate-pulse">⏳</span>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleGPSInModal}
+                disabled={isGeolocating}
+                className="px-3.5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold transition flex items-center gap-1 flex-shrink-0 shadow-xs cursor-pointer active:scale-95"
+                title="Detectar mi ubicación exacta por GPS sin tipear dirección"
+              >
+                <span>🎯</span>
+                <span>{isGeolocating ? 'Detectando...' : 'Detectar'}</span>
+              </button>
             </div>
 
             {/* Dropdown de sugerencias de ubicación */}

@@ -242,15 +242,21 @@ export default function NewProductPage() {
     }
   };
 
-  // Función de geolocalización por GPS para el vendedor
-  const handleDetectGPS = () => {
+  useEffect(() => {
+    loadData();
+    detectUserCurrency();
+    autoDetectGPS(true);
+  }, []);
+
+  // Función de autodetección por GPS (silenciosa o por botón)
+  const autoDetectGPS = (silent = false) => {
     if (!navigator.geolocation) {
-      showModalMessage('GPS no soportado', 'Tu navegador no soporta geolocalización por GPS. Por favor ingresa manualmente el nombre exacto de tu ciudad/barrio.', 'info');
+      if (!silent) showModalMessage('GPS no soportado', 'Tu navegador no soporta geolocalización por GPS.', 'info');
       return;
     }
 
     setIsDetectingGPS(true);
-    setLocationError('');
+    if (!silent) setLocationError('');
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
@@ -258,31 +264,49 @@ export default function NewProductPage() {
           const lat = position.coords.latitude;
           const lng = position.coords.longitude;
           
-          // Reverse geocoding via OpenStreetMap / Nominatim API
           const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
           const data = await res.json();
           
-          const city = data.address?.city || data.address?.town || data.address?.suburb || data.address?.neighbourhood || data.address?.county || 'Buenos Aires';
-          const state = data.address?.state || 'BA';
-          const detectedName = `${city}, ${state}`;
+          const amenity = data.address?.amenity || data.address?.leisure || data.address?.park || '';
+          const suburb = data.address?.suburb || data.address?.neighbourhood || data.address?.quarter || '';
+          const city = data.address?.city || data.address?.town || data.address?.village || data.address?.county || 'Barracas';
 
-          setLocationName(detectedName);
+          let detected = '';
+          if (amenity) {
+            detected = `${amenity}, ${suburb || city}`;
+          } else if (suburb) {
+            detected = `${suburb}, ${city}`;
+          } else {
+            detected = city;
+          }
+
+          const finalLocation = detected || 'Plaza Colombia, Barracas';
+          setLocationName(finalLocation);
           setShowSuggestions(false);
-          showModalMessage('Ubicación GPS detectada', `Se estableció tu ubicación exacta: ${detectedName}`, 'success');
+          if (!silent) {
+            showModalMessage('Ubicación GPS detectada', `Se estableció tu posición exacta sin ingresar dirección: ${finalLocation}`, 'success');
+          }
         } catch (err) {
-          setLocationName('Palermo, CABA');
-          setShowSuggestions(false);
-          showModalMessage('Ubicación estimada', 'Se asignó la ubicación aproximada: Palermo, CABA', 'info');
+          if (!silent) {
+            setLocationName('Plaza Colombia, Barracas');
+            showModalMessage('Ubicación estimada', 'Se asignó la ubicación aproximada: Plaza Colombia, Barracas', 'info');
+          }
         } finally {
           setIsDetectingGPS(false);
         }
       },
       (err) => {
         setIsDetectingGPS(false);
-        showModalMessage('Permiso GPS denegado', 'No se pudo obtener acceso a tu posición GPS. Por favor escribe el nombre exacto de tu barrio/ciudad en el campo.', 'info');
+        if (!silent) {
+          showModalMessage('Permiso GPS denegado', 'No se pudo obtener acceso a tu posición GPS. Por favor presiona la flecha 🎯 o escribe tu barrio.', 'info');
+        }
       },
       { timeout: 10000, enableHighAccuracy: true }
     );
+  };
+
+  const handleDetectGPS = () => {
+    autoDetectGPS(false);
   };
 
   const handleAddProduct = async (e: React.FormEvent) => {
@@ -554,10 +578,11 @@ export default function NewProductPage() {
                 type="button"
                 onClick={handleDetectGPS}
                 disabled={isDetectingGPS}
-                className="px-3.5 py-3 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/80 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800 rounded-xl text-xs font-bold transition flex items-center gap-1.5 flex-shrink-0 shadow-2xs cursor-pointer"
-                title="Detectar mi ciudad o barrio actual por GPS"
+                className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 flex-shrink-0 shadow-xs cursor-pointer active:scale-95"
+                title="Detectar mi ubicación exacta por GPS sin tipear dirección"
               >
-                <span>{isDetectingGPS ? '⏳ Buscando GPS...' : '📍 Usar mi GPS'}</span>
+                <span>🎯</span>
+                <span>{isDetectingGPS ? 'Detectando...' : 'Detectar mi posición'}</span>
               </button>
             </div>
 
