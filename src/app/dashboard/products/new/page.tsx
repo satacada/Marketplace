@@ -205,6 +205,43 @@ export default function NewProductPage() {
     // No hacer nada, mantener el formato visible
   };
 
+  const [locationSuggestions, setLocationSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearchingSuggestions, setIsSearchingSuggestions] = useState(false);
+
+  const handleLocationInputChange = (value: string) => {
+    setLocationName(value);
+    if (value.trim().length >= 3) {
+      setLocationError('');
+      fetchLocationSuggestions(value);
+    } else {
+      setLocationSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const fetchLocationSuggestions = async (query: string) => {
+    setIsSearchingSuggestions(true);
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        const suggestions = data.map((item: any) => {
+          const parts = item.display_name.split(',');
+          const city = parts[0]?.trim();
+          const state = parts[1]?.trim() || parts[2]?.trim() || '';
+          return state ? `${city}, ${state}` : city;
+        });
+        setLocationSuggestions(Array.from(new Set(suggestions)));
+        setShowSuggestions(true);
+      }
+    } catch (err) {
+      console.log('Error buscando sugerencias de ubicación');
+    } finally {
+      setIsSearchingSuggestions(false);
+    }
+  };
+
   // Función de geolocalización por GPS para el vendedor
   const handleDetectGPS = () => {
     if (!navigator.geolocation) {
@@ -230,9 +267,11 @@ export default function NewProductPage() {
           const detectedName = `${city}, ${state}`;
 
           setLocationName(detectedName);
+          setShowSuggestions(false);
           showModalMessage('Ubicación GPS detectada', `Se estableció tu ubicación exacta: ${detectedName}`, 'success');
         } catch (err) {
           setLocationName('Palermo, CABA');
+          setShowSuggestions(false);
           showModalMessage('Ubicación estimada', 'Se asignó la ubicación aproximada: Palermo, CABA', 'info');
         } finally {
           setIsDetectingGPS(false);
@@ -481,7 +520,7 @@ export default function NewProductPage() {
         </div>
 
         {/* CAMPO DE UBICACIÓN VALIDADA CON GPS & GOOGLE MAPS */}
-        <div className="bg-slate-50/90 dark:bg-slate-800/80 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
+        <div className="bg-slate-50/90 dark:bg-slate-800/80 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3 relative">
           <div className="flex justify-between items-center">
             <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300">
               Ubicación de la Publicación (Barrio / Ciudad) <span className="text-red-500">*</span>
@@ -491,29 +530,57 @@ export default function NewProductPage() {
             </span>
           </div>
 
-          <div className="flex gap-2">
-            <input
-              type="text"
-              required
-              value={locationName}
-              onChange={(e) => {
-                setLocationName(e.target.value);
-                if (e.target.value.trim().length >= 3) setLocationError('');
-              }}
-              className={`flex-1 p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 ${
-                locationError ? 'border-red-500' : 'border-gray-300 dark:border-slate-700'
-              }`}
-              placeholder="Ej: Palermo, CABA o Barracas, Buenos Aires"
-            />
-            <button
-              type="button"
-              onClick={handleDetectGPS}
-              disabled={isDetectingGPS}
-              className="px-3.5 py-3 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/80 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800 rounded-xl text-xs font-bold transition flex items-center gap-1.5 flex-shrink-0 shadow-2xs cursor-pointer"
-              title="Detectar mi ciudad o barrio actual por GPS"
-            >
-              <span>{isDetectingGPS ? '⏳ Buscando...' : '📍 Usar mi GPS'}</span>
-            </button>
+          <div className="relative">
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  required
+                  value={locationName}
+                  onChange={(e) => handleLocationInputChange(e.target.value)}
+                  onFocus={() => locationSuggestions.length > 0 && setShowSuggestions(true)}
+                  className={`w-full p-3 pl-9 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 ${
+                    locationError ? 'border-red-500' : 'border-gray-300 dark:border-slate-700'
+                  }`}
+                  placeholder="Escribe tu barrio o ciudad (ej: Barracas, Palermo, Quilmes)..."
+                />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">📍</span>
+                {isSearchingSuggestions && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-blue-500 font-bold animate-pulse">⏳</span>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleDetectGPS}
+                disabled={isDetectingGPS}
+                className="px-3.5 py-3 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/80 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800 rounded-xl text-xs font-bold transition flex items-center gap-1.5 flex-shrink-0 shadow-2xs cursor-pointer"
+                title="Detectar mi ciudad o barrio actual por GPS"
+              >
+                <span>{isDetectingGPS ? '⏳ Buscando GPS...' : '📍 Usar mi GPS'}</span>
+              </button>
+            </div>
+
+            {/* Dropdown de Sugerencias Interactivas de Dirección/Barrio */}
+            {showSuggestions && locationSuggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-xl z-30 max-h-48 overflow-y-auto">
+                {locationSuggestions.map((sug, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => {
+                      setLocationName(sug);
+                      setShowSuggestions(false);
+                      setLocationError('');
+                    }}
+                    className="w-full text-left px-4 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800 text-xs font-bold text-gray-800 dark:text-slate-200 flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 last:border-b-0 transition"
+                  >
+                    <span>📍</span>
+                    <span>{sug}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {locationError && (
@@ -523,20 +590,38 @@ export default function NewProductPage() {
             </p>
           )}
 
+          {/* Previsualización del Mapa Interactivo de Ubicación */}
           {locationName && locationName.trim().length >= 3 && (
-            <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-xs mt-1">
-              <span className="text-gray-700 dark:text-slate-300 font-medium truncate max-w-[240px] sm:max-w-xs">
-                📍 Ubicación registrada: <strong className="text-gray-900 dark:text-slate-100 font-bold">{locationName}</strong>
-              </span>
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationName)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 font-extrabold flex items-center gap-1 hover:underline text-xs"
-              >
-                <span>Ver en Google Maps</span>
-                <span className="text-[10px]">↗</span>
-              </a>
+            <div className="space-y-2 mt-2">
+              <div className="relative h-44 w-full bg-slate-100 dark:bg-slate-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-700 shadow-inner">
+                <iframe
+                  title={`Mapa de ${locationName}`}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  src={`https://maps.google.com/maps?q=${encodeURIComponent(locationName)}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+                  className="w-full h-full rounded-2xl"
+                />
+                <div className="absolute bottom-2.5 left-3 z-10 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-bold px-3 py-1 rounded-xl shadow-xs flex items-center gap-1.5">
+                  <span>📍 Ubicación registrada: {locationName}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-xs">
+                <span className="text-gray-700 dark:text-slate-300 font-medium truncate max-w-[240px] sm:max-w-xs">
+                  📍 Registrarás tu producto en: <strong className="text-gray-900 dark:text-slate-100 font-bold">{locationName}</strong>
+                </span>
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationName)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-800 font-extrabold flex items-center gap-1 hover:underline text-xs"
+                >
+                  <span>Ver en Google Maps</span>
+                  <span className="text-[10px]">↗</span>
+                </a>
+              </div>
             </div>
           )}
         </div>

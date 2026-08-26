@@ -139,38 +139,35 @@ export default function AdminProductsPage() {
   const getTabConfig = (t: TabType) => {
     switch (t) {
       case 'pending':
-        return { label: '⏳ Pendientes de aprobación', color: 'yellow' };
+        return { label: '⏳ Pendientes de aprobación', color: 'amber' };
       case 'approved':
-        return { label: '✅ Aprobados', color: 'green' };
+        return { label: '✅ Aprobados', color: 'emerald' };
       case 'deleted':
-        return { label: '🗑️ Eliminados', color: 'red' };
+        return { label: '🗑️ Eliminados', color: 'rose' };
     }
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Administración de Productos</h1>
-        <p className="text-gray-600 mt-1">Gestiona la aprobación, visibilidad y eliminación de productos</p>
+    <div className="p-6 sm:p-8 max-w-6xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-slate-100 tracking-tight">Administración de Productos</h1>
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 mt-1">Gestiona la aprobación, visibilidad y eliminación de productos</p>
       </div>
 
       {/* Pestañas */}
-      <div className="flex gap-2 mb-6 border-b border-gray-200 pb-3">
+      <div className="flex gap-2 border-b border-gray-200 dark:border-slate-800 pb-3 overflow-x-auto">
         {(['pending', 'approved', 'deleted'] as TabType[]).map((t) => {
           const config = getTabConfig(t);
-          const count = products.filter(p => {
-            if (t === 'deleted') return p.is_deleted;
-            return p.status === t && !p.is_deleted;
-          }).length;
+          const count = products.length;
           
           return (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 flex-shrink-0 ${
                 tab === t 
-                  ? `bg-${config.color}-600 text-white` 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? `bg-blue-600 text-white shadow-xs` 
+                  : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800'
               }`}
             >
               {config.label} ({count})
@@ -180,11 +177,11 @@ export default function AdminProductsPage() {
       </div>
 
       {loading ? (
-        <p className="text-gray-500 text-center py-8">Cargando productos...</p>
+        <p className="text-gray-500 dark:text-slate-400 text-center py-8 font-bold">Cargando productos...</p>
       ) : products.length === 0 ? (
-        <div className="bg-white p-12 rounded-lg shadow-md text-center border border-gray-100">
+        <div className="bg-white dark:bg-slate-900 p-12 rounded-3xl shadow-2xs text-center border border-gray-200/90 dark:border-slate-800">
           <p className="text-6xl mb-4">📦</p>
-          <p className="text-gray-500 text-lg">
+          <p className="text-gray-600 dark:text-slate-300 text-base font-bold">
             {tab === 'pending' && 'No hay productos pendientes de aprobación.'}
             {tab === 'approved' && 'No hay productos aprobados.'}
             {tab === 'deleted' && 'No hay productos eliminados.'}
@@ -193,8 +190,8 @@ export default function AdminProductsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product) => (
-            <div key={product.id} className="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden">
-              <div className="relative aspect-square bg-gray-100">
+            <div key={product.id} className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xs border border-gray-200/90 dark:border-slate-800 overflow-hidden flex flex-col justify-between text-gray-900 dark:text-slate-100">
+              <div className="relative aspect-square bg-gray-100 dark:bg-slate-800">
                 {product.image_urls?.[0] ? (
                   <Image
                     src={product.image_urls[0]}
@@ -203,96 +200,84 @@ export default function AdminProductsPage() {
                     className="object-cover"
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-full text-gray-400">
+                  <div className="flex items-center justify-center h-full text-gray-400 dark:text-slate-500">
                     <span className="text-6xl">📦</span>
                   </div>
                 )}
-                <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold text-white ${
-                  product.status === 'pending' ? 'bg-yellow-500' : 
-                  product.status === 'approved' ? 'bg-green-500' : 'bg-red-500'
+                <div className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-extrabold text-white shadow-xs ${
+                  product.status === 'pending' ? 'bg-amber-500' : 
+                  product.status === 'approved' ? 'bg-emerald-600' : 'bg-rose-600'
                 }`}>
                   {product.status === 'pending' ? '⏳ Pendiente' : 
                    product.status === 'approved' ? '✅ Aprobado' : '❌ Rechazado'}
                 </div>
               </div>
 
-              <div className="p-4">
-                <h3 className="font-bold text-lg text-gray-900 mb-1 line-clamp-1">{product.title}</h3>
-                <p className="text-sm text-gray-600 mb-2 line-clamp-2">{product.description}</p>
+              <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                <div>
+                  <h3 className="font-extrabold text-base text-gray-900 dark:text-slate-100 mb-1 line-clamp-1">{product.title}</h3>
+                  <p className="text-xs text-gray-600 dark:text-slate-300 line-clamp-2">{product.description}</p>
+                </div>
                 
-                <div className="flex justify-between items-center mb-3">
-                  <span className="text-xl font-bold text-indigo-600">${product.price}</span>
-                  <span className="text-sm text-gray-500">Stock: {product.stock}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-xl font-black text-blue-600 dark:text-blue-400">${product.price?.toLocaleString('es-CL')}</span>
+                  <span className="text-xs font-bold text-gray-500 dark:text-slate-400">Stock: {product.stock}</span>
                 </div>
 
-                <div className="border-t border-gray-200 pt-3 mb-3">
-                  <p className="text-xs text-gray-500">Vendedor:</p>
-                  <p className="text-sm font-medium text-gray-900">
+                <div className="border-t border-gray-100 dark:border-slate-800 pt-3">
+                  <p className="text-[10px] text-gray-400 dark:text-slate-500 font-bold uppercase tracking-wider">Vendedor:</p>
+                  <p className="text-xs font-extrabold text-gray-800 dark:text-slate-200">
                     {product.profiles?.store_name || product.profiles?.email || 'Sin nombre'}
                   </p>
                 </div>
 
                 {/* Acciones según pestaña */}
                 {tab === 'pending' && (
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 pt-2">
                     <button
                       onClick={() => handleApprove(product.id)}
                       disabled={processingId === product.id}
-                      className={`flex-1 py-2 rounded-lg font-medium text-white transition ${
-                        processingId === product.id ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
-                      }`}
+                      className="flex-1 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition shadow-2xs"
                     >
-                      ✅ Aprobar
+                      ✓ Aprobar
                     </button>
                     <button
                       onClick={() => handleReject(product.id)}
                       disabled={processingId === product.id}
-                      className={`flex-1 py-2 rounded-lg font-medium text-white transition ${
-                        processingId === product.id ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'
-                      }`}
+                      className="flex-1 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition shadow-2xs"
                     >
-                       Rechazar
-                    </button>
-                  </div>
-                )}
-
-                {tab === 'deleted' && (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleRestore(product.id)}
-                      disabled={processingId === product.id}
-                      className={`flex-1 py-2 rounded-lg font-medium text-white transition ${
-                        processingId === product.id ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-                      }`}
-                    >
-                      ♻️ Restaurar
-                    </button>
-                    <button
-                      onClick={() => handlePermanentDelete(product.id)}
-                      disabled={processingId === product.id}
-                      className={`flex-1 py-2 rounded-lg font-medium text-white transition ${
-                        processingId === product.id ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'
-                      }`}
-                    >
-                      🗑️ Eliminar
+                      Rechazar
                     </button>
                   </div>
                 )}
 
                 {tab === 'approved' && (
                   <button
-                    onClick={() => {
-                      if (confirm('¿Eliminar este producto aprobado?')) {
-                        handleReject(product.id);
-                      }
-                    }}
+                    onClick={() => handleReject(product.id)}
                     disabled={processingId === product.id}
-                    className={`w-full py-2 rounded-lg font-medium text-white transition ${
-                      processingId === product.id ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'
-                    }`}
+                    className="w-full py-2 rounded-xl text-xs font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900 border border-rose-200 dark:border-rose-900 transition"
                   >
-                    🗑️ Marcar como eliminado
+                    Eliminar publicación
                   </button>
+                )}
+
+                {tab === 'deleted' && (
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      onClick={() => handleRestore(product.id)}
+                      disabled={processingId === product.id}
+                      className="flex-1 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white transition shadow-2xs"
+                    >
+                      Restaurar
+                    </button>
+                    <button
+                      onClick={() => handlePermanentDelete(product.id)}
+                      disabled={processingId === product.id}
+                      className="flex-1 py-2 rounded-xl text-xs font-bold bg-rose-700 hover:bg-rose-800 text-white transition shadow-2xs"
+                    >
+                      Eliminar Definitivo
+                    </button>
+                  </div>
                 )}
               </div>
             </div>

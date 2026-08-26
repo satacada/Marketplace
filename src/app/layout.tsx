@@ -28,9 +28,10 @@ export default function RootLayout({
     <html
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full bg-white" suppressHydrationWarning>
-        <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
+      <body className="min-h-full bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100" suppressHydrationWarning>
+        <Suspense fallback={<div className="min-h-screen bg-gray-50 dark:bg-slate-950" />}>
           <LayoutWrapper>
             {children}
           </LayoutWrapper>
