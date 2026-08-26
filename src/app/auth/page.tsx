@@ -1,412 +1,98 @@
 /**
  * ============================================================================
- * FILE: page.tsx
+ * FILE: page.tsx (app/auth)
  * ============================================================================
  * 
- * @description Página de autenticación simplificada (solo login).
- *              Solo contiene formulario de login con links a registro y recuperación.
+ * @description Página de Iniciar Sesión en Marketplace SaaS.
+ *              Refactorizado bajo Clean Architecture y SOLID:
+ *              - Lógica de autenticación en `useAuthPage` (< 40 líneas)
+ *              - Vista limpia y orquestada (< 90 líneas)
  * 
  * @module Presentation/Pages/Auth
- * 
- * @author System
- * @created 2026-07-16
- * @modified 2026-08-23
- * 
- * @dependencies
- * - react
- * - @/features/auth/hooks/useAuth
- * - @/components/ui/Button
- * - @/components/ui/Input
- * - @/components/ui/Modal
- * 
- * @related-files
- * - @/features/auth/hooks/useAuth.ts
- * - @/features/auth/services/auth.service.ts
- * 
- * @exports
- * - AuthPage (default)
- * 
  * ============================================================================
  */
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Modal } from '@/components/ui/Modal';
+import { useAuthPage } from '@/features/auth/hooks/useAuthPage';
 
-export default function AuthPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  
-  // Estados para recuperación de contraseña (Reset)
-  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const [showModal, setShowModal] = useState(false);
-  const [modalData, setModalData] = useState({ 
-    title: '', 
-    message: '', 
-    type: 'success' as 'success' | 'info' | 'error' 
-  });
-  const [localError, setLocalError] = useState('');
-  
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { login, updatePassword, isLoading } = useAuth();
-
-  // Efecto para detectar tokens de recuperación o pre-llenar email
-  useEffect(() => {
-    const emailParam = searchParams.get('email');
-    if (emailParam) {
-      setEmail(emailParam);
-    }
-
-    const typeParam = searchParams.get('type');
-    const codeParam = searchParams.get('code');
-    const hash = typeof window !== 'undefined' ? window.location.hash : '';
-
-    // Si la URL trae un código PKCE (?code=...), type=recovery o hash de acceso, redirigir al formulario de reset
-    if (codeParam || typeParam === 'recovery' || hash.includes('type=recovery') || hash.includes('access_token')) {
-      const queryStr = searchParams.toString();
-      const redirectUrl = `/auth/reset${queryStr ? `?${queryStr}` : ''}${hash}`;
-      router.push(redirectUrl);
-      return;
-    }
-
-    // Escuchar eventos de sesión de Supabase (PASSWORD_RECOVERY)
-    const checkRecoveryEvent = async () => {
-      const { supabase } = await import('@/infrastructure/database/supabase.client');
-      
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        if (event === 'PASSWORD_RECOVERY') {
-          const userEmail = session?.user?.email || '';
-          router.push(`/auth/reset?email=${encodeURIComponent(userEmail)}`);
-        }
-      });
-      return subscription;
-    };
-
-    let sub: any;
-    checkRecoveryEvent().then(s => { sub = s; });
-
-    return () => {
-      if (sub) sub.unsubscribe();
-    };
-  }, [searchParams, router]);
-
-  const showModalMessage = (title: string, message: string, type: 'success' | 'info' | 'error' = 'success') => {
-    setModalData({ title, message, type });
-    setShowModal(true);
-  };
-
-  const validateEmail = (email: string) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLocalError('');
-
-    if (!validateEmail(email)) {
-      setLocalError('Por favor ingresa un correo electrónico válido');
-      return;
-    }
-
-    if (!password) {
-      setLocalError('Por favor ingresa tu contraseña');
-      return;
-    }
-
-    const result = await login({ email, password });
-    if (result.success) {
-      router.push('/marketplace');
-    } else {
-      setLocalError(result.error || 'Error al iniciar sesión');
-    }
-  };
-
-  const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLocalError('');
-
-    if (newPassword.length < 6) {
-      setLocalError('La contraseña debe tener al menos 6 caracteres');
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      setLocalError('Las contraseñas no coinciden');
-      return;
-    }
-
-    setIsProcessing(true);
-
-    try {
-      const result = await updatePassword(newPassword);
-      if (result.success) {
-        showModalMessage(
-          '¡Contraseña restablecida!',
-          'Tu contraseña ha sido actualizada exitosamente.\n\nAhora puedes iniciar sesión con tu nueva contraseña.',
-          'success'
-        );
-        setIsRecoveryMode(false);
-        setPassword('');
-      } else {
-        setLocalError(result.error || 'Error al restablecer contraseña');
-      }
-    } catch (error: any) {
-      setLocalError(error.message || 'Error al restablecer contraseña');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+export default function LoginPage() {
+  const auth = useAuthPage();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full">
-        {/* Card principal */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-          {/* Header con branding */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6 text-center">
-            <div className="text-4xl mb-2">{isRecoveryMode ? '🔐' : '🛒'}</div>
-            <h1 className="text-2xl font-bold text-white">
-              {isRecoveryMode ? 'Restablecer Contraseña' : 'Marketplace SaaS'}
-            </h1>
-            <p className="text-blue-100 text-sm mt-1">
-              {isRecoveryMode ? 'Ingresa tu nueva contraseña' : 'Multi-Tenant Platform'}
-            </p>
-          </div>
-
-          {/* Contenido del formulario */}
-          <div className="px-8 py-6">
-            {isRecoveryMode ? (
-              /* VISTA DE RESTABLECER CONTRASEÑA (RECOVERY) */
-              <div>
-                {email && (
-                  <div className="mb-5 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
-                    <span className="font-medium">Usuario:</span> {email}
-                  </div>
-                )}
-
-                <p className="text-gray-600 mb-6 text-sm">
-                  Ingresa tu nueva contraseña y su confirmación para restablecer tu cuenta.
-                </p>
-
-                <form onSubmit={handleResetPassword} className="space-y-5">
-                  {/* Nueva contraseña */}
-                  <div>
-                    <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                      Nueva contraseña
-                    </label>
-                    <div className="relative">
-                      <Input
-                        id="newPassword"
-                        type="password"
-                        required
-                        placeholder="••••••••"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        fullWidth
-                        className="pl-10"
-                      />
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                        🔒
-                      </div>
-                    </div>
-                    <p className="mt-1 text-xs text-gray-500">Mínimo 6 caracteres</p>
-                  </div>
-
-                  {/* Confirmar contraseña */}
-                  <div>
-                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                      Confirmar nueva contraseña
-                    </label>
-                    <div className="relative">
-                      <Input
-                        id="confirmPassword"
-                        type="password"
-                        required
-                        placeholder="••••••••"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        fullWidth
-                        className="pl-10"
-                      />
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                        🔒
-                      </div>
-                    </div>
-                  </div>
-
-                  {localError && (
-                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                      {localError}
-                    </div>
-                  )}
-
-                  <Button
-                    type="submit"
-                    isLoading={isProcessing}
-                    fullWidth
-                    variant="primary"
-                    className="py-3 text-base font-medium"
-                  >
-                    {isProcessing ? 'Procesando...' : 'Restablecer Contraseña'}
-                  </Button>
-                </form>
-
-                <div className="mt-6 text-center text-sm text-gray-500">
-                  <button
-                    type="button"
-                    onClick={() => setIsRecoveryMode(false)}
-                    className="text-blue-600 hover:text-blue-800 font-medium transition"
-                  >
-                    ← Volver a Iniciar Sesión
-                  </button>
-                </div>
-              </div>
-            ) : (
-              /* VISTA DE INICIAR SESIÓN (LOGIN) */
-              <div>
-                <h2 className="text-xl font-bold text-gray-900 mb-6">
-                  Iniciar Sesión
-                </h2>
-
-                <form onSubmit={handleLogin} className="space-y-5">
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                      Correo electrónico
-                    </label>
-                    <div className="relative">
-                      <Input
-                        id="email"
-                        type="email"
-                        required
-                        placeholder="tu@correo.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        fullWidth
-                        className="pl-10"
-                      />
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                        📧
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                      Contraseña
-                    </label>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        type="password"
-                        required
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        fullWidth
-                        className="pl-10"
-                      />
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                        🔒
-                      </div>
-                    </div>
-                    <div className="mt-2 text-right">
-                      <Link
-                        href="/auth/reset-password"
-                        className="text-sm text-blue-600 hover:text-blue-800 transition"
-                      >
-                        ¿Olvidaste tu contraseña?
-                      </Link>
-                    </div>
-                  </div>
-
-                  {localError && (
-                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                      {localError}
-                    </div>
-                  )}
-
-                  <Button
-                    type="submit"
-                    isLoading={isLoading}
-                    fullWidth
-                    variant="primary"
-                    className="py-3 text-base font-medium"
-                  >
-                    Iniciar Sesión
-                  </Button>
-                </form>
-
-                <div className="mt-6 text-center text-sm text-gray-500">
-                  <p>
-                    ¿No tienes cuenta?{' '}
-                    <Link
-                      href="/auth/register"
-                      className="text-blue-600 hover:text-blue-800 font-medium transition"
-                    >
-                      Regístrate gratis
-                    </Link>
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-6 text-center text-xs text-gray-500">
-          <p>Al continuar, aceptas nuestros Términos de Servicio y Política de Privacidad</p>
-          <p className="mt-2 font-medium text-gray-400">Desarrollado por David TC</p>
-        </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-gray-900 dark:text-slate-100">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-2">
+        <span className="text-4xl">🛍️</span>
+        <h2 className="text-2xl font-black text-gray-900 dark:text-slate-100">
+          Iniciar Sesión en Marketplace
+        </h2>
+        <p className="text-xs text-gray-500 font-medium">
+          Accede a tu cuenta de vendedor o comprador
+        </p>
       </div>
 
-      {/* Modal profesional */}
-      <Modal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        size="sm"
-      >
-        <div className={`text-center p-6 rounded-t-lg ${
-          modalData.type === 'success' 
-            ? 'bg-gradient-to-br from-green-50 to-emerald-50' 
-            : modalData.type === 'error'
-            ? 'bg-gradient-to-br from-red-50 to-pink-50'
-            : 'bg-gradient-to-br from-blue-50 to-indigo-50'
-        }`}>
-          <div className="text-6xl mb-3">
-            {modalData.type === 'success' ? '✅' : modalData.type === 'error' ? '❌' : 'ℹ️'}
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white dark:bg-slate-900 py-8 px-6 shadow-2xs rounded-3xl border border-gray-200/90 dark:border-slate-800 space-y-6">
+          {auth.error && (
+            <div className="p-3 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs font-bold rounded-xl border border-rose-200 dark:border-rose-900">
+              {auth.error}
+            </div>
+          )}
+
+          <form onSubmit={auth.handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300 mb-1">
+                Correo Electrónico
+              </label>
+              <input
+                type="email"
+                value={auth.email}
+                onChange={(e) => auth.setEmail(e.target.value)}
+                placeholder="tu@email.com"
+                className="w-full p-3 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 font-medium focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300 mb-1">
+                Contraseña
+              </label>
+              <input
+                type="password"
+                value={auth.password}
+                onChange={(e) => auth.setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full p-3 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 font-medium focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            <div className="flex items-center justify-between text-xs font-bold">
+              <Link href="/auth/reset" className="text-blue-600 dark:text-blue-400 hover:underline">
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
+
+            <button
+              type="submit"
+              disabled={auth.loading}
+              className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black text-xs transition shadow-xs disabled:opacity-50 cursor-pointer"
+            >
+              {auth.loading ? 'Verificando...' : 'Iniciar Sesión'}
+            </button>
+          </form>
+
+          <div className="pt-4 border-t border-gray-100 dark:border-slate-800 text-center text-xs font-medium">
+            <span className="text-gray-500">¿Aún no tienes cuenta? </span>
+            <Link href="/auth/register" className="text-blue-600 font-bold hover:underline">
+              Regístrate gratis
+            </Link>
           </div>
-          <h3 className="text-2xl font-bold text-gray-900">
-            {modalData.title}
-          </h3>
         </div>
-        
-        <div className="p-6">
-          <p className="text-gray-600 text-center whitespace-pre-line leading-relaxed">
-            {modalData.message}
-          </p>
-          
-          <Button
-            onClick={() => setShowModal(false)}
-            fullWidth
-            variant={modalData.type === 'success' ? 'success' : modalData.type === 'error' ? 'danger' : 'primary'}
-            className="mt-6"
-          >
-            Entendido / Ir a Iniciar Sesión
-          </Button>
-        </div>
-      </Modal>
+      </div>
     </div>
   );
 }

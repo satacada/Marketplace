@@ -15,6 +15,7 @@ All AI agents (Antigravity, Cursor, Windsurf, Claude Code, GitHub Copilot, ChatG
 - **`docs/standards/design_patterns.md`** (UI Colors `#2563eb`, SVG Icons, Compact Cards & Modals)
 - **`docs/standards/scalability_patterns.md`** (Caching, Cursors, Guest Cart & Database Indexing)
 - **`docs/standards/traceability_and_testing_guide.md`** (Change Traceability, Code Modularity & Zero-Error Testing)
+- **`docs/standards/enterprise_architecture_guide.md`** (Amazon, Google & AliExpress Enterprise Architecture Standards)
 
 ## MANDATORY RULES:
 1. BEFORE writing code: Read `docs/standards/` to ensure full alignment.

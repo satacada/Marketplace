@@ -29,3 +29,7 @@ Este directorio contiene los manuales técnicos y estándares profesionales que 
 6. 🔍 **Guía de Trazabilidad, Modularidad y Pruebas:**  
    [`traceability_and_testing_guide.md`](file:///D:/APLICACIONES/marketplace-saas/docs/standards/traceability_and_testing_guide.md)  
    *Reglas para registro exacto de archivos modificados, desacoplamiento modular, trazabilidad de errores y testing de build.*
+
+7. 🏛️ **Guía de Arquitectura Nivel Empresa (Amazon, Google & AliExpress):**  
+   [`enterprise_architecture_guide.md`](file:///D:/APLICACIONES/marketplace-saas/docs/standards/enterprise_architecture_guide.md)  
+   *Normas de arquitectura limpia, SOLID, desacoplamiento en Custom Hooks por Feature, subcomponentes modulares de < 120 líneas y JSDoc obligatorio.*
