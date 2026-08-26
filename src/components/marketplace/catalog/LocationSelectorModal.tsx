@@ -113,8 +113,9 @@ export default function LocationSelectorModal({
           <OpenStreetMapEmbed
             lat={mapCoords.lat}
             lng={mapCoords.lng}
-            zoomDelta={0.01 + selectedRadius * 0.003}
+            zoom={Math.max(10, 14 - Math.floor(selectedRadius / 10))}
             height="h-56"
+            markerColor="red"
           />
 
           {/* Círculo Azul Transparente del Radio de Búsqueda Centrado */}
