@@ -1,3 +1,15 @@
+/**
+ * ============================================================================
+ * FILE: page.tsx (app/page.tsx)
+ * ============================================================================
+ * 
+ * @description Ruta Raíz del Sistema. Redirige automáticamente al usuario
+ *              a la experiencia principal de Autenticación / Marketplace.
+ * 
+ * @module Presentation/Pages/Root
+ * ============================================================================
+ */
+
 'use client';
 
 import { useEffect } from 'react';
