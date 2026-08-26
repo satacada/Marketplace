@@ -54,6 +54,7 @@ import { debounce } from '@/shared/utils/debounce';
 import { getLocalStorageItem, setLocalStorageItem } from '@/shared/utils/localStorage';
 import { AdvancedProductFilters, SortOption } from '@/features/products/types/product-filters.types';
 import { trackUserEvent } from '@/lib/telemetry';
+import PersonalizedRecommendationsSection from '@/components/marketplace/PersonalizedRecommendationsSection';
 
 type Product = {
   id: string;
@@ -953,6 +954,9 @@ export default function MarketplacePage() {
 
           {/* Grid de productos compacto estilo Facebook Marketplace */}
           <main className="flex-1">
+            {/* FASE 4: SECCIÓN DE RECOMENDADOS PERSONALIZADOS POR IA */}
+            <PersonalizedRecommendationsSection userId={user?.id || null} />
+
             {loading && products.length === 0 ? (
               <div className="flex items-center justify-center py-12">
                 <div className="text-center">
