@@ -137,69 +137,84 @@ export default function FavoritesPage() {
             <p className="text-gray-600 dark:text-slate-300 text-lg font-bold mb-4">No tienes productos favoritos aún.</p>
             <Link 
               href="/marketplace" 
-              className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl hover:bg-indigo-700 font-bold transition inline-block shadow-xs"
+              className="bg-blue-600 text-white px-6 py-2.5 rounded-xl hover:bg-blue-700 font-bold transition inline-block shadow-xs"
             >
               Explorar Marketplace
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="space-y-6">
             {favorites.map((fav) => {
               const product = fav.products;
               const isOwnProduct = userId && product.seller_id === userId;
 
               return (
-                <div key={fav.id} className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xs border border-gray-200/90 dark:border-slate-800 overflow-hidden flex flex-col hover:shadow-xs transition">
-                  <Link href={`/marketplace/product/${product.id}`} className="block">
+                <div 
+                  key={fav.id} 
+                  className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xs border border-gray-200/90 dark:border-slate-800 overflow-hidden flex flex-col lg:flex-row gap-6 p-6 hover:shadow-md transition-all duration-200"
+                >
+                  {/* Columna Izquierda: Galería de Fotos del Producto */}
+                  <div className="w-full lg:w-1/2 flex-shrink-0">
                     <ImageGallery images={product.image_urls || []} />
-                  </Link>
-                  
-                  <div className="p-6 flex-1 flex flex-col">
-                    <Link href={`/marketplace/product/${product.id}`} className="block mb-2">
+                  </div>
+
+                  {/* Columna Derecha: Detalles del Producto & Acciones (Llena el espacio libre en pantalla grande) */}
+                  <div className="w-full lg:w-1/2 flex flex-col justify-between space-y-4">
+                    <div>
                       <div className="mb-2">
-                        <span className="text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 px-2 py-1 rounded-md border border-blue-100 dark:border-blue-900">
+                        <span className="text-xs font-extrabold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-900">
                           {product.categories?.name || 'Sin categoría'}
                         </span>
                       </div>
-                      <h3 className="text-xl font-extrabold text-gray-900 dark:text-slate-100 mb-2 hover:text-indigo-600 dark:hover:text-indigo-400 transition">
-                        {product.title}
-                      </h3>
-                    </Link>
-                    
-                    <p className="text-gray-600 dark:text-slate-300 text-xs mb-4 line-clamp-2 flex-1">
-                      {product.description}
-                    </p>
-                    
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-2xl font-black text-blue-600 dark:text-blue-400">${product.price?.toLocaleString('es-CL')}</span>
-                      <span className="text-xs font-bold text-gray-500 dark:text-slate-400">Stock: {product.stock}</span>
-                    </div>
-                    
-                    {isOwnProduct ? (
-                      <button disabled className="w-full py-2.5 rounded-xl font-bold text-xs bg-gray-200 dark:bg-slate-800 text-gray-500 dark:text-slate-400 cursor-not-allowed mb-2">
-                        Es tu propio producto
-                      </button>
-                    ) : (
-                      <Link 
-                        href={`/marketplace/product/${product.id}`}
-                        className="block w-full text-center py-2.5 rounded-xl font-bold text-xs bg-indigo-600 text-white hover:bg-indigo-700 transition mb-2 shadow-xs"
-                      >
-                        Ver detalle
+                      
+                      <Link href={`/marketplace/product/${product.id}`} className="block group">
+                        <h3 className="text-2xl font-black text-gray-900 dark:text-slate-100 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition leading-tight">
+                          {product.title}
+                        </h3>
                       </Link>
-                    )}
 
-                    <button
-                      onClick={() => handleRemoveFavorite(fav.id)}
-                      className="w-full py-2.5 rounded-xl font-bold text-xs bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-900 transition"
-                    >
-                      ❤️ Quitar de favoritos
-                    </button>
-
-                    <div className="pt-4 mt-4 border-t border-gray-100 dark:border-slate-800">
-                      <p className="text-[10px] text-gray-400 dark:text-slate-500 font-bold uppercase tracking-wider">Vendido por:</p>
-                      <p className="text-sm font-extrabold text-gray-800 dark:text-slate-200">
-                        {product.profiles?.store_name || 'Tienda sin nombre'}
+                      <p className="text-gray-600 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-line font-medium mb-4">
+                        {product.description || 'Sin descripción adicional del vendedor.'}
                       </p>
+
+                      <div className="flex items-baseline gap-4 mb-2">
+                        <span className="text-3xl font-black text-blue-600 dark:text-blue-400">
+                          ${product.price?.toLocaleString('es-CL')}
+                        </span>
+                        <span className={`text-xs font-extrabold px-2.5 py-0.5 rounded-full border ${product.stock > 0 ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900' : 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-900'}`}>
+                          {product.stock > 0 ? `Stock: ${product.stock}` : 'Sin stock'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 pt-3 border-t border-gray-100 dark:border-slate-800">
+                      {isOwnProduct ? (
+                        <button disabled className="w-full py-3 rounded-xl font-extrabold text-xs bg-gray-200 dark:bg-slate-800 text-gray-500 dark:text-slate-400 cursor-not-allowed">
+                          Es tu propio producto
+                        </button>
+                      ) : (
+                        <Link 
+                          href={`/marketplace/product/${product.id}`}
+                          className="block w-full text-center py-3 rounded-xl font-extrabold text-xs bg-blue-600 hover:bg-blue-700 text-white transition shadow-xs"
+                        >
+                          Ver detalle del producto
+                        </Link>
+                      )}
+
+                      <button
+                        onClick={() => handleRemoveFavorite(fav.id)}
+                        className="w-full py-2.5 rounded-xl font-extrabold text-xs bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-900 transition flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <span>❤️</span>
+                        <span>Quitar de favoritos</span>
+                      </button>
+
+                      <div className="pt-3 mt-3 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between text-xs">
+                        <span className="text-[10px] text-gray-400 dark:text-slate-500 font-bold uppercase tracking-wider">Vendido por:</span>
+                        <span className="font-extrabold text-gray-800 dark:text-slate-200">
+                          {product.profiles?.store_name || 'Tienda sin nombre'}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
