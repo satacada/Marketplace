@@ -26,6 +26,7 @@ import ProductCard from '@/components/marketplace/catalog/ProductCard';
 import CatalogHeaderBanner from '@/components/marketplace/catalog/CatalogHeaderBanner';
 import CatalogFilterSidebar from '@/components/marketplace/catalog/CatalogFilterSidebar';
 import VisualSearchModal from '@/components/marketplace/catalog/VisualSearchModal';
+import LocationSelectorModal from '@/components/marketplace/catalog/LocationSelectorModal';
 
 export default function MarketplacePage() {
   const catalog = useMarketplaceCatalog();
@@ -138,48 +139,18 @@ export default function MarketplacePage() {
       {/* Footer Global */}
       <Footer />
 
-      {/* Modal de Ubicación GPS / Radio en km */}
+      {/* Modal de Ubicación GPS / Radio en km (Estilo Facebook Marketplace - Imagen 1) */}
       {catalog.showLocationModal && (
-        <Modal
+        <LocationSelectorModal
           isOpen={catalog.showLocationModal}
           onClose={() => catalog.setShowLocationModal(false)}
-          title="Configurar Ubicación de Búsqueda"
-        >
-          <div className="space-y-4 pt-2">
-            <div>
-              <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
-                Ciudad / Zona
-              </label>
-              <input
-                type="text"
-                value={catalog.locationName}
-                onChange={(e) => catalog.setLocationName(e.target.value)}
-                placeholder="Ej: Buenos Aires, Barracas, Palermo"
-                className="w-full p-2.5 text-xs border border-gray-300 dark:border-slate-700 rounded-xl font-medium"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
-                Radio de Búsqueda ({catalog.radiusKm} km)
-              </label>
-              <input
-                type="range"
-                min="1"
-                max="50"
-                value={catalog.radiusKm}
-                onChange={(e) => catalog.setRadiusKm(Number(e.target.value))}
-                className="w-full text-blue-600"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={() => catalog.setShowLocationModal(false)}
-              className="w-full py-2.5 bg-blue-600 text-white rounded-xl text-xs font-extrabold"
-            >
-              Aplicar Ubicación
-            </button>
-          </div>
-        </Modal>
+          currentLocation={catalog.locationName}
+          currentRadiusKm={catalog.radiusKm}
+          onApplyLocation={(city, radius) => {
+            catalog.setLocationName(city);
+            catalog.setRadiusKm(radius);
+          }}
+        />
       )}
 
       {/* Modal de Búsqueda Visual por Foto */}
