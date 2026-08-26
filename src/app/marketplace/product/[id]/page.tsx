@@ -135,15 +135,21 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
     setProduct(productData as Product);
 
-    // Cargar vendedores que ofrecen publicaciones similares (Visual Match por Foto/Categoría)
+    // Cargar vendedores que ofrecen publicaciones similares (Visual Match por Categoría/Foto)
     try {
-      const { data: similarData } = await supabase
+      let query = supabase
         .from('products')
         .select('id, title, price, stock, image_urls, seller_id, location_name, profiles(store_name)')
         .neq('id', productId)
         .neq('seller_id', productData.seller_id)
-        .eq('is_deleted', false)
-        .limit(4);
+        .eq('is_deleted', false);
+
+      // Filtrar ESTRICTAMENTE por la misma categoría del producto
+      if (productData.category_id) {
+        query = query.eq('category_id', productData.category_id);
+      }
+
+      const { data: similarData } = await query.limit(4);
 
       let mappedSimilar: SimilarSellerProduct[] = [];
       if (similarData && similarData.length > 0) {
@@ -162,38 +168,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         }));
       }
 
-      // Si hay pocas publicaciones en BD, abastecer alternativas reales para experiencia fluida
-      if (mappedSimilar.length < 2) {
-        const fallbacks: SimilarSellerProduct[] = [
-          {
-            id: 'sim-alt-1',
-            title: `${productData.title} (Garantía Oficial Vendedor)`,
-            price: Math.round(productData.price * 0.93),
-            stock: 8,
-            image_url: productData.image_urls?.[0] || null,
-            seller_id: 'seller-alt-1',
-            seller_name: 'Store Express BA',
-            is_trusted_seller: true,
-            location_name: 'Barracas, Buenos Aires',
-            has_free_shipping: true,
-            rating: 4.9
-          },
-          {
-            id: 'sim-alt-2',
-            title: `${productData.title} (Stock Inmediato)`,
-            price: Math.round(productData.price * 0.98),
-            stock: 15,
-            image_url: productData.image_urls?.[0] || null,
-            seller_id: 'seller-alt-2',
-            seller_name: 'Distribuidora Argentina SA',
-            is_trusted_seller: true,
-            location_name: 'Palermo, CABA',
-            has_free_shipping: false,
-            rating: 4.7
-          }
-        ];
-        mappedSimilar = [...mappedSimilar, ...fallbacks];
-      }
       setSimilarSellers(mappedSimilar);
     } catch (err) {
       console.log('Error cargando vendedores similares:', err);
@@ -204,10 +178,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     const complementDiscounted = Math.round(complementOriginal * 0.9); // 10% OFF
     setComplementaryProduct({
       id: 'comp-pack-1',
-      title: `Kit Complementario de Protección & Accesorios para ${productData.title.split(' ')[0] || 'Producto'}`,
+      title: `Garantía Extendida & Kit de Cuidado de ${productData.title}`,
       original_price: complementOriginal,
       price: complementDiscounted,
-      image_url: productData.image_urls?.[0] || null,
+      image_url: null, // Icono exclusivo de accesorios 🎁 sin duplicar foto
       discount_percentage: 10
     });
 
@@ -761,58 +735,68 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {similarSellers.map((sellerItem) => {
-              const isCheaper = sellerItem.price < product.price;
-              const priceDiff = Math.abs(product.price - sellerItem.price);
-              
-              return (
-                <div 
-                  key={sellerItem.id}
-                  className="p-4 rounded-2xl border border-gray-200/90 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/40 hover:border-blue-300 dark:hover:border-blue-800 transition flex items-center justify-between gap-3 shadow-2xs"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-14 h-14 bg-slate-200 dark:bg-slate-700 rounded-xl overflow-hidden relative flex-shrink-0 border border-gray-200 dark:border-slate-700">
-                      {sellerItem.image_url ? (
-                        <img src={sellerItem.image_url} alt={sellerItem.title} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="flex items-center justify-center h-full text-base">📦</div>
-                      )}
-                    </div>
-
-                    <div>
-                      <div className="flex items-center gap-1.5 mb-0.5">
-                        <span className="text-xs font-extrabold text-gray-900 dark:text-slate-100">{sellerItem.seller_name}</span>
-                        {sellerItem.is_trusted_seller && (
-                          <span className="text-[10px] bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-1.5 py-0.2 rounded font-extrabold border border-blue-200 dark:border-blue-900">
-                            ⭐ 4.9
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[11px] text-gray-500 dark:text-slate-400 line-clamp-1">{sellerItem.title}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm font-black text-gray-900 dark:text-slate-100">
-                          ${sellerItem.price.toLocaleString('es-CL')}
-                        </span>
-                        {isCheaper && (
-                          <span className="text-[10px] font-extrabold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-300 dark:border-emerald-800">
-                            🏷️ ${priceDiff.toLocaleString('es-CL')} más económico
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <Link
-                    href={`/marketplace/product/${sellerItem.id}`}
-                    className="py-2 px-3 bg-white dark:bg-slate-900 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900 rounded-xl text-xs font-extrabold transition shadow-2xs text-center flex-shrink-0"
+          {similarSellers.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {similarSellers.map((sellerItem) => {
+                const isCheaper = sellerItem.price < product.price;
+                const priceDiff = Math.abs(product.price - sellerItem.price);
+                
+                return (
+                  <div 
+                    key={sellerItem.id}
+                    className="p-4 rounded-2xl border border-gray-200/90 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/40 hover:border-blue-300 dark:hover:border-blue-800 transition flex items-center justify-between gap-3 shadow-2xs"
                   >
-                    Ver opción
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-14 h-14 bg-slate-200 dark:bg-slate-700 rounded-xl overflow-hidden relative flex-shrink-0 border border-gray-200 dark:border-slate-700">
+                        {sellerItem.image_url ? (
+                          <img src={sellerItem.image_url} alt={sellerItem.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="flex items-center justify-center h-full text-base">📦</div>
+                        )}
+                      </div>
+
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span className="text-xs font-extrabold text-gray-900 dark:text-slate-100">{sellerItem.seller_name}</span>
+                          {sellerItem.is_trusted_seller && (
+                            <span className="text-[10px] bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-1.5 py-0.2 rounded font-extrabold border border-blue-200 dark:border-blue-900">
+                              ⭐ 4.9
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-gray-500 dark:text-slate-400 line-clamp-1">{sellerItem.title}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-sm font-black text-gray-900 dark:text-slate-100">
+                            ${sellerItem.price.toLocaleString('es-CL')}
+                          </span>
+                          {isCheaper && (
+                            <span className="text-[10px] font-extrabold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-300 dark:border-emerald-800">
+                              🏷️ ${priceDiff.toLocaleString('es-CL')} más económico
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <Link
+                      href={`/marketplace/product/${sellerItem.id}`}
+                      className="py-2 px-3 bg-white dark:bg-slate-900 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900 rounded-xl text-xs font-extrabold transition shadow-2xs text-center flex-shrink-0"
+                    >
+                      Ver opción
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-8 px-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-dashed border-gray-200 dark:border-slate-700">
+              <span className="text-3xl mb-2 block">📷</span>
+              <h4 className="text-sm font-extrabold text-gray-900 dark:text-slate-100">No hay otros vendedores activos para este producto exacto</h4>
+              <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 max-w-md mx-auto font-medium">
+                Esta tienda es la única en la categoría <strong className="text-blue-600 dark:text-blue-400 font-bold">{product.categories?.name || 'general'}</strong> que lo tiene publicado actualmente.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Sección de Preguntas */}
