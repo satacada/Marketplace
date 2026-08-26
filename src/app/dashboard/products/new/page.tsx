@@ -513,18 +513,37 @@ export default function NewProductPage() {
           />
         </div>
 
-        {/* ATRIBUTOS ESTRUCTURADOS OBLIGATORIOS PARA IA INFALIBLE */}
-        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="text-sm">🏷️</span>
-            <h4 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200">
-              Atributos de Identificación del Producto (Para IA 100% Exacta)
-            </h4>
+        {/* CONTENEDOR UNIFICADO: ATRIBUTOS ESTRUCTURADOS & ASISTENTE DE IA */}
+        <div className="bg-gradient-to-br from-purple-50/90 via-indigo-50/80 to-blue-50/90 dark:from-slate-800 dark:via-slate-800/90 dark:to-slate-800/80 p-5 rounded-3xl border border-purple-200/90 dark:border-slate-700 shadow-xs space-y-4">
+          <div className="flex items-center justify-between gap-2 border-b border-purple-200/60 dark:border-slate-700 pb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-purple-600 dark:text-purple-400 text-xl font-black">✨</span>
+              <div>
+                <h4 className="text-sm font-extrabold text-gray-900 dark:text-slate-100">
+                  Asistente de IA & Atributos de Identificación
+                </h4>
+                <p className="text-[11px] text-gray-600 dark:text-slate-400 font-medium">
+                  Completa los campos clave a continuación para que la IA genere una Ficha Técnica 100% exacta.
+                </p>
+              </div>
+            </div>
+            <span className="text-[10px] font-extrabold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-950/80 px-3 py-1 rounded-full border border-purple-300 dark:border-purple-800 hidden sm:inline-block flex-shrink-0">
+              📌 Requisito Obligatorio para IA
+            </span>
           </div>
 
+          {/* Aviso claro sobre la obligación de llenar los campos */}
+          <div className="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200 dark:border-amber-900/60 text-xs text-amber-900 dark:text-amber-200 font-medium flex items-start gap-2">
+            <span className="text-base leading-none">⚠️</span>
+            <p>
+              <strong>Atención:</strong> Para que la Inteligencia Artificial analice correctamente tu producto y genere su resumen técnico sin errores, es <strong>OBLIGATORIO ingresar la Marca, Material y subir al menos 1 foto</strong>. Si no completas estos datos, la generación por IA no se ejecutará.
+            </p>
+          </div>
+
+          {/* Inputs de Atributos */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
-              <label className="block text-[11px] font-bold text-gray-700 dark:text-slate-300 mb-1">
+              <label className="block text-[11px] font-extrabold text-gray-800 dark:text-slate-200 mb-1">
                 Marca / Fabricante *
               </label>
               <input
@@ -532,12 +551,12 @@ export default function NewProductPage() {
                 value={brand}
                 onChange={(e) => setBrand(e.target.value)}
                 placeholder="Ej: Nike, Samsung, Genérico"
-                className="w-full p-2.5 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium"
+                className="w-full p-2.5 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium focus:ring-2 focus:ring-purple-500"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-gray-700 dark:text-slate-300 mb-1">
+              <label className="block text-[11px] font-extrabold text-gray-800 dark:text-slate-200 mb-1">
                 Modelo / Serie
               </label>
               <input
@@ -545,12 +564,12 @@ export default function NewProductPage() {
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
                 placeholder="Ej: Air Max, Galaxy S23, R36S"
-                className="w-full p-2.5 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium"
+                className="w-full p-2.5 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium focus:ring-2 focus:ring-purple-500"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-gray-700 dark:text-slate-300 mb-1">
+              <label className="block text-[11px] font-extrabold text-gray-800 dark:text-slate-200 mb-1">
                 Material Principal *
               </label>
               <input
@@ -558,18 +577,18 @@ export default function NewProductPage() {
                 value={material}
                 onChange={(e) => setMaterial(e.target.value)}
                 placeholder="Ej: Algodón, Cuero, Plástico ABS"
-                className="w-full p-2.5 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium"
+                className="w-full p-2.5 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium focus:ring-2 focus:ring-purple-500"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-gray-700 dark:text-slate-300 mb-1">
+              <label className="block text-[11px] font-extrabold text-gray-800 dark:text-slate-200 mb-1">
                 Estado del Producto *
               </label>
               <select
                 value={condition}
                 onChange={(e) => setCondition(e.target.value)}
-                className="w-full p-2.5 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium"
+                className="w-full p-2.5 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium focus:ring-2 focus:ring-purple-500"
               >
                 <option value="Nuevo">Nuevo</option>
                 <option value="Reacondicionado">Reacondicionado</option>
@@ -578,32 +597,21 @@ export default function NewProductPage() {
               </select>
             </div>
           </div>
-        </div>
 
-        {/* ASISTENTE DE IA PARA FICHA TÉCNICA */}
-        <div className="bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 dark:from-slate-800 dark:via-slate-800/90 dark:to-slate-800 p-5 rounded-2xl border border-purple-200 dark:border-slate-700 shadow-2xs space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-purple-600 dark:text-purple-400 text-xl font-black">✨</span>
-                <h4 className="text-sm font-extrabold text-gray-900 dark:text-slate-100">
-                  Asistente de IA para Ficha Técnica
-                </h4>
-              </div>
-              <p className="text-xs text-gray-600 dark:text-slate-400 mt-1 font-medium leading-relaxed">
-                Genera automáticamente el <strong>✦ Resumen de IA del artículo</strong> y viñetas técnicas verificadas a partir de tus fotos (1 a 3 fotos), marca y datos clave.
-              </p>
-            </div>
-
+          {/* Botón de Generar Ficha Técnica */}
+          <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-purple-200/60 dark:border-slate-700">
+            <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">
+              Al presionar el botón, la IA analizará tus fotos cargadas y los 4 atributos anteriores para redactar la ficha técnica.
+            </p>
             <button
               type="button"
               onClick={handleGenerateAISummary}
               disabled={isGeneratingAI}
-              className="py-3 px-5 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl text-xs font-extrabold transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center gap-2 cursor-pointer flex-shrink-0 border border-purple-400/30"
+              className="py-3 px-6 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl text-xs font-extrabold transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center gap-2 cursor-pointer flex-shrink-0 border border-purple-400/30"
               title="Generar Ficha Técnica y análisis visual automático con Inteligencia Artificial"
             >
               <span className="text-sm">✨</span>
-              <span>{isGeneratingAI ? 'Analizando datos...' : 'Generar Ficha Técnica con IA'}</span>
+              <span>{isGeneratingAI ? 'Generando Ficha Técnica...' : 'Generar Ficha Técnica con IA'}</span>
             </button>
           </div>
         </div>
