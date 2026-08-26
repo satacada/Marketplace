@@ -53,6 +53,7 @@ import { Button } from '@/components/ui/Button';
 import { debounce } from '@/shared/utils/debounce';
 import { getLocalStorageItem, setLocalStorageItem } from '@/shared/utils/localStorage';
 import { AdvancedProductFilters, SortOption } from '@/features/products/types/product-filters.types';
+import { trackUserEvent } from '@/lib/telemetry';
 
 type Product = {
   id: string;
@@ -580,7 +581,6 @@ export default function MarketplacePage() {
         console.error('Error al cargar favoritos:', error);
       }
     };
-
     loadUserFavorites();
   }, [userId]);
 
@@ -588,6 +588,9 @@ export default function MarketplacePage() {
   const debouncedSearch = useCallback(
     debounce((query: string) => {
       setSearchQuery(query);
+      if (query.trim().length >= 2) {
+        trackUserEvent({ eventType: 'search', searchQuery: query });
+      }
     }, 300),
     []
   );

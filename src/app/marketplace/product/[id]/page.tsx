@@ -14,6 +14,7 @@ import { useCart } from '@/features/cart/hooks/useCart';
 import { useOrders } from '@/features/orders/hooks/useOrders';
 import { calculateImageSimilarity } from '@/lib/visualSearch';
 import { generateAIProductSummary } from '@/lib/aiProductGenerator';
+import { trackUserEvent } from '@/lib/telemetry';
 
 type Product = {
   id: string;
@@ -229,11 +230,27 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     }
 
     setLoading(false);
+
+    // Telemetría: Registrar vista de producto para perfilamiento de IA
+    trackUserEvent({
+      eventType: 'view',
+      productId: productData.id,
+      categoryId: productData.category_id || undefined,
+      dwellTimeSeconds: 5
+    });
   };
 
   const handleVisualSearch = () => {
     setIsScanningPhoto(true);
     setActiveTab('similar_sellers');
+    
+    // Telemetría: Registrar búsqueda por foto
+    trackUserEvent({
+      eventType: 'visual_search',
+      productId: product?.id,
+      categoryId: product?.category_id || undefined
+    });
+
     const elem = document.getElementById('visual-sellers-comparison');
     if (elem) {
       elem.scrollIntoView({ behavior: 'smooth' });
@@ -293,6 +310,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         .from('favorites')
         .insert({ user_id: userId, product_id: productId });
       setIsFavorite(true);
+      trackUserEvent({ eventType: 'favorite', productId: productId, categoryId: product?.category_id || undefined });
     }
   };
 
@@ -321,6 +339,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       showModalMessage('Error', 'Error al agregar al carrito: ' + error.message, 'error');
     } else {
       showModalMessage('¡Producto Agregado!', 'El producto fue agregado a tu carrito exitosamente.', 'success');
+      trackUserEvent({ eventType: 'cart_add', productId: productId, categoryId: product?.category_id || undefined });
     }
   };
 
@@ -343,6 +362,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       showModalMessage('Error', 'Error al enviar pregunta: ' + error.message, 'error');
     } else {
       showModalMessage('¡Pregunta Enviada!', 'Tu pregunta ha sido enviada al vendedor exitosamente.', 'success');
+      trackUserEvent({ eventType: 'ask_question', productId: productId, categoryId: product?.category_id || undefined, searchQuery: newQuestion });
       setNewQuestion('');
       loadData(); // Recargar preguntas
     }

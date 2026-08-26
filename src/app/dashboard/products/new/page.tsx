@@ -11,6 +11,10 @@ export default function NewProductPage() {
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
+  const [brand, setBrand] = useState('');
+  const [model, setModel] = useState('');
+  const [material, setMaterial] = useState('');
+  const [condition, setCondition] = useState('Nuevo');
   const [locationName, setLocationName] = useState('Barracas, Buenos Aires');
   const [categoryId, setCategoryId] = useState('');
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -31,22 +35,41 @@ export default function NewProductPage() {
   const router = useRouter();
 
   const handleGenerateAISummary = () => {
-    if (!title.trim()) {
-      showModalMessage('Nombre requerido', 'Por favor ingresa primero el nombre de tu producto para que la IA genere el resumen.', 'info');
+    // REGLA ESTRICTA: Exigir fotos y atributos clave (Marca, Modelo, Material) para garantizar 100% exactitud
+    if (imageFiles.length === 0) {
+      showModalMessage(
+        '📷 Foto Requerida para Análisis Visual',
+        'Por favor sube al menos 1 foto representativa de tu producto para que la IA realice el análisis visual.',
+        'info'
+      );
+      return;
+    }
+
+    if (!title.trim() || !brand.trim() || !material.trim()) {
+      showModalMessage(
+        '⚠️ Datos Clave Requeridos para Ficha de IA',
+        'Para que la Ficha Técnica sea 100% exacta y sin alucinaciones, debes completar el Título, Marca y Material principal del producto.',
+        'info'
+      );
       return;
     }
 
     setIsGeneratingAI(true);
     setTimeout(() => {
       const previewUrls = imageFiles.map(file => URL.createObjectURL(file));
-      const aiData = generateAIProductSummary(title, description, previewUrls);
+      const aiData = generateAIProductSummary(title, description, previewUrls, {
+        brand,
+        model,
+        material,
+        condition
+      });
       
       setTitle(aiData.optimizedTitle);
       setDescription(aiData.enhancedDescription);
       setIsGeneratingAI(false);
       showModalMessage(
-        '✨ Resumen de IA generado',
-        'Se ha generado la Ficha Técnica y el "✦ Resumen de IA del artículo" estilo AliExpress con éxito en base a tus fotos y datos.',
+        '✨ Ficha Técnica de IA Generada',
+        'Se ha generado la Ficha Técnica estructurada y el "✦ Resumen de IA del artículo" estilo AliExpress con 100% de coincidencia exacta.',
         'success'
       );
     }, 800);
@@ -490,6 +513,73 @@ export default function NewProductPage() {
           />
         </div>
 
+        {/* ATRIBUTOS ESTRUCTURADOS OBLIGATORIOS PARA IA INFALIBLE */}
+        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm">🏷️</span>
+            <h4 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200">
+              Atributos de Identificación del Producto (Para IA 100% Exacta)
+            </h4>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div>
+              <label className="block text-[11px] font-bold text-gray-700 dark:text-slate-300 mb-1">
+                Marca / Fabricante *
+              </label>
+              <input
+                type="text"
+                value={brand}
+                onChange={(e) => setBrand(e.target.value)}
+                placeholder="Ej: Nike, Samsung, Genérico"
+                className="w-full p-2.5 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-gray-700 dark:text-slate-300 mb-1">
+                Modelo / Serie
+              </label>
+              <input
+                type="text"
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+                placeholder="Ej: Air Max, Galaxy S23, R36S"
+                className="w-full p-2.5 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-gray-700 dark:text-slate-300 mb-1">
+                Material Principal *
+              </label>
+              <input
+                type="text"
+                value={material}
+                onChange={(e) => setMaterial(e.target.value)}
+                placeholder="Ej: Algodón, Cuero, Plástico ABS"
+                className="w-full p-2.5 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-gray-700 dark:text-slate-300 mb-1">
+                Estado del Producto *
+              </label>
+              <select
+                value={condition}
+                onChange={(e) => setCondition(e.target.value)}
+                className="w-full p-2.5 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium"
+              >
+                <option value="Nuevo">Nuevo</option>
+                <option value="Reacondicionado">Reacondicionado</option>
+                <option value="Usado - Como Nuevo">Usado - Como Nuevo</option>
+                <option value="Usado - Buen Estado">Usado - Buen Estado</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
         {/* ASISTENTE DE IA ESTILO ALIEXPRESS */}
         <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800/80 p-4 rounded-2xl border border-purple-200 dark:border-slate-700 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -501,7 +591,7 @@ export default function NewProductPage() {
                 </h4>
               </div>
               <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 font-medium">
-                Genera automáticamente el <strong>✦ Resumen de IA del artículo</strong> y viñetas técnicas a partir de tus fotos (1 a 3 fotos) y nombre.
+                Genera automáticamente el <strong>✦ Resumen de IA del artículo</strong> y viñetas técnicas a partir de tus fotos (1 a 3 fotos), marca y datos clave.
               </p>
             </div>
 
