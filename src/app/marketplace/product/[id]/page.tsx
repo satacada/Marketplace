@@ -177,7 +177,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             rating: 4.8,
             visual_match_score: matchScore
           };
-        }).sort((a, b) => (b.visual_match_score || 0) - (a.visual_match_score || 0));
+        })
+        .filter(item => (item.visual_match_score || 0) >= 85) // Solo mostrar publicaciones con alta coincidencia visual de foto (>=85%)
+        .sort((a, b) => (b.visual_match_score || 0) - (a.visual_match_score || 0));
       }
 
       setSimilarSellers(mappedSimilar);
@@ -855,37 +857,59 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </p>
           )}
 
-          {/* Formulario para hacer pregunta */}
+          {/* Formulario para hacer pregunta (Usuario Autenticado) */}
           {userId && product.seller_id !== userId && (
             <form onSubmit={handleAskQuestion} className="border-t border-gray-200 dark:border-slate-800 pt-6">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-slate-100 mb-3">Haz una pregunta sobre este producto</h3>
+              <h3 className="text-lg font-extrabold text-gray-900 dark:text-slate-100 mb-3">Haz una pregunta sobre este producto</h3>
               <textarea
                 value={newQuestion}
                 onChange={(e) => setNewQuestion(e.target.value)}
                 required
                 placeholder="Ej: ¿Tiene garantía? ¿Hacen envíos a todo el país?"
-                className="w-full p-3 border border-gray-300 rounded-lg h-24 focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-3"
+                className="w-full p-3.5 border border-gray-300 dark:border-slate-700 rounded-xl h-24 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 text-sm font-medium"
               />
               <button
                 type="submit"
                 disabled={submitting || !newQuestion.trim()}
-                className={`px-6 py-2 rounded-lg font-medium text-white transition ${
+                className={`px-6 py-3 rounded-xl font-extrabold text-white transition flex items-center gap-2 shadow-xs ${
                   submitting || !newQuestion.trim()
                     ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-green-600 hover:bg-green-700'
+                    : 'bg-emerald-600 hover:bg-emerald-700 active:scale-95 cursor-pointer'
                 }`}
               >
-                {submitting ? 'Enviando...' : 'Enviar Pregunta'}
+                <span>❓</span>
+                <span>{submitting ? 'Enviando...' : 'Realizar una pregunta'}</span>
               </button>
             </form>
           )}
 
+          {/* Formulario para hacer pregunta (Usuario No Autenticado) */}
           {!userId && (
-            <div className="border-t border-gray-200 pt-6 text-center">
-              <p className="text-gray-600 mb-3">¿Tienes preguntas sobre este producto?</p>
-              <Link href="/auth" className="text-blue-600 hover:text-blue-700 font-medium">
-                Inicia sesión para preguntar
-              </Link>
+            <div className="border-t border-gray-200 dark:border-slate-800 pt-6">
+              <h3 className="text-lg font-extrabold text-gray-900 dark:text-slate-100 mb-3">Haz una pregunta sobre este producto</h3>
+              <div 
+                onClick={() => showModalMessage(
+                  'Registro / Inicio de Sesión Requerido',
+                  'Para enviar tu pregunta al vendedor debes estar registrado o iniciar sesión.',
+                  'info',
+                  '/auth',
+                  'Registrarse / Iniciar Sesión'
+                )}
+                className="cursor-pointer group"
+              >
+                <textarea
+                  readOnly
+                  placeholder="Escribe tu pregunta sobre el producto..."
+                  className="w-full p-3.5 border border-gray-300 dark:border-slate-700 rounded-xl h-24 focus:outline-none mb-3 bg-gray-50 dark:bg-slate-800/40 text-gray-400 dark:text-slate-500 text-sm font-medium cursor-pointer group-hover:border-blue-400 transition"
+                />
+                <button
+                  type="button"
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-xl transition flex items-center gap-2 shadow-sm cursor-pointer active:scale-95"
+                >
+                  <span>❓</span>
+                  <span>Realizar una pregunta</span>
+                </button>
+              </div>
             </div>
           )}
         </div>
