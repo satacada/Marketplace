@@ -125,97 +125,96 @@ const ProductCard = memo(({
   return (
     <>
       <div 
-        className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col hover:shadow-md transition-all duration-300 cursor-pointer group"
+        className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xs border border-gray-200/90 dark:border-slate-800 overflow-hidden flex flex-col hover:shadow-xs transition-all duration-300 cursor-pointer group"
         onClick={handleClick}
       >
         {/* Imagen compacta con navegación por flechas e indicador */}
-        <div className="relative h-40 bg-slate-50">
+        <div className="relative h-40 bg-slate-100 dark:bg-slate-800">
           {images.length > 0 ? (
-            <>
-              <div className="relative w-full h-full">
-                <Image
-                  src={images[currentImageIndex]}
-                  alt={product.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300 rounded-t-2xl cursor-pointer"
-                  loading="lazy"
-                  title={`Ver detalle de "${product.title}"`}
-                  onClick={openLightbox}
-                />
+            <div className="relative w-full h-full">
+              <Image
+                src={images[currentImageIndex]}
+                alt={product.title}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-300 rounded-t-2xl cursor-pointer"
+                loading="lazy"
+                title={`Ver detalle de "${product.title}"`}
+                onClick={openLightbox}
+              />
 
-                {/* Flechas de navegación de fotos en la tarjeta (izquierda / derecha) */}
-                {images.length > 1 && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={prevImage}
-                      className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold shadow-md z-10"
-                      title="Foto anterior"
-                    >
-                      ‹
-                    </button>
-                    <button
-                      type="button"
-                      onClick={nextImage}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold shadow-md z-10"
-                      title="Foto siguiente"
-                    >
-                      ›
-                    </button>
-
-                    {/* Indicador visual de fotos (📷 1/3) */}
-                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-xs flex items-center gap-1 z-10 pointer-events-none">
-                      <span>📷</span>
-                      <span>{currentImageIndex + 1}/{images.length}</span>
-                    </div>
-                  </>
-                )}
-                
-                {/* Botón de Favoritos (Esquinado arriba a la derecha) */}
-                <div className="absolute top-2 right-2 z-10">
+              {/* Flechas de navegación de fotos en la tarjeta (izquierda / derecha) */}
+              {images.length > 1 && (
+                <>
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onToggleFavorite(product.id);
-                    }}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110 ${
-                      isFavorite 
-                        ? 'bg-rose-500 text-white' 
-                        : 'bg-white/95 hover:bg-white text-gray-700 hover:text-rose-500'
-                    }`}
-                    title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                    onClick={prevImage}
+                    className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold shadow-md z-10"
+                    title="Foto anterior"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill={isFavorite ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.684a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
+                    ‹
                   </button>
-                </div>
+                  <button
+                    type="button"
+                    onClick={nextImage}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold shadow-md z-10"
+                    title="Foto siguiente"
+                  >
+                    ›
+                  </button>
 
-                {/* Badges compactos */}
-                <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-                  {product.has_free_shipping && (
-                    <span className="bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded font-medium shadow-xs">
-                      🚚
-                    </span>
-                  )}
-                  {product.average_rating && product.average_rating >= 4 && (
-                    <span className="bg-yellow-500 text-white text-[10px] px-1.5 py-0.5 rounded font-medium shadow-xs">
-                      ⭐ {product.average_rating.toFixed(1)}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </>
+                  {/* Indicador visual de fotos (📷 1/3) */}
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-xs flex items-center gap-1 z-10 pointer-events-none">
+                    <span>📷</span>
+                    <span>{currentImageIndex + 1}/{images.length}</span>
+                  </div>
+                </>
+              )}
+            </div>
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-400">
-              <span className="text-4xl">📦</span>
+            <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800">
+              <span className="text-3xl mb-1">📦</span>
+              <span className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400">Sin foto</span>
             </div>
           )}
+
+          {/* Botón de Favoritos - SIEMPRE VISIBLE ARRIBA A LA DERECHA */}
+          <div className="absolute top-2 right-2 z-10">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite(product.id);
+              }}
+              className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110 border ${
+                isFavorite 
+                  ? 'bg-rose-600 text-white border-rose-500 shadow-rose-900/30' 
+                  : 'bg-slate-900/80 hover:bg-slate-900 text-white border-slate-700/80 backdrop-blur-xs'
+              }`}
+              title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill={isFavorite ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.684a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Badges compactos */}
+          <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+            {product.has_free_shipping && (
+              <span className="bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded font-extrabold shadow-xs">
+                🚚
+              </span>
+            )}
+            {product.average_rating && product.average_rating >= 4 && (
+              <span className="bg-amber-500 text-white text-[10px] px-1.5 py-0.5 rounded font-extrabold shadow-xs">
+                ⭐ {product.average_rating.toFixed(1)}
+              </span>
+            )}
+          </div>
         </div>
         
         {/* Cuerpo de la tarjeta */}
-        <div className="p-3 flex-1 flex flex-col justify-between">
+        <div className="p-3 flex-1 flex flex-col justify-between bg-white dark:bg-slate-900">
           <div>
             <div className="mb-1 flex items-center justify-between gap-1">
               <span className="text-[10px] font-extrabold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 px-1.5 py-0.5 rounded border border-blue-100 dark:border-blue-900">
@@ -223,20 +222,20 @@ const ProductCard = memo(({
               </span>
               
               {isOwnProduct && product.status === 'pending' && (
-                <span className="text-[10px] font-semibold text-yellow-700 bg-yellow-100 px-1 py-0.5 rounded border border-yellow-300">
+                <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-1 py-0.5 rounded border border-amber-300 dark:border-amber-800">
                   Pendiente
                 </span>
               )}
               
               {isOwnProduct && product.status === 'rejected' && (
-                <span className="text-[10px] font-semibold text-red-700 bg-red-100 px-1 py-0.5 rounded border border-red-300">
+                <span className="text-[10px] font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 px-1 py-0.5 rounded border border-rose-300 dark:border-rose-800">
                   ❌
                 </span>
               )}
             </div>
             
             <h3 
-              className="text-sm font-bold text-gray-900 dark:text-slate-100 mb-1 hover:text-blue-600 dark:hover:text-blue-400 transition line-clamp-1 cursor-pointer"
+              className="text-sm font-extrabold text-gray-900 dark:text-slate-100 mb-1 hover:text-blue-600 dark:hover:text-blue-400 transition line-clamp-1 cursor-pointer"
               title={`Ver detalle de "${product.title}"`}
             >
               {product.title}
@@ -245,7 +244,7 @@ const ProductCard = memo(({
             {/* Precio, Stock y Botón de Carrito */}
             <div className="flex items-center justify-between my-1">
               <div title={`Ver detalle de "${product.title}"`} className="cursor-pointer">
-                <div className="text-base font-extrabold text-blue-600 dark:text-blue-400">
+                <div className="text-base font-black text-blue-600 dark:text-blue-400">
                   ${product.price?.toLocaleString('es-CL')}
                 </div>
                 <div className={`text-[10px] font-bold ${product.stock > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
@@ -254,14 +253,14 @@ const ProductCard = memo(({
               </div>
 
               <div className="flex items-center gap-1.5 flex-shrink-0">
-                {/* Botón de Compartir en redes sociales (WhatsApp, Messenger, Telegram...) */}
+                {/* Botón de Compartir en redes sociales */}
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     onShareProduct(product);
                   }}
-                  className="w-8 h-8 rounded-full bg-gray-100 hover:bg-blue-50 text-gray-600 hover:text-blue-600 border border-gray-200/80 flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-2xs"
+                  className="w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 border border-gray-200/80 dark:border-slate-700 flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-2xs"
                   title="Compartir producto (WhatsApp, Telegram, Messenger, Facebook...)"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
