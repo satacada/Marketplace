@@ -650,6 +650,26 @@ export default function NewProductPage() {
               />
             </div>
 
+            {/* Selector de Categoría del producto */}
+            <div>
+              <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300 mb-1">
+                Categoría del producto *
+              </label>
+              <select
+                required
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                className="w-full p-3 text-sm border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-bold"
+              >
+                <option value="">-- Seleccionar Categoría --</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300 mb-1">
@@ -775,16 +795,21 @@ export default function NewProductPage() {
           {/* SECCIÓN 4: UBICACIÓN DEL VENDEDOR CON MAPA E INPUT INTELIGENTE */}
           <div className="space-y-3 pt-4 border-t border-gray-100 dark:border-slate-800">
             <div className="flex items-center justify-between">
-              <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200">
-                Ubicación de la publicación *
-              </label>
+              <div>
+                <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200">
+                  Ubicación de la publicación *
+                </label>
+                <p className="text-[11px] text-gray-500 dark:text-slate-400 font-medium mt-0.5">
+                  💡 Formato sugerido: <strong className="text-gray-700 dark:text-slate-300">Barrio, Ciudad</strong> (Ej: <em>Barracas, Buenos Aires</em> o <em>Av. Montes de Oca 1200, Barracas, Buenos Aires</em>).
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => autoDetectGPS(false)}
                 disabled={isDetectingGPS}
-                className="text-xs font-extrabold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+                className="text-xs font-extrabold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1.5 cursor-pointer bg-blue-50 dark:bg-blue-950/80 px-3 py-1.5 rounded-xl border border-blue-200 dark:border-blue-800 shadow-2xs flex-shrink-0"
               >
-                <span>🎯</span>
+                <span className="text-sm">🎯</span>
                 <span>{isDetectingGPS ? 'Detectando GPS...' : 'Ubicar por GPS'}</span>
               </button>
             </div>
@@ -796,7 +821,7 @@ export default function NewProductPage() {
                 value={locationName}
                 onChange={(e) => handleLocationInputChange(e.target.value)}
                 onFocus={() => locationSuggestions.length > 0 && setShowSuggestions(true)}
-                placeholder="Escribe tu ciudad, barrio o dirección..."
+                placeholder="Ej: Barracas, Buenos Aires o Av. Montes de Oca 1200, Barracas"
                 className="w-full p-3.5 text-xs font-extrabold border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 shadow-2xs"
               />
 
@@ -822,22 +847,37 @@ export default function NewProductPage() {
               )}
             </div>
 
-            {/* Mapa interactivo de vista previa centrado */}
-            <div className="relative h-44 w-full rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-700 shadow-2xs bg-slate-100 dark:bg-slate-800">
-              <iframe
-                key={mapCoords?.key || 'default-map'}
-                title="Mapa de ubicación"
-                width="100%"
-                height="100%"
-                frameBorder="0"
-                src={`https://yandex.com/map-widget/v1/?ll=${mapCoords?.lng || -58.375}&pt=${mapCoords?.lng || -58.375},${mapCoords?.lat || -34.640},pm2rdm&z=14`}
-                className="w-full h-full"
-              />
-              <div className="absolute top-2 left-2 z-10 bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-1 rounded-xl flex items-center gap-1 shadow-xs">
-                <span>📍 {locationName}</span>
-                <span className="text-gray-400">• Ubicación aproximada</span>
-              </div>
-            </div>
+            {/* Mapa interactivo OpenStreetMap de vista previa centrado en Barracas / GPS */}
+            {(() => {
+              const currentLat = mapCoords?.lat || -34.6375;
+              const currentLng = mapCoords?.lng || -58.3752;
+              const bboxMinLng = currentLng - 0.012;
+              const bboxMinLat = currentLat - 0.008;
+              const bboxMaxLng = currentLng + 0.012;
+              const bboxMaxLat = currentLat + 0.008;
+              const osmEmbedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bboxMinLng}%2C${bboxMinLat}%2C${bboxMaxLng}%2C${bboxMaxLat}&layer=mapnik&marker=${currentLat}%2C${currentLng}`;
+
+              return (
+                <div className="relative h-48 w-full rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-700 shadow-2xs bg-slate-100 dark:bg-slate-800">
+                  <iframe
+                    key={mapCoords?.key || 'default-osm-map'}
+                    title="Mapa de ubicación"
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    src={osmEmbedUrl}
+                    className="w-full h-full"
+                  />
+                  {/* Badge con Luz Azul de GPS Activo */}
+                  <div className="absolute top-2 left-2 z-10 bg-slate-900/90 backdrop-blur-md text-white text-[11px] font-extrabold px-3 py-1.5 rounded-xl flex items-center gap-2 shadow-sm border border-slate-700">
+                    <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-blue-400 -ml-5" />
+                    <span>📍 {locationName}</span>
+                    <span className="text-gray-400">• GPS Centrado</span>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* BOTÓN FINAL DE PUBLICACIÓN ESTILO FACEBOOK MARKETPLACE */}
