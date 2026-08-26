@@ -61,10 +61,110 @@ export default function NewProductPage() {
   const [propertyRooms, setPropertyRooms] = useState('');
   const [propertyArea, setPropertyArea] = useState('');
 
+  // Estados para búsqueda de ubicación y mapa
+  const [mapCoords, setMapCoords] = useState<{ lat: number; lng: number; key: number } | null>(null);
+  const [locationSuggestions, setLocationSuggestions] = useState<{ label: string; lat: number; lng: number }[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearchingSuggestions, setIsSearchingSuggestions] = useState(false);
+  const [isDetectingGPS, setIsDetectingGPS] = useState(false);
+
   useEffect(() => {
     loadData();
     detectUserCurrency();
+    autoDetectGPS(true);
   }, []);
+
+  const handleLocationInputChange = (value: string) => {
+    setLocationName(value);
+    if (value.trim().length >= 3) {
+      fetchLocationSuggestions(value);
+    } else {
+      setLocationSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const fetchLocationSuggestions = async (query: string) => {
+    setIsSearchingSuggestions(true);
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        const suggestions = data.map((item: any) => {
+          const parts = item.display_name.split(',');
+          const city = parts[0]?.trim();
+          const state = parts[1]?.trim() || parts[2]?.trim() || '';
+          const label = state ? `${city}, ${state}` : city;
+          return {
+            label,
+            lat: parseFloat(item.lat),
+            lng: parseFloat(item.lon)
+          };
+        });
+        setLocationSuggestions(suggestions);
+        setShowSuggestions(true);
+      }
+    } catch {
+      console.log('Error buscando sugerencias de ubicación');
+    } finally {
+      setIsSearchingSuggestions(false);
+    }
+  };
+
+  const autoDetectGPS = (silent = false) => {
+    if (!navigator.geolocation) {
+      if (!silent) showModalMessage('GPS no soportado', 'Tu navegador no soporta geolocalización por GPS.', 'info');
+      return;
+    }
+
+    setIsDetectingGPS(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          setMapCoords({ lat, lng, key: Date.now() });
+
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+          const data = await res.json();
+          
+          const amenity = data.address?.amenity || data.address?.leisure || data.address?.park || '';
+          const suburb = data.address?.suburb || data.address?.neighbourhood || data.address?.quarter || '';
+          const city = data.address?.city || data.address?.town || data.address?.village || data.address?.county || 'Barracas';
+
+          let detected = '';
+          if (amenity) {
+            detected = `${amenity}, ${suburb || city}`;
+          } else if (suburb) {
+            detected = `${suburb}, ${city}`;
+          } else {
+            detected = city;
+          }
+
+          const finalLocation = detected || 'Plaza Colombia, Barracas';
+          setLocationName(finalLocation);
+          setShowSuggestions(false);
+          if (!silent) {
+            showModalMessage('Ubicación GPS detectada', `Se re-centró el mapa en tu posición exacta: ${finalLocation}`, 'success');
+          }
+        } catch {
+          if (!silent) {
+            setLocationName('Plaza Colombia, Barracas');
+            showModalMessage('Ubicación estimada', 'Se asignó la ubicación aproximada: Plaza Colombia, Barracas', 'info');
+          }
+        } finally {
+          setIsDetectingGPS(false);
+        }
+      },
+      () => {
+        setIsDetectingGPS(false);
+        if (!silent) {
+          showModalMessage('Permiso GPS denegado', 'No pudimos acceder a tu GPS. Por favor escribe tu ubicación manualmente.', 'info');
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   const loadData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -672,17 +772,72 @@ export default function NewProductPage() {
             </div>
           </div>
 
-          {/* SECCIÓN 4: UBICACIÓN DEL VENDEDOR */}
-          <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-slate-800">
-            <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-300">
-              Ubicación de la publicación *
-            </label>
-            <input
-              type="text"
-              value={locationName}
-              onChange={(e) => setLocationName(e.target.value)}
-              className="w-full p-3 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-bold"
-            />
+          {/* SECCIÓN 4: UBICACIÓN DEL VENDEDOR CON MAPA E INPUT INTELIGENTE */}
+          <div className="space-y-3 pt-4 border-t border-gray-100 dark:border-slate-800">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200">
+                Ubicación de la publicación *
+              </label>
+              <button
+                type="button"
+                onClick={() => autoDetectGPS(false)}
+                disabled={isDetectingGPS}
+                className="text-xs font-extrabold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <span>🎯</span>
+                <span>{isDetectingGPS ? 'Detectando GPS...' : 'Ubicar por GPS'}</span>
+              </button>
+            </div>
+
+            <div className="relative">
+              <input
+                type="text"
+                required
+                value={locationName}
+                onChange={(e) => handleLocationInputChange(e.target.value)}
+                onFocus={() => locationSuggestions.length > 0 && setShowSuggestions(true)}
+                placeholder="Escribe tu ciudad, barrio o dirección..."
+                className="w-full p-3.5 text-xs font-extrabold border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 shadow-2xs"
+              />
+
+              {/* Dropdown de sugerencias de autocompletado */}
+              {showSuggestions && locationSuggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 z-30 mt-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl shadow-xl overflow-hidden">
+                  {locationSuggestions.map((item, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setLocationName(item.label);
+                        setMapCoords({ lat: item.lat, lng: item.lng, key: Date.now() });
+                        setShowSuggestions(false);
+                      }}
+                      className="w-full text-left p-3 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-800 border-b border-gray-100 dark:border-slate-800/60 last:border-0 flex items-center gap-2 cursor-pointer"
+                    >
+                      <span>📍</span>
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Mapa interactivo de vista previa centrado */}
+            <div className="relative h-44 w-full rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-700 shadow-2xs bg-slate-100 dark:bg-slate-800">
+              <iframe
+                key={mapCoords?.key || 'default-map'}
+                title="Mapa de ubicación"
+                width="100%"
+                height="100%"
+                frameBorder="0"
+                src={`https://yandex.com/map-widget/v1/?ll=${mapCoords?.lng || -58.375}&pt=${mapCoords?.lng || -58.375},${mapCoords?.lat || -34.640},pm2rdm&z=14`}
+                className="w-full h-full"
+              />
+              <div className="absolute top-2 left-2 z-10 bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-1 rounded-xl flex items-center gap-1 shadow-xs">
+                <span>📍 {locationName}</span>
+                <span className="text-gray-400">• Ubicación aproximada</span>
+              </div>
+            </div>
           </div>
 
           {/* BOTÓN FINAL DE PUBLICACIÓN ESTILO FACEBOOK MARKETPLACE */}
