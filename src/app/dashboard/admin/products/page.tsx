@@ -1,3 +1,16 @@
+/**
+ * ============================================================================
+ * FILE: page.tsx (dashboard/admin/products)
+ * ============================================================================
+ * 
+ * @description Panel de Administración de Productos con diseño horizontal
+ *              de ancho completo (Full Width Rows) para eliminar espacios vacíos
+ *              a la derecha y permitir aprobación rápida (Imagen cargada por usuario).
+ * 
+ * @module Presentation/Pages/Dashboard/Admin/Products
+ * ============================================================================
+ */
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -27,7 +40,6 @@ export default function AdminProductsPage() {
   const [tab, setTab] = useState<TabType>('pending');
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     loadProducts();
@@ -148,13 +160,13 @@ export default function AdminProductsPage() {
   };
 
   return (
-    <div className="p-6 sm:p-8 max-w-6xl mx-auto space-y-6">
+    <div className="p-6 sm:p-8 max-w-7xl mx-auto space-y-6 text-gray-900 dark:text-slate-100">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-slate-100 tracking-tight">Administración de Productos</h1>
-        <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 mt-1">Gestiona la aprobación, visibilidad y eliminación de productos</p>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Administración de Productos</h1>
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 mt-1">Gestiona la aprobación, visibilidad y eliminación de productos de la plataforma.</p>
       </div>
 
-      {/* Pestañas */}
+      {/* Pestañas de Filtro */}
       <div className="flex gap-2 border-b border-gray-200 dark:border-slate-800 pb-3 overflow-x-auto">
         {(['pending', 'approved', 'deleted'] as TabType[]).map((t) => {
           const config = getTabConfig(t);
@@ -164,7 +176,7 @@ export default function AdminProductsPage() {
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 flex-shrink-0 ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 flex-shrink-0 cursor-pointer ${
                 tab === t 
                   ? `bg-blue-600 text-white shadow-xs` 
                   : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800'
@@ -188,96 +200,113 @@ export default function AdminProductsPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        /* Tarjetas en Filas Horizontales de Ancho Completo (Full Width) para eliminar espacios vacíos */
+        <div className="space-y-4 w-full">
           {products.map((product) => (
-            <div key={product.id} className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xs border border-gray-200/90 dark:border-slate-800 overflow-hidden flex flex-col justify-between text-gray-900 dark:text-slate-100">
-              <div className="relative aspect-square bg-gray-100 dark:bg-slate-800">
-                {product.image_urls?.[0] ? (
-                  <Image
-                    src={product.image_urls[0]}
-                    alt={product.title}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-400 dark:text-slate-500">
-                    <span className="text-6xl">📦</span>
+            <div
+              key={product.id}
+              className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-gray-200/90 dark:border-slate-800 shadow-2xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6 w-full hover:border-blue-200 dark:hover:border-slate-700 transition"
+            >
+              {/* Foto + Badge de Estado */}
+              <div className="flex items-center gap-4 w-full md:w-auto">
+                <div className="relative w-28 h-28 sm:w-36 sm:h-36 bg-gray-100 dark:bg-slate-800 rounded-2xl overflow-hidden flex-shrink-0 border border-gray-200/60 dark:border-slate-800">
+                  {product.image_urls?.[0] ? (
+                    <Image
+                      src={product.image_urls[0]}
+                      alt={product.title}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-gray-400 dark:text-slate-500">
+                      <span className="text-4xl">📦</span>
+                    </div>
+                  )}
+                  <div className={`absolute top-2 right-2 px-2 py-0.5 rounded-full text-[9px] font-black text-white shadow-xs ${
+                    product.status === 'pending' ? 'bg-amber-500' : 
+                    product.status === 'approved' ? 'bg-emerald-600' : 'bg-rose-600'
+                  }`}>
+                    {product.status === 'pending' ? '⏳ Pendiente' : 
+                     product.status === 'approved' ? '✅ Aprobado' : '❌ Rechazado'}
                   </div>
-                )}
-                <div className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-extrabold text-white shadow-xs ${
-                  product.status === 'pending' ? 'bg-amber-500' : 
-                  product.status === 'approved' ? 'bg-emerald-600' : 'bg-rose-600'
-                }`}>
-                  {product.status === 'pending' ? '⏳ Pendiente' : 
-                   product.status === 'approved' ? '✅ Aprobado' : '❌ Rechazado'}
+                </div>
+
+                {/* Detalles de Titulo, Descripcion y Vendedor */}
+                <div className="space-y-1.5 flex-1 min-w-0">
+                  <h3 className="font-black text-base text-gray-900 dark:text-slate-100 truncate">
+                    {product.title}
+                  </h3>
+                  <p className="text-xs text-gray-600 dark:text-slate-300 font-medium line-clamp-2 leading-relaxed">
+                    {product.description || 'Sin descripción adicional.'}
+                  </p>
+                  
+                  <div className="flex items-center gap-4 pt-1 text-xs">
+                    <span className="font-black text-blue-600 dark:text-blue-400 text-sm">
+                      ${product.price?.toLocaleString('es-CL')}
+                    </span>
+                    <span className="font-extrabold text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full text-[11px]">
+                      Stock: {product.stock} u.
+                    </span>
+                  </div>
+
+                  <div className="pt-1 text-[11px] text-gray-400 dark:text-slate-500 font-bold flex items-center gap-1">
+                    <span>Vendedor:</span>
+                    <span className="text-gray-800 dark:text-slate-200 font-extrabold">
+                      {product.profiles?.store_name || product.profiles?.email || 'Sin nombre'}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                <div>
-                  <h3 className="font-extrabold text-base text-gray-900 dark:text-slate-100 mb-1 line-clamp-1">{product.title}</h3>
-                  <p className="text-xs text-gray-600 dark:text-slate-300 line-clamp-2">{product.description}</p>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-xl font-black text-blue-600 dark:text-blue-400">${product.price?.toLocaleString('es-CL')}</span>
-                  <span className="text-xs font-bold text-gray-500 dark:text-slate-400">Stock: {product.stock}</span>
-                </div>
-
-                <div className="border-t border-gray-100 dark:border-slate-800 pt-3">
-                  <p className="text-[10px] text-gray-400 dark:text-slate-500 font-bold uppercase tracking-wider">Vendedor:</p>
-                  <p className="text-xs font-extrabold text-gray-800 dark:text-slate-200">
-                    {product.profiles?.store_name || product.profiles?.email || 'Sin nombre'}
-                  </p>
-                </div>
-
-                {/* Acciones según pestaña */}
+              {/* Botones de Acción a la Derecha (Aprobar, Rechazar, Restaurar, Eliminar) */}
+              <div className="flex flex-row md:flex-col gap-2.5 w-full md:w-44 flex-shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-gray-100 dark:border-slate-800">
                 {tab === 'pending' && (
-                  <div className="flex gap-2 pt-2">
+                  <>
                     <button
                       onClick={() => handleApprove(product.id)}
                       disabled={processingId === product.id}
-                      className="flex-1 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition shadow-2xs"
+                      className="flex-1 py-2.5 px-4 rounded-xl text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                     >
-                      ✓ Aprobar
+                      <span>✓</span>
+                      <span>Aprobar</span>
                     </button>
                     <button
                       onClick={() => handleReject(product.id)}
                       disabled={processingId === product.id}
-                      className="flex-1 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition shadow-2xs"
+                      className="flex-1 py-2.5 px-4 rounded-xl text-xs font-black bg-rose-600 hover:bg-rose-700 text-white transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                     >
-                      Rechazar
+                      <span>Rechazar</span>
                     </button>
-                  </div>
+                  </>
                 )}
 
                 {tab === 'approved' && (
                   <button
                     onClick={() => handleReject(product.id)}
                     disabled={processingId === product.id}
-                    className="w-full py-2 rounded-xl text-xs font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900 border border-rose-200 dark:border-rose-900 transition"
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-black bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900 border border-rose-200 dark:border-rose-900 transition cursor-pointer"
                   >
                     Eliminar publicación
                   </button>
                 )}
 
                 {tab === 'deleted' && (
-                  <div className="flex gap-2 pt-2">
+                  <>
                     <button
                       onClick={() => handleRestore(product.id)}
                       disabled={processingId === product.id}
-                      className="flex-1 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white transition shadow-2xs"
+                      className="flex-1 py-2.5 px-4 rounded-xl text-xs font-black bg-blue-600 hover:bg-blue-700 text-white transition shadow-xs cursor-pointer"
                     >
                       Restaurar
                     </button>
                     <button
                       onClick={() => handlePermanentDelete(product.id)}
                       disabled={processingId === product.id}
-                      className="flex-1 py-2 rounded-xl text-xs font-bold bg-rose-700 hover:bg-rose-800 text-white transition shadow-2xs"
+                      className="flex-1 py-2.5 px-4 rounded-xl text-xs font-black bg-rose-700 hover:bg-rose-800 text-white transition shadow-xs cursor-pointer"
                     >
                       Eliminar Definitivo
                     </button>
-                  </div>
+                  </>
                 )}
               </div>
             </div>
