@@ -28,6 +28,7 @@ export type DetailProduct = {
   category_id: string | null;
   seller_id: string;
   is_deleted: boolean;
+  created_at?: string | null;
   location_name?: string | null;
   categories: { name: string } | null;
   profiles: { store_name: string | null; email: string | null; is_trusted_seller?: boolean } | null;

@@ -3,10 +3,10 @@
  * FILE: ProductSellerSidebar.tsx
  * ============================================================================
  * 
- * @description Componente modular para el sidebar derecho del detalle de producto.
- *              Incluye mapa de ubicación aproximada del vendedor (Imagen 2),
- *              información del vendedor con estrellas de calificación,
- *              caja de mensaje rápido "Hola, ¿Sigue estando disponible?" y botones de compra.
+ * @description Componente modular para el sidebar derecho del detalle de producto (Imagen 2).
+ *              Incluye fecha de publicación amigable ("Publicado hoy", "Publicado el jueves",
+ *              "Publicado la semana pasada"), mapa con "La ubicación es aproximada",
+ *              información del vendedor con estrellas de calificación y caja de mensaje directo.
  * 
  * @module Presentation/Components/Marketplace/Detail/ProductSellerSidebar
  * ============================================================================
@@ -15,6 +15,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import OpenStreetMapEmbed from '@/components/ui/OpenStreetMapEmbed';
+import { formatPublicationDate } from '@/lib/formatPublicationDate';
 import { DetailProduct } from '@/features/products/hooks/useProductDetail';
 
 type Props = {
@@ -49,6 +50,9 @@ export default function ProductSellerSidebar({
     setTimeout(() => setMessageSent(false), 3000);
   };
 
+  const formattedDate = formatPublicationDate(product.created_at);
+  const locationText = product.location_name || 'Ciudad de Buenos Aires, CABA';
+
   return (
     <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-6 sticky top-6 text-gray-900 dark:text-slate-100">
       {/* Categoría y Botón de Favorito */}
@@ -71,13 +75,18 @@ export default function ProductSellerSidebar({
         </button>
       </div>
 
-      {/* Título de la Publicación y Estado "Disponible" */}
-      <div>
+      {/* Título, Precio y Fecha de Publicación Amigable (Resaltado en amarillo en Imagen 2) */}
+      <div className="space-y-1">
         <h1 className="text-2xl sm:text-3xl font-black leading-tight">
           {product.title}
         </h1>
-        <p className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
-          ${product.price?.toLocaleString('es-AR')} · {product.stock > 0 ? 'Disponible' : 'Agotado'}
+        <p className="text-base font-black text-blue-600 dark:text-blue-400">
+          ${product.price?.toLocaleString('es-AR')} · <span className="text-emerald-600 font-extrabold text-xs">{product.stock > 0 ? 'Disponible' : 'Agotado'}</span>
+        </p>
+        
+        {/* Fecha de publicación estilo Facebook Marketplace: Publicado en Ciudad de Buenos Aires · Publicado el jueves */}
+        <p className="text-xs font-extrabold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-1 rounded-xl inline-block border border-amber-200 dark:border-amber-900">
+          📍 {formattedDate} en {locationText}
         </p>
       </div>
 
@@ -132,7 +141,7 @@ export default function ProductSellerSidebar({
         </p>
       </div>
 
-      {/* Sección de Ubicación con Mapa Aproximado Estilo Facebook Marketplace (Imagen 2) */}
+      {/* Ubicación con Mapa y Leyenda "La ubicación es aproximada" (Resaltado en amarillo en Imagen 2) */}
       <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-slate-800">
         <span className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">
           Ubicación del Vendedor
@@ -140,8 +149,8 @@ export default function ProductSellerSidebar({
         <div className="rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-800">
           <OpenStreetMapEmbed height="h-28" />
         </div>
-        <p className="text-[11px] font-bold text-gray-500 dark:text-slate-400">
-          📍 {product.location_name || 'Gerli, BA'} - <span className="text-gray-400">La ubicación es aproximada</span>
+        <p className="text-[11px] font-bold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 p-2 rounded-xl border border-amber-200/60 dark:border-amber-900/40">
+          📍 <strong>{locationText}</strong> · <span className="font-semibold">La ubicación es aproximada</span>
         </p>
       </div>
 

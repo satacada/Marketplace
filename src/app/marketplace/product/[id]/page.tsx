@@ -90,23 +90,14 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           <span className="text-gray-800 dark:text-slate-200 truncate max-w-xs">{detail.product.title}</span>
         </div>
 
-        {/* Layout Principal a 2 Columnas (Galería + IA a la izq / Vendedor a la der) */}
+        {/* Layout Principal a 2 Columnas (Galería de Fotos a la izq / Vendedor, Ubicación y Chat a la der) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Columna Izquierda: Galería de Fotos + Resumen de IA */}
-          <div className="lg:col-span-7 space-y-6">
+          <div className="lg:col-span-7">
             <ProductGalleryColumn
               title={detail.product.title}
               imageUrls={detail.product.image_urls || []}
               aiSummary={detail.aiSummary}
-            />
-
-            {/* Sugerencias de IA para mejorar la publicación (Orientado al Vendedor - Imagen 3) */}
-            <AISellerSuggestionsBox isOwnProduct={isOwnProduct} />
-
-            {/* Combo "Este producto se compra frecuentemente con este otro" (Imagen 3) */}
-            <FrequentlyBoughtTogether
-              mainProductTitle={detail.product.title}
-              mainProductPrice={detail.product.price}
             />
           </div>
 
@@ -130,25 +121,20 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
 
-        {/* Pestañas Estilo AliExpress (Valoraciones, Detalles, Descripción, Tienda - Imagen 3) */}
+        {/* Sección Central de 3 Pestañas Organizativas (Imagen 1):
+            1. ❓ Preguntas al Vendedor
+            2. ⚡ Este producto se compra con este otro
+            3. 💡 Sugerencias y Productos Relacionados por Análisis de Foto */}
         <ProductAliExpressTabs
-          productTitle={detail.product.title}
-          description={detail.product.description}
-        />
-
-        {/* Sección de Preguntas y Respuestas al Vendedor */}
-        <ProductQuestionsSection
+          mainProductTitle={detail.product.title}
+          mainProductPrice={detail.product.price}
           questions={detail.questions}
           newQuestion={detail.newQuestion}
           onNewQuestionChange={detail.setNewQuestion}
           onSubmitQuestion={detail.handlePostQuestion}
           submitting={detail.submitting}
           isOwnProduct={isOwnProduct}
-        />
-
-        {/* Productos Relacionados / Te podría interesar (Imagen 3) */}
-        <RelatedProductsSection
-          products={detail.similarSellers || []}
+          relatedProducts={detail.similarSellers || []}
         />
       </main>
 

@@ -3,160 +3,122 @@
  * FILE: ProductAliExpressTabs.tsx
  * ============================================================================
  * 
- * @description Pestañas de producto estilo AliExpress (Imagen 3):
- *              - Navegación por pestañas (Valoraciones, Detalles, Descripción, Tienda, Te podría interesar)
- *              - Reseñas con desglose por aspecto (Fácil instalación, Claridad, Durabilidad)
- *              - Filtros por foto, país, opiniones clave y fotos subidas por compradores.
+ * @description Pestañas de detalle de producto organizadas en EXACTAMENTE 3 PESTAÑAS (Imagen 1):
+ *              1. ❓ Preguntas al Vendedor
+ *              2. ⚡ Este producto se compra con este otro (Combo)
+ *              3. 💡 Sugerencias y Productos Relacionados (por análisis de foto)
  * 
  * @module Presentation/Components/Marketplace/Detail/ProductAliExpressTabs
  * ============================================================================
  */
 
 import React, { useState } from 'react';
+import ProductQuestionsSection from './ProductQuestionsSection';
+import FrequentlyBoughtTogether from './FrequentlyBoughtTogether';
+import AISellerSuggestionsBox from './AISellerSuggestionsBox';
+import RelatedProductsSection from './RelatedProductsSection';
 
 type Props = {
-  productTitle: string;
-  description?: string | null;
+  mainProductTitle: string;
+  mainProductPrice: number;
+  questions: any[];
+  newQuestion: string;
+  onNewQuestionChange: (val: string) => void;
+  onSubmitQuestion: (e: React.FormEvent) => void;
+  submitting: boolean;
+  isOwnProduct: boolean;
+  relatedProducts: any[];
 };
 
 export default function ProductAliExpressTabs({
-  productTitle,
-  description,
+  mainProductTitle,
+  mainProductPrice,
+  questions,
+  newQuestion,
+  onNewQuestionChange,
+  onSubmitQuestion,
+  submitting,
+  isOwnProduct,
+  relatedProducts,
 }: Props) {
-  const [activeTab, setActiveTab] = useState<'reviews' | 'details' | 'description' | 'store'>('reviews');
+  const [activeTab, setActiveTab] = useState<'questions' | 'combo' | 'related'>('questions');
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-6 text-gray-900 dark:text-slate-100">
-      {/* Navegación por Pestañas Estilo AliExpress (Imagen 3) */}
+      {/* Navegación por EXACTAMENTE 3 Pestañas (Indicado con flechas en Imagen 1) */}
       <div className="flex items-center gap-6 border-b border-gray-100 dark:border-slate-800 pb-3 overflow-x-auto text-xs font-black">
+        {/* Pestaña 1: Preguntas al Vendedor */}
         <button
           type="button"
-          onClick={() => setActiveTab('reviews')}
-          className={`flex items-center gap-1.5 pb-2 transition border-b-2 cursor-pointer whitespace-nowrap ${
-            activeTab === 'reviews'
+          onClick={() => setActiveTab('questions')}
+          className={`flex items-center gap-1.5 pb-2.5 transition border-b-2 cursor-pointer whitespace-nowrap ${
+            activeTab === 'questions'
               ? 'border-blue-600 text-blue-600 dark:text-blue-400'
               : 'border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-slate-200'
           }`}
         >
-          <span>📍</span>
-          <span>Valoraciones (1,745)</span>
+          <span>❓</span>
+          <span>Preguntas al Vendedor ({questions.length})</span>
         </button>
 
+        {/* Pestaña 2: Este producto se compra con este otro */}
         <button
           type="button"
-          onClick={() => setActiveTab('details')}
-          className={`pb-2 transition border-b-2 cursor-pointer whitespace-nowrap ${
-            activeTab === 'details'
+          onClick={() => setActiveTab('combo')}
+          className={`flex items-center gap-1.5 pb-2.5 transition border-b-2 cursor-pointer whitespace-nowrap ${
+            activeTab === 'combo'
               ? 'border-blue-600 text-blue-600 dark:text-blue-400'
               : 'border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-slate-200'
           }`}
         >
-          Detalles
+          <span>⚡</span>
+          <span>Este producto se compra con este otro</span>
         </button>
 
+        {/* Pestaña 3: Sugerencias y Productos Relacionados */}
         <button
           type="button"
-          onClick={() => setActiveTab('description')}
-          className={`pb-2 transition border-b-2 cursor-pointer whitespace-nowrap ${
-            activeTab === 'description'
+          onClick={() => setActiveTab('related')}
+          className={`flex items-center gap-1.5 pb-2.5 transition border-b-2 cursor-pointer whitespace-nowrap ${
+            activeTab === 'related'
               ? 'border-blue-600 text-blue-600 dark:text-blue-400'
               : 'border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-slate-200'
           }`}
         >
-          Descripción
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('store')}
-          className={`pb-2 transition border-b-2 cursor-pointer whitespace-nowrap ${
-            activeTab === 'store'
-              ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-              : 'border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-slate-200'
-          }`}
-        >
-          Tienda
+          <span>💡</span>
+          <span>Sugerencias y Productos Relacionados</span>
         </button>
       </div>
 
-      {/* Contenido de Pestaña: Reseñas / Valoraciones Estilo AliExpress */}
-      {activeTab === 'reviews' && (
-        <div className="space-y-6">
-          {/* Header de Reseñas */}
-          <div className="flex flex-wrap items-center gap-3">
-            <h3 className="text-xl font-black">Reseña | 4.8</h3>
-            <div className="flex items-center text-amber-400 text-sm">
-              ★★★★★
-            </div>
-            <span className="text-xs text-gray-500 font-bold">1,722 calificaciones</span>
-            <span className="text-xs text-emerald-600 font-extrabold bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full">
-              ✓ Todo desde compras verificadas
-            </span>
-          </div>
-
-          {/* Barras de Desglose por Aspecto (Imagen 3) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="p-3 bg-gray-50 dark:bg-slate-800/60 rounded-2xl space-y-1">
-              <div className="flex justify-between text-xs font-bold">
-                <span>Fácil instalación</span>
-                <span className="text-blue-600">Excelente (94%)</span>
-              </div>
-              <div className="h-1.5 w-full bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                <div className="h-full bg-blue-600 w-[94%]" />
-              </div>
-            </div>
-
-            <div className="p-3 bg-gray-50 dark:bg-slate-800/60 rounded-2xl space-y-1">
-              <div className="flex justify-between text-xs font-bold">
-                <span>Claridad de instrucciones</span>
-                <span className="text-blue-600">Muy claro (88%)</span>
-              </div>
-              <div className="h-1.5 w-full bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                <div className="h-full bg-blue-600 w-[88%]" />
-              </div>
-            </div>
-
-            <div className="p-3 bg-gray-50 dark:bg-slate-800/60 rounded-2xl space-y-1">
-              <div className="flex justify-between text-xs font-bold">
-                <span>Durabilidad</span>
-                <span className="text-blue-600">Alta durabilidad (91%)</span>
-              </div>
-              <div className="h-1.5 w-full bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                <div className="h-full bg-blue-600 w-[91%]" />
-              </div>
-            </div>
-          </div>
-
-          {/* Tags de Filtros de Opiniones (Imagen 3) */}
-          <div className="flex items-center gap-2 flex-wrap text-xs font-extrabold">
-            <span className="px-3 py-1.5 bg-blue-600 text-white rounded-full">Todas las valoraciones ▾</span>
-            <span className="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 rounded-full cursor-pointer">📷 Con fotos (239)</span>
-            <span className="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 rounded-full cursor-pointer">🇦🇷 Argentina (142)</span>
-            <span className="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 rounded-full cursor-pointer">💬 Comentarios detallados (59)</span>
-            <span className="px-3 py-1.5 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 rounded-full cursor-pointer">funciona bien (83)</span>
-            <span className="px-3 py-1.5 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 rounded-full cursor-pointer">entrega rápida (80)</span>
-          </div>
+      {/* Pestaña 1: Sección de Preguntas al Vendedor */}
+      {activeTab === 'questions' && (
+        <div className="animate-fadeIn">
+          <ProductQuestionsSection
+            questions={questions}
+            newQuestion={newQuestion}
+            onNewQuestionChange={onNewQuestionChange}
+            onSubmitQuestion={onSubmitQuestion}
+            submitting={submitting}
+            isOwnProduct={isOwnProduct}
+          />
         </div>
       )}
 
-      {/* Pestañas Secundarias */}
-      {activeTab === 'details' && (
-        <div className="space-y-2 text-xs font-medium text-gray-700 dark:text-slate-300">
-          <p>• <strong>Producto:</strong> {productTitle}</p>
-          <p>• <strong>Garantía:</strong> 12 meses oficial del fabricante</p>
-          <p>• <strong>Envío:</strong> Despacho rápido en 24h a todo el país</p>
+      {/* Pestaña 2: Combo "Este producto se compra frecuentemente con este otro" */}
+      {activeTab === 'combo' && (
+        <div className="animate-fadeIn">
+          <FrequentlyBoughtTogether
+            mainProductTitle={mainProductTitle}
+            mainProductPrice={mainProductPrice}
+          />
         </div>
       )}
 
-      {activeTab === 'description' && (
-        <div className="text-xs font-medium text-gray-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">
-          {description || 'Sin descripción adicional provista por el vendedor.'}
-        </div>
-      )}
-
-      {activeTab === 'store' && (
-        <div className="text-xs font-medium text-gray-700 dark:text-slate-300">
-          <p>Vendedor oficial verificado en Marketplace SAAS.</p>
+      {/* Pestaña 3: Sugerencias de IA y Productos Relacionados (por análisis de foto) */}
+      {activeTab === 'related' && (
+        <div className="space-y-6 animate-fadeIn">
+          <AISellerSuggestionsBox isOwnProduct={isOwnProduct} />
+          <RelatedProductsSection products={relatedProducts} />
         </div>
       )}
     </div>
