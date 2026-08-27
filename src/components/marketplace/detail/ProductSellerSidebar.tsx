@@ -3,10 +3,14 @@
  * FILE: ProductSellerSidebar.tsx
  * ============================================================================
  * 
- * @description Componente modular para el sidebar derecho del detalle de producto (Imagen 2).
- *              Incluye fecha de publicación amigable ("Publicado hoy", "Publicado el jueves",
- *              "Publicado la semana pasada"), mapa con "La ubicación es aproximada",
- *              información del vendedor con estrellas de calificación y caja de mensaje directo.
+ * @description Componente modular para el sidebar derecho del detalle de producto.
+ *              Reorganizado según indicación visual del usuario:
+ *              1. Categoría y Favorito
+ *              2. Título, Precio y Fecha de Publicación
+ *              3. Detalles de la Publicación (Descripción libre)
+ *              4. Ubicación del Vendedor (Mapa Estático)
+ *              5. BLOQUE DE BOTONES (Agregar al Carrito, Compartir, Reportar)
+ *              6. Información del Vendedor & Formulario de Chat
  * 
  * @module Presentation/Components/Marketplace/Detail/ProductSellerSidebar
  * ============================================================================
@@ -57,7 +61,7 @@ export default function ProductSellerSidebar({
 
   return (
     <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-6 sticky top-6 text-gray-900 dark:text-slate-100">
-      {/* Categoría y Botón de Favorito */}
+      {/* 1. Categoría y Botón de Favorito */}
       <div className="flex justify-between items-center">
         <span className="text-xs font-extrabold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-900">
           {product.categories?.name || 'Sin categoría'}
@@ -77,7 +81,7 @@ export default function ProductSellerSidebar({
         </button>
       </div>
 
-      {/* Título, Precio y Fecha de Publicación Amigable (Resaltado en amarillo en Imagen 2) */}
+      {/* 2. Título, Precio y Fecha de Publicación Amigable */}
       <div className="space-y-1">
         <h1 className="text-2xl sm:text-3xl font-black leading-tight">
           {product.title}
@@ -86,14 +90,45 @@ export default function ProductSellerSidebar({
           ${product.price?.toLocaleString('es-AR')} · <span className="text-emerald-600 font-extrabold text-xs">{product.stock > 0 ? 'Disponible' : 'Agotado'}</span>
         </p>
         
-        {/* Fecha de publicación estilo Facebook Marketplace: Publicado en Ciudad de Buenos Aires · Publicado el jueves */}
         <p className="text-xs font-extrabold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-1 rounded-xl inline-block border border-amber-200 dark:border-amber-900">
           📍 {formattedDate} en {locationText}
         </p>
       </div>
 
-      {/* Acciones de Compra y Carrito */}
-      <div className="space-y-2.5">
+      {/* 3. Detalles de la Publicación (Descripción Libre) */}
+      <div className="space-y-2">
+        <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-400">
+          Detalles de la Publicación
+        </h3>
+        <p className="text-xs text-gray-700 dark:text-slate-300 font-medium leading-relaxed whitespace-pre-line bg-gray-50/60 dark:bg-slate-800/30 p-3.5 rounded-2xl border border-gray-100 dark:border-slate-800">
+          {product.description || 'El vendedor no agregó detalles adicionales.'}
+        </p>
+      </div>
+
+      {/* 4. Ubicación con Mapa Estático Clickeable */}
+      <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-slate-800">
+        <span className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">
+          Ubicación del Vendedor
+        </span>
+        <div 
+          onClick={onOpenLocationModal}
+          className="rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-800 cursor-pointer hover:opacity-90 transition relative group"
+          title="Haz clic para ampliar y navegar en la ubicación"
+        >
+          <OpenStreetMapEmbed height="h-28" interactive={false} />
+          <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/10 transition flex items-center justify-center">
+            <span className="text-[10px] font-black text-white bg-slate-900/80 px-2.5 py-1 rounded-full opacity-0 group-hover:opacity-100 transition shadow-md">
+              🔍 Ver mapa completo
+            </span>
+          </div>
+        </div>
+        <p className="text-[11px] font-bold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 p-2 rounded-xl border border-amber-200/60 dark:border-amber-900/40">
+          📍 <strong>{locationText}</strong> · <span className="font-semibold">La ubicación es aproximada</span>
+        </p>
+      </div>
+
+      {/* 5. Acciones de Compra, Carrito, Compartir y Reportar (Reubicado según la flecha del usuario) */}
+      <div className="space-y-2.5 pt-2 border-t border-gray-100 dark:border-slate-800">
         {isOwnProduct ? (
           <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 rounded-2xl text-center text-xs font-bold text-amber-800 dark:text-amber-300">
             Es tu propia publicación
@@ -133,39 +168,7 @@ export default function ProductSellerSidebar({
         </div>
       </div>
 
-      {/* Descripción Libre del Vendedor */}
-      <div className="space-y-2">
-        <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-400">
-          Detalles de la Publicación
-        </h3>
-        <p className="text-xs text-gray-700 dark:text-slate-300 font-medium leading-relaxed whitespace-pre-line bg-gray-50/60 dark:bg-slate-800/30 p-3.5 rounded-2xl border border-gray-100 dark:border-slate-800">
-          {product.description || 'El vendedor no agregó detalles adicionales.'}
-        </p>
-      </div>
-
-      {/* Ubicación con Mapa Estático Clickeable para abrir Modal (Imagen cargada) */}
-      <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-slate-800">
-        <span className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">
-          Ubicación del Vendedor
-        </span>
-        <div 
-          onClick={onOpenLocationModal}
-          className="rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-800 cursor-pointer hover:opacity-90 transition relative group"
-          title="Haz clic para ampliar y navegar en la ubicación"
-        >
-          <OpenStreetMapEmbed height="h-28" interactive={false} />
-          <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/10 transition flex items-center justify-center">
-            <span className="text-[10px] font-black text-white bg-slate-900/80 px-2.5 py-1 rounded-full opacity-0 group-hover:opacity-100 transition shadow-md">
-              🔍 Ver mapa completo
-            </span>
-          </div>
-        </div>
-        <p className="text-[11px] font-bold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 p-2 rounded-xl border border-amber-200/60 dark:border-amber-900/40">
-          📍 <strong>{locationText}</strong> · <span className="font-semibold">La ubicación es aproximada</span>
-        </p>
-      </div>
-
-      {/* Datos del Vendedor con Estrellas y Caja de Chat Rápido (Imagen 2) */}
+      {/* 6. Datos del Vendedor con Estrellas y Caja de Chat Rápido */}
       <div className="pt-4 border-t border-gray-100 dark:border-slate-800 space-y-4">
         <span className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">
           Información del Vendedor
@@ -198,7 +201,7 @@ export default function ProductSellerSidebar({
           </Link>
         </div>
 
-        {/* Caja de Enviar Mensaje al Vendedor Estilo Facebook Marketplace (Imagen 2) */}
+        {/* Caja de Enviar Mensaje al Vendedor */}
         {!isOwnProduct && (
           <form onSubmit={handleSendQuickMessage} className="space-y-2 pt-2">
             <span className="text-xs font-extrabold text-gray-700 dark:text-slate-300 block">
