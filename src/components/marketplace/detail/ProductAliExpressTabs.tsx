@@ -3,16 +3,18 @@
  * FILE: ProductAliExpressTabs.tsx
  * ============================================================================
  * 
- * @description Pestañas de detalle de producto organizadas en EXACTAMENTE 3 PESTAÑAS (Imagen 1):
- *              1. ❓ Preguntas al Vendedor
- *              2. ⚡ Este producto se compra con este otro (Combo)
- *              3. 💡 Sugerencias y Productos Relacionados (por análisis de foto)
+ * @description Pestañas de detalle de producto organizadas con Valoraciones estilo AliExpress (Imagen 1 y 2):
+ *              1. 📍 Valoraciones (4) — Estilo AliExpress con filtros por estrellas y compra verificada
+ *              2. ❓ Preguntas al Vendedor (X) — Formulario de preguntas e historial completo
+ *              3. ⚡ Este producto se compra con este otro (Combo)
+ *              4. 💡 Sugerencias y Productos Relacionados (por análisis de foto)
  * 
  * @module Presentation/Components/Marketplace/Detail/ProductAliExpressTabs
  * ============================================================================
  */
 
 import React, { useState } from 'react';
+import ProductReviewsTab from './ProductReviewsTab';
 import ProductQuestionsSection from './ProductQuestionsSection';
 import FrequentlyBoughtTogether from './FrequentlyBoughtTogether';
 import AISellerSuggestionsBox from './AISellerSuggestionsBox';
@@ -41,13 +43,27 @@ export default function ProductAliExpressTabs({
   isOwnProduct,
   relatedProducts,
 }: Props) {
-  const [activeTab, setActiveTab] = useState<'questions' | 'combo' | 'related'>('questions');
+  const [activeTab, setActiveTab] = useState<'reviews' | 'questions' | 'combo' | 'related'>('questions');
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-6 text-gray-900 dark:text-slate-100">
-      {/* Navegación por EXACTAMENTE 3 Pestañas (Indicado con flechas en Imagen 1) */}
+      {/* Navegación por Pestañas Estilo AliExpress (Indicado en Imagen 1 y 2) */}
       <div className="flex items-center gap-6 border-b border-gray-100 dark:border-slate-800 pb-3 overflow-x-auto text-xs font-black">
-        {/* Pestaña 1: Preguntas al Vendedor */}
+        {/* Pestaña 1: Valoraciones (Estilo AliExpress - Imagen 1) */}
+        <button
+          type="button"
+          onClick={() => setActiveTab('reviews')}
+          className={`flex items-center gap-1.5 pb-2.5 transition border-b-2 cursor-pointer whitespace-nowrap ${
+            activeTab === 'reviews'
+              ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+              : 'border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-slate-200'
+          }`}
+        >
+          <span>📍</span>
+          <span>Valoraciones (4)</span>
+        </button>
+
+        {/* Pestaña 2: Preguntas al Vendedor */}
         <button
           type="button"
           onClick={() => setActiveTab('questions')}
@@ -61,7 +77,7 @@ export default function ProductAliExpressTabs({
           <span>Preguntas al Vendedor ({questions.length})</span>
         </button>
 
-        {/* Pestaña 2: Este producto se compra con este otro */}
+        {/* Pestaña 3: Este producto se compra con este otro */}
         <button
           type="button"
           onClick={() => setActiveTab('combo')}
@@ -75,7 +91,7 @@ export default function ProductAliExpressTabs({
           <span>Este producto se compra con este otro</span>
         </button>
 
-        {/* Pestaña 3: Sugerencias y Productos Relacionados */}
+        {/* Pestaña 4: Sugerencias y Productos Relacionados */}
         <button
           type="button"
           onClick={() => setActiveTab('related')}
@@ -90,7 +106,12 @@ export default function ProductAliExpressTabs({
         </button>
       </div>
 
-      {/* Pestaña 1: Sección de Preguntas al Vendedor */}
+      {/* Pestaña 1: Sección de Valoraciones Estilo AliExpress */}
+      {activeTab === 'reviews' && (
+        <ProductReviewsTab />
+      )}
+
+      {/* Pestaña 2: Sección de Preguntas al Vendedor */}
       {activeTab === 'questions' && (
         <div className="animate-fadeIn">
           <ProductQuestionsSection
@@ -104,7 +125,7 @@ export default function ProductAliExpressTabs({
         </div>
       )}
 
-      {/* Pestaña 2: Combo "Este producto se compra frecuentemente con este otro" */}
+      {/* Pestaña 3: Combo "Este producto se compra frecuentemente con este otro" */}
       {activeTab === 'combo' && (
         <div className="animate-fadeIn">
           <FrequentlyBoughtTogether
@@ -114,7 +135,7 @@ export default function ProductAliExpressTabs({
         </div>
       )}
 
-      {/* Pestaña 3: Sugerencias de IA y Productos Relacionados (por análisis de foto) */}
+      {/* Pestaña 4: Sugerencias de IA y Productos Relacionados */}
       {activeTab === 'related' && (
         <div className="space-y-6 animate-fadeIn">
           <AISellerSuggestionsBox isOwnProduct={isOwnProduct} />
