@@ -281,8 +281,8 @@ export function useProductForm() {
   const handleGenerateAISummary = async () => {
     if (!brand.trim() && !model.trim() && !title.trim()) {
       showModalMessage(
-        '⚠️ Atributos Requeridos para IA',
-        'Ingresa al menos el Título, la Marca o el Modelo de tu producto para que la IA investigue las especificaciones técnicas en la web en tiempo real.',
+        '⚠️ 3 Campos Requeridos para IA',
+        'Por favor ingresa al menos el Título, la Marca o el Modelo de tu producto. Con estos 3 campos la IA investigará la Ficha Técnica oficial en tiempo real en la web.',
         'info'
       );
       return;

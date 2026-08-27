@@ -3,7 +3,11 @@
  * FILE: AISpecificationCard.tsx
  * ============================================================================
  * 
- * @description Componente modular para la Sección de Atributos e Inteligencia Web por IA.
+ * @description Componente modular para la Sección de Atributos e Investigación Web por IA.
+ *              Indica claramente que la IA solo requiere los 3 campos clave:
+ *              1. Título de la publicación
+ *              2. Marca / Fabricante
+ *              3. Modelo / Serie
  * 
  * @module Presentation/Components/Marketplace/Creation/AISpecificationCard
  * ============================================================================
@@ -42,27 +46,31 @@ export default function AISpecificationCard({
         <div className="flex items-center gap-2">
           <span className="text-purple-600 dark:text-purple-400 text-xl font-black">✨</span>
           <div>
-            <h4 className="text-sm font-extrabold text-gray-900 dark:text-slate-100">
-              Asistente de IA & Atributos de Identificación
+            <h4 className="text-sm font-extrabold text-gray-900 dark:text-slate-100 flex items-center gap-2">
+              <span>Asistente de IA & Atributos de Identificación</span>
+              <span className="text-[10px] font-black bg-purple-600 text-white px-2 py-0.5 rounded-full uppercase tracking-wider">
+                3 Campos Clave
+              </span>
             </h4>
             <p className="text-[11px] text-gray-600 dark:text-slate-400 font-medium">
-              Ingresa la Marca o Modelo para que la IA investigue la Ficha Técnica exacta en la web.
+              La IA investigará especificaciones reales en la web usando solo 3 campos: <strong>1. Título</strong>, <strong>2. Marca</strong> y <strong>3. Modelo</strong>.
             </p>
           </div>
         </div>
       </div>
 
-      <div className="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200 dark:border-amber-900/60 text-xs text-amber-900 dark:text-amber-200 font-medium flex items-start gap-2">
-        <span className="text-base leading-none">💡</span>
+      <div className="p-3 bg-purple-100/60 dark:bg-purple-950/40 rounded-xl border border-purple-200 dark:border-purple-900/60 text-xs text-purple-900 dark:text-purple-200 font-medium flex items-start gap-2">
+        <span className="text-base leading-none">🌐</span>
         <p>
-          <strong>Información por IA:</strong> Al presionar <strong>Generar Ficha Técnica con IA</strong>, el sistema buscará las especificaciones detalladas estilo AliExpress y creará el Resumen de IA en vivo. Tu cuadro de descripción libre se mantiene 100% independiente.
+          <strong>Búsqueda Web en Vivo:</strong> Al presionar <strong>Investigar Ficha en la Web con IA</strong>, el sistema consultará internet con tus 3 campos (Título, Marca y Modelo) para extraer datos técnicos reales sin inventar guiones.
         </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="block text-[11px] font-extrabold text-gray-800 dark:text-slate-200 mb-1">
-            Marca / Fabricante *
+          <label className="block text-[11px] font-extrabold text-gray-800 dark:text-slate-200 mb-1 flex items-center justify-between">
+            <span>Marca / Fabricante *</span>
+            <span className="text-[10px] text-purple-600 font-bold">Campo 2 de 3</span>
           </label>
           <input
             type="text"
@@ -74,8 +82,9 @@ export default function AISpecificationCard({
         </div>
 
         <div>
-          <label className="block text-[11px] font-extrabold text-gray-800 dark:text-slate-200 mb-1">
-            Modelo / Serie *
+          <label className="block text-[11px] font-extrabold text-gray-800 dark:text-slate-200 mb-1 flex items-center justify-between">
+            <span>Modelo / Serie *</span>
+            <span className="text-[10px] text-purple-600 font-bold">Campo 3 de 3</span>
           </label>
           <input
             type="text"
@@ -88,7 +97,7 @@ export default function AISpecificationCard({
 
         <div>
           <label className="block text-[11px] font-extrabold text-gray-800 dark:text-slate-200 mb-1">
-            Material Principal
+            Material Principal (Opcional)
           </label>
           <input
             type="text"
@@ -109,27 +118,26 @@ export default function AISpecificationCard({
             className="w-full p-2.5 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium focus:ring-2 focus:ring-purple-500"
           >
             <option value="Nuevo">Nuevo</option>
-            <option value="Reacondicionado">Reacondicionado</option>
-            <option value="Usado - Como Nuevo">Usado - Como Nuevo</option>
-            <option value="Usado - Buen Estado">Usado - Buen Estado</option>
+            <option value="Usado - Como nuevo">Usado - Como nuevo</option>
+            <option value="Usado - Buen estado">Usado - Buen estado</option>
+            <option value="Usado - Aceptable">Usado - Aceptable</option>
           </select>
         </div>
       </div>
 
-      <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-purple-200/60 dark:border-slate-700">
-        <p className="text-[11px] text-gray-500 dark:text-slate-400 font-medium">
-          Presiona para investigar en la web y generar las viñetas técnicas del producto.
-        </p>
-        <button
-          type="button"
-          onClick={onGenerateAISummary}
-          disabled={isGeneratingAI}
-          className="py-2.5 px-5 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl text-xs font-extrabold transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center gap-2 cursor-pointer flex-shrink-0"
-        >
-          <span>✨</span>
-          <span>{isGeneratingAI ? 'Generando por IA...' : 'Generar Ficha Técnica con IA'}</span>
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={onGenerateAISummary}
+        disabled={isGeneratingAI}
+        className="w-full py-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-2xl text-xs font-black transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <span>🌐</span>
+        <span>
+          {isGeneratingAI
+            ? 'Investigando especificaciones reales en la web...'
+            : 'Investigar Ficha en la Web con IA (3 Campos Clave)'}
+        </span>
+      </button>
     </div>
   );
 }
