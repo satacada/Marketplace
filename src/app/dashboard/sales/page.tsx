@@ -20,6 +20,8 @@ import { Modal } from '@/components/ui/Modal';
 import { useSalesAnalytics } from '@/features/sales/hooks/useSalesAnalytics';
 import SalesHeaderBanner from '@/components/sales/SalesHeaderBanner';
 import SalesSummaryMetrics from '@/components/sales/SalesSummaryMetrics';
+import SalesSuggestionsTab from '@/components/sales/SalesSuggestionsTab';
+import SellerReputationAuditTab from '@/components/sales/SellerReputationAuditTab';
 
 export default function SalesAnalyticsPage() {
   const sales = useSalesAnalytics();
@@ -112,44 +114,17 @@ export default function SalesAnalyticsPage() {
         </div>
       )}
 
-      {/* Pestaña 2: Sugerencias de IA */}
+      {/* Pestaña 2: Sugerencias de Optimización por IA */}
       {sales.activeTab === 'suggestions' && (
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">💡</span>
-            <h3 className="text-base font-black text-gray-900 dark:text-slate-100">
-              Sugerencias de Optimización por IA
-            </h3>
-          </div>
-          <div className="space-y-3">
-            {sales.topProducts.map((p) => (
-              <div key={p.id} className="p-4 bg-purple-50/60 dark:bg-purple-950/30 rounded-2xl border border-purple-100 dark:border-purple-900/60 flex items-start gap-3">
-                <span className="text-purple-600 font-black text-lg mt-0.5">✨</span>
-                <div>
-                  <h4 className="text-xs font-extrabold text-purple-950 dark:text-purple-200">{p.title}</h4>
-                  <p className="text-xs text-purple-900 dark:text-purple-300 font-medium mt-1">
-                    {p.suggestion || 'Mantén tu publicación actualizada con fotos de alta resolución.'}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <SalesSuggestionsTab topProducts={sales.topProducts} />
       )}
 
-      {/* Pestaña 3: Auditoría de Calidad y Reseñas */}
+      {/* Pestaña 3: Auditoría de Calidad, Puntaje del Vendedor y Reseñas */}
       {sales.activeTab === 'audit' && (
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">⭐</span>
-            <h3 className="text-base font-black text-gray-900 dark:text-slate-100">
-              Opiniones y Calidad del Vendedor
-            </h3>
-          </div>
-          <p className="text-xs text-gray-500 font-medium">
-            Tus compradores destacan la velocidad de despacho (98%) y la precisión de las descripciones del producto (96%).
-          </p>
-        </div>
+        <SellerReputationAuditTab 
+          avgRating={sales.summary.avgRating} 
+          positivePercent={sales.summary.positiveRatingPercent} 
+        />
       )}
 
       {/* Modal de edición de Meta Mensual */}
