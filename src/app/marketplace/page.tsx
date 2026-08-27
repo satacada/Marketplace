@@ -68,10 +68,6 @@ export default function MarketplacePage() {
           {/* Sidebar Izquierdo: Panel de Filtros Estilo Facebook */}
           <div className="lg:col-span-3 space-y-6">
             <CatalogFilterSidebar
-              categories={catalog.categories}
-              categoriesLoading={catalog.categoriesLoading}
-              selectedCategory={catalog.selectedCategory}
-              onSelectCategory={catalog.setSelectedCategory}
               priceRange={catalog.priceRange}
               onPriceChange={catalog.setPriceRange}
               inStockOnly={catalog.inStockOnly}

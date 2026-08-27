@@ -3,10 +3,10 @@
  * FILE: CatalogFilterSidebar.tsx
  * ============================================================================
  * 
- * @description Panel lateral de Filtros estilo Facebook Marketplace (Imagen 4 y 5):
- *              - Ubicación GPS / Radio en km (Buenos Aires / Barracas)
- *              - Botón "✨ Recomendados para ti" debajo de categorías
- *              - Desplegables colapsables (Categorías, Ordenar por, Estado, Fecha, Disponibilidad)
+ * @description Panel lateral de Filtros estilo Facebook Marketplace (Imagen 1, 2 y 3):
+ *              - Eliminada la sección redundante de Categorías (manejada arriba en Todos los departamentos ▾)
+ *              - Todos los acordeones aparecen COLAPSADOS por defecto (sin desplegar)
+ *              - Agregados los acordeones faltantes de Estado, Fecha de publicación y Disponibilidad
  * 
  * @module Presentation/Components/Marketplace/Catalog/CatalogFilterSidebar
  * ============================================================================
@@ -16,16 +16,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { SortOption } from '@/features/products/types/product-filters.types';
 
-type Category = {
-  id: string;
-  name: string;
-};
-
 type Props = {
-  categories: Category[];
-  categoriesLoading: boolean;
-  selectedCategory: string | null;
-  onSelectCategory: (id: string | null) => void;
   priceRange: { min?: number; max?: number };
   onPriceChange: (range: { min?: number; max?: number }) => void;
   inStockOnly: boolean;
@@ -40,10 +31,6 @@ type Props = {
 };
 
 export default function CatalogFilterSidebar({
-  categories,
-  categoriesLoading,
-  selectedCategory,
-  onSelectCategory,
   priceRange,
   onPriceChange,
   inStockOnly,
@@ -56,22 +43,34 @@ export default function CatalogFilterSidebar({
   radiusKm,
   onOpenLocationModal,
 }: Props) {
-  // Estados para acordeones desplegables (desplegados u ocultos al hacer clic)
+  // Todos los acordeones colapsados por defecto (sin desplegar) según la Imagen 1 y 2
   const [openSections, setOpenSections] = useState({
-    categories: false,
-    sort: true,
-    price: true,
+    sort: false,
+    price: false,
     condition: false,
     date: false,
-    stock: true,
+    availability: false,
   });
+
+  // Estados locales para los filtros visuales estilo Facebook Marketplace (Imagen 3)
+  const [selectedCondition, setSelectedCondition] = useState<string[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string>('all');
+  const [selectedAvailability, setSelectedAvailability] = useState<string>('available');
 
   const toggleSection = (key: keyof typeof openSections) => {
     setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const toggleCondition = (cond: string) => {
+    if (selectedCondition.includes(cond)) {
+      setSelectedCondition(selectedCondition.filter(c => c !== cond));
+    } else {
+      setSelectedCondition([...selectedCondition, cond]);
+    }
+  };
+
   return (
-    <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-5 text-gray-900 dark:text-slate-100">
+    <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-4 text-gray-900 dark:text-slate-100">
       {/* Botón Estilo Facebook: + Crear publicación */}
       <Link
         href="/dashboard/products/new"
@@ -86,7 +85,7 @@ export default function CatalogFilterSidebar({
           Filtros
         </h3>
 
-        {/* Sección de Ubicación Estilo Facebook Marketplace (Resaltado en amarillo en Imagen 5) */}
+        {/* Ubicación Resaltada (Imagen 1 y 2) */}
         <div className="p-3 bg-blue-50/50 dark:bg-slate-800/60 rounded-2xl border border-blue-100 dark:border-slate-700 space-y-1">
           <span className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">
             Ubicación
@@ -105,7 +104,7 @@ export default function CatalogFilterSidebar({
           </div>
         </div>
 
-        {/* Acordeón 1: Ordenar por (Estilo Facebook) */}
+        {/* Acordeón 1: Ordenar por (Colapsado por defecto) */}
         <div className="border-b border-gray-100 dark:border-slate-800 pb-3">
           <button
             type="button"
@@ -113,11 +112,11 @@ export default function CatalogFilterSidebar({
             className="w-full flex justify-between items-center text-xs font-extrabold text-gray-800 dark:text-slate-200 cursor-pointer"
           >
             <span>Ordenar por</span>
-            <span>{openSections.sort ? '▲' : '▼'}</span>
+            <span className="text-gray-400 text-xs">{openSections.sort ? '▲' : '▼'}</span>
           </button>
 
           {openSections.sort && (
-            <div className="mt-2.5 space-y-1.5 pl-1">
+            <div className="mt-2.5 space-y-1.5 pl-1 animate-fadeIn">
               {[
                 { label: 'Sugerencias', value: 'relevance' },
                 { label: 'Fecha de publicación: más recientes', value: 'newest' },
@@ -140,7 +139,7 @@ export default function CatalogFilterSidebar({
           )}
         </div>
 
-        {/* Acordeón 2: Precio (Min a Max) */}
+        {/* Acordeón 2: Precio ($) (Colapsado por defecto) */}
         <div className="border-b border-gray-100 dark:border-slate-800 pb-3">
           <button
             type="button"
@@ -148,11 +147,11 @@ export default function CatalogFilterSidebar({
             className="w-full flex justify-between items-center text-xs font-extrabold text-gray-800 dark:text-slate-200 cursor-pointer"
           >
             <span>Precio ($)</span>
-            <span>{openSections.price ? '▲' : '▼'}</span>
+            <span className="text-gray-400 text-xs">{openSections.price ? '▲' : '▼'}</span>
           </button>
 
           {openSections.price && (
-            <div className="mt-2.5 grid grid-cols-2 gap-2">
+            <div className="mt-2.5 grid grid-cols-2 gap-2 animate-fadeIn">
               <input
                 type="number"
                 placeholder="Mín."
@@ -171,49 +170,104 @@ export default function CatalogFilterSidebar({
           )}
         </div>
 
-        {/* Acordeón 3: Categorías (Se despliega únicamente al hacer clic en Imagen 2 y 4) */}
+        {/* Acordeón 3: Estado / Condición (Fiel a la Imagen 3) */}
         <div className="border-b border-gray-100 dark:border-slate-800 pb-3">
           <button
             type="button"
-            onClick={() => toggleSection('categories')}
+            onClick={() => toggleSection('condition')}
             className="w-full flex justify-between items-center text-xs font-extrabold text-gray-800 dark:text-slate-200 cursor-pointer"
           >
-            <span>Categorías {selectedCategory ? '(1 Seleccionada)' : ''}</span>
-            <span>{openSections.categories ? '▲' : '▼'}</span>
+            <span>Estado</span>
+            <span className="text-gray-400 text-xs">{openSections.condition ? '▲' : '▼'}</span>
           </button>
 
-          {openSections.categories && (
-            <div className="mt-2.5 space-y-1 max-h-48 overflow-y-auto pr-1">
-              <button
-                type="button"
-                onClick={() => onSelectCategory(null)}
-                className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${
-                  selectedCategory === null
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                Todas las categorías
-              </button>
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => onSelectCategory(cat.id)}
-                  className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${
-                    selectedCategory === cat.id
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  {cat.name}
-                </button>
+          {openSections.condition && (
+            <div className="mt-2.5 space-y-1.5 pl-1 animate-fadeIn">
+              {['Nuevo', 'Usado - Como nuevo', 'Usado - Buen estado', 'Usado - Aceptable'].map((cond) => (
+                <label key={cond} className="flex items-center gap-2 text-xs font-medium text-gray-700 dark:text-slate-300 cursor-pointer hover:text-blue-600">
+                  <input
+                    type="checkbox"
+                    checked={selectedCondition.includes(cond)}
+                    onChange={() => toggleCondition(cond)}
+                    className="rounded text-blue-600 focus:ring-blue-500"
+                  />
+                  <span>{cond}</span>
+                </label>
               ))}
             </div>
           )}
         </div>
 
-        {/* Botón de Recomendados para ti debajo de Categorías (Indicado en Imagen 2) */}
+        {/* Acordeón 4: Fecha de publicación (Fiel a la Imagen 3) */}
+        <div className="border-b border-gray-100 dark:border-slate-800 pb-3">
+          <button
+            type="button"
+            onClick={() => toggleSection('date')}
+            className="w-full flex justify-between items-center text-xs font-extrabold text-gray-800 dark:text-slate-200 cursor-pointer"
+          >
+            <span>Fecha de publicación</span>
+            <span className="text-gray-400 text-xs">{openSections.date ? '▲' : '▼'}</span>
+          </button>
+
+          {openSections.date && (
+            <div className="mt-2.5 space-y-1.5 pl-1 animate-fadeIn">
+              {[
+                { label: 'Todo', value: 'all' },
+                { label: 'Últimas 24 horas', value: '24h' },
+                { label: 'Últimos 7 días', value: '7d' },
+                { label: 'Últimos 30 días', value: '30d' },
+              ].map((opt) => (
+                <label key={opt.value} className="flex items-center gap-2 text-xs font-medium text-gray-700 dark:text-slate-300 cursor-pointer hover:text-blue-600">
+                  <input
+                    type="radio"
+                    name="selectedDate"
+                    checked={selectedDate === opt.value}
+                    onChange={() => setSelectedDate(opt.value)}
+                    className="text-blue-600 focus:ring-blue-500"
+                  />
+                  <span>{opt.label}</span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Acordeón 5: Disponibilidad (Fiel a la Imagen 3) */}
+        <div className="border-b border-gray-100 dark:border-slate-800 pb-3">
+          <button
+            type="button"
+            onClick={() => toggleSection('availability')}
+            className="w-full flex justify-between items-center text-xs font-extrabold text-gray-800 dark:text-slate-200 cursor-pointer"
+          >
+            <span>Disponibilidad</span>
+            <span className="text-gray-400 text-xs">{openSections.availability ? '▲' : '▼'}</span>
+          </button>
+
+          {openSections.availability && (
+            <div className="mt-2.5 space-y-1.5 pl-1 animate-fadeIn">
+              {[
+                { label: 'Disponibles', value: 'available' },
+                { label: 'Vendidos', value: 'sold' },
+              ].map((opt) => (
+                <label key={opt.value} className="flex items-center gap-2 text-xs font-medium text-gray-700 dark:text-slate-300 cursor-pointer hover:text-blue-600">
+                  <input
+                    type="radio"
+                    name="selectedAvailability"
+                    checked={selectedAvailability === opt.value}
+                    onChange={() => {
+                      setSelectedAvailability(opt.value);
+                      onInStockChange(opt.value === 'available');
+                    }}
+                    className="text-blue-600 focus:ring-blue-500"
+                  />
+                  <span>{opt.label}</span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Botón de Recomendados para ti */}
         <button
           type="button"
           onClick={onToggleRecommendations}
@@ -226,19 +280,6 @@ export default function CatalogFilterSidebar({
           <span>✨</span>
           <span>{showRecommendations ? 'Ocultar Recomendados' : 'Recomendados para ti'}</span>
         </button>
-
-        {/* Acordeón 4: Disponibilidad / Stock */}
-        <div className="pt-2">
-          <label className="flex items-center gap-2 text-xs font-bold text-gray-700 dark:text-slate-300 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={inStockOnly}
-              onChange={(e) => onInStockChange(e.target.checked)}
-              className="rounded text-blue-600 focus:ring-blue-500"
-            />
-            <span>Mostrar sólo productos disponibles</span>
-          </label>
-        </div>
       </div>
     </div>
   );
