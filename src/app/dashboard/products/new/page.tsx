@@ -116,16 +116,12 @@ export default function NewProductPage() {
                 />
               </div>
 
-              {/* Sección 3: Asistente de IA & Atributos */}
+              {/* Sección 3: Asistente de IA & Atributos de Identificación */}
               <AISpecificationCard
                 brand={form.brand}
                 setBrand={form.setBrand}
                 model={form.model}
                 setModel={form.setModel}
-                material={form.material}
-                setMaterial={form.setMaterial}
-                condition={form.condition}
-                setCondition={form.setCondition}
                 isGeneratingAI={form.isGeneratingAI}
                 onGenerateAISummary={form.handleGenerateAISummary}
               />
@@ -192,6 +188,38 @@ export default function NewProductPage() {
                     className="w-full p-3 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-bold focus:ring-2 focus:ring-blue-500"
                     required
                   />
+                </div>
+              </div>
+
+              {/* Atributos Específicos Reubicados: Material y Estado del Producto */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200 mb-1">
+                    Material Principal (Opcional)
+                  </label>
+                  <input
+                    type="text"
+                    value={form.material}
+                    onChange={(e) => form.setMaterial(e.target.value)}
+                    placeholder="Ej: Sintético, Algodón, Cuero, Aluminio"
+                    className="w-full p-3 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200 mb-1">
+                    Estado del Producto *
+                  </label>
+                  <select
+                    value={form.condition}
+                    onChange={(e) => form.setCondition(e.target.value)}
+                    className="w-full p-3 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="Nuevo">Nuevo</option>
+                    <option value="Usado - Como nuevo">Usado - Como nuevo</option>
+                    <option value="Usado - Buen estado">Usado - Buen estado</option>
+                    <option value="Usado - Aceptable">Usado - Aceptable</option>
+                  </select>
                 </div>
               </div>
 

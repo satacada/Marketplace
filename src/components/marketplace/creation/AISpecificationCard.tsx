@@ -4,10 +4,8 @@
  * ============================================================================
  * 
  * @description Componente modular para la Sección de Atributos e Investigación Web por IA.
- *              Indica claramente que la IA solo requiere los 3 campos clave:
- *              1. Título de la publicación
- *              2. Marca / Fabricante
- *              3. Modelo / Serie
+ *              Contiene únicamente los campos de identificación (Marca y Modelo)
+ *              utilizados para la investigación web en tiempo real.
  * 
  * @module Presentation/Components/Marketplace/Creation/AISpecificationCard
  * ============================================================================
@@ -20,10 +18,6 @@ type Props = {
   setBrand: (val: string) => void;
   model: string;
   setModel: (val: string) => void;
-  material: string;
-  setMaterial: (val: string) => void;
-  condition: string;
-  setCondition: (val: string) => void;
   isGeneratingAI: boolean;
   onGenerateAISummary: () => void;
 };
@@ -33,10 +27,6 @@ export default function AISpecificationCard({
   setBrand,
   model,
   setModel,
-  material,
-  setMaterial,
-  condition,
-  setCondition,
   isGeneratingAI,
   onGenerateAISummary,
 }: Props) {
@@ -93,35 +83,6 @@ export default function AISpecificationCard({
             placeholder="Ej: Air Jordan 6 Retro, Civic, Galaxy S24"
             className="w-full p-2.5 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium focus:ring-2 focus:ring-purple-500"
           />
-        </div>
-
-        <div>
-          <label className="block text-[11px] font-extrabold text-gray-800 dark:text-slate-200 mb-1">
-            Material Principal (Opcional)
-          </label>
-          <input
-            type="text"
-            value={material}
-            onChange={(e) => setMaterial(e.target.value)}
-            placeholder="Ej: Sintético, Algodón, Cuero, Aluminio"
-            className="w-full p-2.5 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium focus:ring-2 focus:ring-purple-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-[11px] font-extrabold text-gray-800 dark:text-slate-200 mb-1">
-            Estado del Producto *
-          </label>
-          <select
-            value={condition}
-            onChange={(e) => setCondition(e.target.value)}
-            className="w-full p-2.5 text-xs border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-medium focus:ring-2 focus:ring-purple-500"
-          >
-            <option value="Nuevo">Nuevo</option>
-            <option value="Usado - Como nuevo">Usado - Como nuevo</option>
-            <option value="Usado - Buen estado">Usado - Buen estado</option>
-            <option value="Usado - Aceptable">Usado - Aceptable</option>
-          </select>
         </div>
       </div>
 
