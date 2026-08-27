@@ -4,7 +4,8 @@
  * ============================================================================
  * 
  * @description Componente centralizado y reutilizable para renderizar mapas
- *              OpenStreetMap en vivo. Control de Zoom ubicado a la IZQUIERDA (topleft).
+ *              OpenStreetMap en vivo. Soporta modo estático (interactive = false)
+ *              para tarjetas de vista previa sin manipulación accidental, o modo interactivo.
  * 
  * @module Presentation/Components/UI/OpenStreetMapEmbed
  * ============================================================================
@@ -18,6 +19,7 @@ type Props = {
   zoom?: number;
   height?: string;
   markerColor?: 'red' | 'green' | 'blue';
+  interactive?: boolean;
 };
 
 export default function OpenStreetMapEmbed({
@@ -26,6 +28,7 @@ export default function OpenStreetMapEmbed({
   zoom = 13,
   height = 'h-56',
   markerColor = 'red',
+  interactive = true,
 }: Props) {
   const pinColor = markerColor === 'red' ? '#ea4335' : markerColor === 'blue' ? '#2563eb' : '#22c55e';
 
@@ -66,12 +69,15 @@ export default function OpenStreetMapEmbed({
         <script>
           document.addEventListener("DOMContentLoaded", function() {
             var map = L.map('map', {
-              zoomControl: false,
+              zoomControl: ${interactive},
+              dragging: ${interactive},
+              touchZoom: ${interactive},
+              scrollWheelZoom: ${interactive},
+              doubleClickZoom: ${interactive},
               attributionControl: true
             }).setView([${lat}, ${lng}], ${zoom});
 
-            // Forzar Control de Zoom (+ / -) a la IZQUIERDA
-            L.control.zoom({ position: 'topleft' }).addTo(map);
+            ${interactive ? "L.control.zoom({ position: 'topleft' }).addTo(map);" : ""}
 
             // Servidor Oficial Libre de OpenStreetMap
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -98,7 +104,7 @@ export default function OpenStreetMapEmbed({
   `;
 
   return (
-    <div className={`${height} w-full rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-800 relative shadow-inner select-none bg-slate-50 dark:bg-slate-900`}>
+    <div className={`${height} w-full rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-800 relative shadow-inner select-none bg-slate-50 dark:bg-slate-900 ${interactive ? '' : 'pointer-events-none'}`}>
       <iframe
         srcDoc={mapHtml}
         width="100%"
@@ -106,7 +112,7 @@ export default function OpenStreetMapEmbed({
         frameBorder="0"
         scrolling="no"
         className="w-full h-full border-0"
-        title="Mapa de Ubicación OpenStreetMap Oficial Limpio"
+        title="Mapa de Ubicación OpenStreetMap"
       />
     </div>
   );

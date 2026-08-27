@@ -34,12 +34,14 @@ import ProductAliExpressTabs from '@/components/marketplace/detail/ProductAliExp
 import FrequentlyBoughtTogether from '@/components/marketplace/detail/FrequentlyBoughtTogether';
 import AISellerSuggestionsBox from '@/components/marketplace/detail/AISellerSuggestionsBox';
 import RelatedProductsSection from '@/components/marketplace/detail/RelatedProductsSection';
+import ProductLocationModal from '@/components/marketplace/detail/ProductLocationModal';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const productId = resolvedParams.id;
 
   const detail = useProductDetail(productId);
+  const [showLocationModal, setShowLocationModal] = React.useState(false);
 
   if (detail.loading) {
     return (
@@ -116,6 +118,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               })}
               onShare={() => detail.setShowShareModal(true)}
               onReport={(type, title) => detail.setReportTarget({ type, title })}
+              onOpenLocationModal={() => setShowLocationModal(true)}
               userId={detail.userId}
             />
           </div>
@@ -163,6 +166,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           targetType={detail.reportTarget.type}
           targetTitle={detail.reportTarget.title}
           onSubmitReport={detail.handleReportSubmit}
+        />
+      )}
+
+      {/* Modal de Ubicación de la publicación Estilo Facebook Marketplace */}
+      {showLocationModal && (
+        <ProductLocationModal
+          isOpen={showLocationModal}
+          onClose={() => setShowLocationModal(false)}
+          locationName={detail.product.location_name || 'Ciudad de Buenos Aires, CABA'}
         />
       )}
     </div>

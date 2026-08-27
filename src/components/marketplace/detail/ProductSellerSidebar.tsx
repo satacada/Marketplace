@@ -26,6 +26,7 @@ type Props = {
   onAddToCart: () => void;
   onShare: () => void;
   onReport: (type: 'product' | 'seller', title: string) => void;
+  onOpenLocationModal: () => void;
   userId: string | null;
 };
 
@@ -37,6 +38,7 @@ export default function ProductSellerSidebar({
   onAddToCart,
   onShare,
   onReport,
+  onOpenLocationModal,
   userId,
 }: Props) {
   const isOwnProduct = userId && product.seller_id === userId;
@@ -141,13 +143,22 @@ export default function ProductSellerSidebar({
         </p>
       </div>
 
-      {/* Ubicación con Mapa y Leyenda "La ubicación es aproximada" (Resaltado en amarillo en Imagen 2) */}
+      {/* Ubicación con Mapa Estático Clickeable para abrir Modal (Imagen cargada) */}
       <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-slate-800">
         <span className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">
           Ubicación del Vendedor
         </span>
-        <div className="rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-800">
-          <OpenStreetMapEmbed height="h-28" />
+        <div 
+          onClick={onOpenLocationModal}
+          className="rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-800 cursor-pointer hover:opacity-90 transition relative group"
+          title="Haz clic para ampliar y navegar en la ubicación"
+        >
+          <OpenStreetMapEmbed height="h-28" interactive={false} />
+          <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/10 transition flex items-center justify-center">
+            <span className="text-[10px] font-black text-white bg-slate-900/80 px-2.5 py-1 rounded-full opacity-0 group-hover:opacity-100 transition shadow-md">
+              🔍 Ver mapa completo
+            </span>
+          </div>
         </div>
         <p className="text-[11px] font-bold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 p-2 rounded-xl border border-amber-200/60 dark:border-amber-900/40">
           📍 <strong>{locationText}</strong> · <span className="font-semibold">La ubicación es aproximada</span>
