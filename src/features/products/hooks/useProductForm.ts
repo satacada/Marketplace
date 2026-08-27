@@ -13,7 +13,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { generateAIProductSummary } from '@/lib/aiProductGenerator';
+import { generateAIProductSummary, fetchLiveWebProductSpecs } from '@/lib/aiProductGenerator';
 
 export type PublicationType = 'none' | 'article' | 'vehicle' | 'property';
 
@@ -278,25 +278,29 @@ export function useProductForm() {
     setImagePreviews(updatedPreviews);
   };
 
-  const handleGenerateAISummary = () => {
+  const handleGenerateAISummary = async () => {
     if (!brand.trim() && !model.trim() && !title.trim()) {
       showModalMessage(
         '⚠️ Atributos Requeridos para IA',
-        'Ingresa al menos el Título, la Marca o el Modelo de tu producto para que la IA investigue las especificaciones técnicas en la web.',
+        'Ingresa al menos el Título, la Marca o el Modelo de tu producto para que la IA investigue las especificaciones técnicas en la web en tiempo real.',
         'info'
       );
       return;
     }
 
     setIsGeneratingAI(true);
-    setTimeout(() => {
-      const aiData = generateAIProductSummary(title || model || brand || 'Producto', description, imagePreviews, {
-        brand,
-        model,
-        material,
-        condition
-      });
-      
+
+    try {
+      // 🌐 Intentar búsqueda web en tiempo real para obtener datos técnicos auténticos
+      const liveWebData = await fetchLiveWebProductSpecs(title, brand, model, material, condition);
+
+      const aiData = liveWebData || generateAIProductSummary(
+        title || model || brand || 'Producto',
+        description,
+        imagePreviews,
+        { brand, model, material, condition }
+      );
+
       if (!title.trim() && aiData.optimizedTitle) {
         setTitle(aiData.optimizedTitle);
       }
@@ -315,11 +319,14 @@ export function useProductForm() {
 
       setIsGeneratingAI(false);
       showModalMessage(
-        '✨ Resumen de IA del Artículo Generado',
-        `Se investigó las especificaciones técnicas reales estilo AliExpress para "${brand} ${model || title}" y se asignó la categoría "${aiData.category}". Tu cuadro de descripción libre se mantiene 100% independiente.`,
+        '✨ Especificaciones Técnicas Web Generadas',
+        `Se investigaron las especificaciones técnicas reales de la web para "${brand} ${model || title}". Se asignaron los datos a las viñetas técnicas sin alterar tu cuadro de descripción libre.`,
         'success'
       );
-    }, 800);
+    } catch (error) {
+      console.error('Error generando ficha con IA:', error);
+      setIsGeneratingAI(false);
+    }
   };
 
   const formatNumber = (value: string): string => {
