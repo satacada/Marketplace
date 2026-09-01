@@ -30,6 +30,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useCart } from '@/features/cart/hooks/useCart';
 
 export interface HeaderProps {
   title?: string;
@@ -41,18 +42,22 @@ export interface HeaderProps {
 
 export default function Header({
   title,
-  cartItemCount = 0,
-  cartTotal = 0,
+  cartItemCount,
+  cartTotal,
   ordersCount,
   isMarketplacePublic = false,
 }: HeaderProps) {
   const { user, isAuthenticated } = useAuth();
+  const { cart } = useCart(user?.id || null);
+
+  const displayCount = cartItemCount !== undefined ? cartItemCount : cart.itemCount;
+  const displayTotal = cartTotal !== undefined ? cartTotal : cart.total;
 
   const formattedTotal = new Intl.NumberFormat('es-CL', {
     style: 'currency',
     currency: 'CLP',
     maximumFractionDigits: 0,
-  }).format(cartTotal || 0);
+  }).format(displayTotal || 0);
 
   return (
     <header className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 sticky top-0 z-40 shadow-xs transition-colors duration-200">
@@ -77,7 +82,7 @@ export default function Header({
             >
               <div className="relative flex items-center justify-center">
                 <span className="w-5 h-5 bg-blue-600 group-hover:bg-blue-700 text-white text-xs font-bold rounded-full flex items-center justify-center transition">
-                  {cartItemCount}
+                  {displayCount}
                 </span>
               </div>
               <span className="font-semibold text-gray-800 dark:text-slate-100 text-sm group-hover:text-blue-700 dark:group-hover:text-blue-400 transition">

@@ -26,7 +26,10 @@ export function useMarketplaceCatalog() {
   // Estados de autenticación y carrito
   const { user } = useAuth();
   const userId = user?.id || null;
-  const { cart, addToCart } = useCart();
+  const { cart, addToCart, updateCartItem, removeFromCart } = useCart(userId);
+
+  // Estado de modal de autenticación requerida para finalizar compra
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Estado de lista de Favoritos del usuario
   const [favoriteProductIds, setFavoriteProductIds] = useState<string[]>([]);
@@ -172,8 +175,23 @@ export function useMarketplaceCatalog() {
     return map;
   }, [cart]);
 
+  const handleCheckoutClick = () => {
+    if (!userId) {
+      setShowAuthModal(true);
+    } else {
+      router.push('/marketplace/cart');
+    }
+  };
+
   return {
     userId,
+    isGuest: !userId,
+    cart,
+    updateCartItem: (cartItemId: string, newQty: number) => updateCartItem({ cartItemId, quantity: newQty }),
+    removeFromCart,
+    showAuthModal,
+    setShowAuthModal,
+    handleCheckoutClick,
     products,
     productsLoading,
     totalCount: total,

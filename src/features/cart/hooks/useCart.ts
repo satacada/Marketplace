@@ -178,6 +178,9 @@ export function useCart(buyerId: string | null = null) {
         
         setLocalStorageItem(GUEST_CART_KEY, guestCart);
         await loadGuestCart();
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('cartUpdated'));
+        }
         return { success: true };
       } catch (err: any) {
         const errorMessage = err.message || 'Error al agregar al carrito';
@@ -190,6 +193,9 @@ export function useCart(buyerId: string | null = null) {
       setError(null);
       await cartService.addToCart(input, buyerId);
       await fetchCart();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('cartUpdated'));
+      }
       return { success: true };
     } catch (err: any) {
       const errorMessage = err.message || 'Error al agregar al carrito';
@@ -199,24 +205,53 @@ export function useCart(buyerId: string | null = null) {
   }, [buyerId, fetchCart, loadGuestCart]);
 
   /**
-   * Actualiza cantidad de un item
+   * Actualiza cantidad de un item (soporta tanto usuarios autenticados como invitados)
    */
   const updateCartItem = useCallback(async (input: UpdateCartItemInput) => {
     if (!buyerId) {
-      return { success: false, error: 'Usuario no autenticado' };
+      try {
+        const guestCart = getLocalStorageItem<GuestCartItem[]>(GUEST_CART_KEY, []);
+        const productId = input.cartItemId.replace('guest-', '');
+        
+        let updatedCart: GuestCartItem[];
+        if (input.quantity <= 0) {
+          updatedCart = guestCart.filter(item => item.productId !== productId);
+        } else {
+          updatedCart = guestCart.map(item => {
+            if (item.productId === productId) {
+              return { ...item, quantity: input.quantity };
+            }
+            return item;
+          });
+        }
+
+        setLocalStorageItem(GUEST_CART_KEY, updatedCart);
+        await loadGuestCart();
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('cartUpdated'));
+        }
+        return { success: true };
+      } catch (err: any) {
+        const errorMessage = err.message || 'Error al actualizar item';
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      }
     }
 
     try {
       setError(null);
       await cartService.updateCartItem(input, buyerId);
       await fetchCart();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('cartUpdated'));
+      }
       return { success: true };
     } catch (err: any) {
       const errorMessage = err.message || 'Error al actualizar item';
       setError(errorMessage);
       return { success: false, error: errorMessage };
     }
-  }, [buyerId, fetchCart]);
+  }, [buyerId, fetchCart, loadGuestCart]);
 
   /**
    * Elimina un item del carrito
@@ -230,7 +265,10 @@ export function useCart(buyerId: string | null = null) {
         const updatedCart = guestCart.filter(item => item.productId !== productId);
         
         setLocalStorageItem(GUEST_CART_KEY, updatedCart);
-        loadGuestCart();
+        await loadGuestCart();
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('cartUpdated'));
+        }
         return { success: true };
       } catch (err: any) {
         const errorMessage = err.message || 'Error al eliminar item';
@@ -243,6 +281,9 @@ export function useCart(buyerId: string | null = null) {
       setError(null);
       await cartService.removeFromCart(cartItemId, buyerId);
       await fetchCart();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('cartUpdated'));
+      }
       return { success: true };
     } catch (err: any) {
       const errorMessage = err.message || 'Error al eliminar item';
@@ -256,20 +297,49 @@ export function useCart(buyerId: string | null = null) {
    */
   const clearCart = useCallback(async () => {
     if (!buyerId) {
-      return { success: false, error: 'Usuario no autenticado' };
+      removeLocalStorageItem(GUEST_CART_KEY);
+      await loadGuestCart();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('cartUpdated'));
+      }
+      return { success: true };
     }
 
     try {
       setError(null);
       await cartService.clearCart(buyerId);
       await fetchCart();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('cartUpdated'));
+      }
       return { success: true };
     } catch (err: any) {
       const errorMessage = err.message || 'Error al vaciar carrito';
       setError(errorMessage);
       return { success: false, error: errorMessage };
     }
-  }, [buyerId, fetchCart]);
+  }, [buyerId, fetchCart, loadGuestCart]);
+
+  /**
+   * Escucha eventos globales cartUpdated y storage para mantener todos los componentes en vivo 100% sincronizados
+   */
+  useEffect(() => {
+    const handleSync = () => {
+      fetchCart();
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('cartUpdated', handleSync);
+      window.addEventListener('storage', handleSync);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('cartUpdated', handleSync);
+        window.removeEventListener('storage', handleSync);
+      }
+    };
+  }, [fetchCart]);
 
   /**
    * Verifica si un producto está en el carrito
