@@ -4,7 +4,7 @@
  * ============================================================================
  * 
  * @description Ruta Raíz del Sistema. Redirige automáticamente al usuario
- *              a la experiencia principal de Autenticación / Marketplace.
+ *              al Catálogo Público de Marketplace (/marketplace).
  * 
  * @module Presentation/Pages/Root
  * ============================================================================
@@ -19,7 +19,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    router.push('/auth');
+    router.push('/marketplace');
   }, [router]);
 
   return (
@@ -27,7 +27,7 @@ export default function Home() {
       <div className="text-center">
         <div className="text-6xl mb-4">🛒</div>
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Marketplace SaaS</h1>
-        <p className="text-gray-600">Redirigiendo a la página de inicio de sesión...</p>
+        <p className="text-gray-600">Redirigiendo al Catálogo del Marketplace...</p>
       </div>
     </div>
   );
