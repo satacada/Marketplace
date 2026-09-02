@@ -28,8 +28,9 @@ export function useMarketplaceCatalog() {
   const userId = user?.id || null;
   const { cart, addToCart, updateCartItem, removeFromCart } = useCart(userId);
 
-  // Estado de modal de autenticación requerida para finalizar compra
+  // Estado de modal y drawer de carrito emergente
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showCartDrawer, setShowCartDrawer] = useState(false);
 
   // Estado de lista de Favoritos del usuario
   const [favoriteProductIds, setFavoriteProductIds] = useState<string[]>([]);
@@ -176,11 +177,8 @@ export function useMarketplaceCatalog() {
   }, [cart]);
 
   const handleCheckoutClick = () => {
-    if (!userId) {
-      setShowAuthModal(true);
-    } else {
-      router.push('/marketplace/cart');
-    }
+    setShowCartDrawer(false);
+    router.push('/marketplace/cart');
   };
 
   return {
@@ -191,6 +189,8 @@ export function useMarketplaceCatalog() {
     removeFromCart,
     showAuthModal,
     setShowAuthModal,
+    showCartDrawer,
+    setShowCartDrawer,
     handleCheckoutClick,
     products,
     productsLoading,

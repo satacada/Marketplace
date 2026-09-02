@@ -6,10 +6,10 @@
  * @description Catálogo Público del Marketplace al estilo Facebook Marketplace / AliExpress.
  *              Incluye:
  *              - Panel Lateral Izquierdo de Filtros estilo Facebook Marketplace
- *              - Grilla Central de Productos
- *              - Panel Lateral Derecha Flotante de Cesta (MiniCartSidebar) estilo AliExpress
- *              - Carrito reactivo en tiempo real para usuarios NO registrados y registrados
- *              - Modal de login/registro diferido solo al intentar finalizar compra
+ *              - Grilla Principal de Productos en ANCHO COMPLETO (lg:col-span-9)
+ *              - Panel Emergente Deslizante para la Cesta (MiniCartDrawer) sin restar espacio a los productos
+ *              - Navegación Directa a la Cesta completa (/marketplace/cart) desde el header
+ *              - Carrito reactivo en tiempo real para usuarios NO registrados e invitados
  * 
  * @module Presentation/Pages/Marketplace
  * ============================================================================
@@ -29,14 +29,14 @@ import CatalogHeaderBanner from '@/components/marketplace/catalog/CatalogHeaderB
 import CatalogFilterSidebar from '@/components/marketplace/catalog/CatalogFilterSidebar';
 import VisualSearchModal from '@/components/marketplace/catalog/VisualSearchModal';
 import LocationSelectorModal from '@/components/marketplace/catalog/LocationSelectorModal';
-import MiniCartSidebar from '@/components/cart/MiniCartSidebar';
+import MiniCartDrawer from '@/components/cart/MiniCartDrawer';
 
 export default function MarketplacePage() {
   const catalog = useMarketplaceCatalog();
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 transition-colors duration-200">
-      {/* Header global único (Contiene Logo Marketplace y Carrito Reactivo) */}
+      {/* Header global único (Contiene Logo Marketplace y Carrito Reactivo que envía directo a /marketplace/cart) */}
       <div className="p-4 sm:p-6 max-w-7xl mx-auto pb-0">
         <Header />
       </div>
@@ -66,10 +66,9 @@ export default function MarketplacePage() {
           </div>
         )}
 
-        {/* Layout Principal de 3 Columnas:
-            1. Izquierda (col-span-3): Filtros Estilo Facebook Marketplace
-            2. Centro (col-span-6): Grilla de Productos
-            3. Derecha (col-span-3): Cesta / Carrito Flotante Estilo AliExpress (Imágenes 2, 3 y 4)
+        {/* Layout Principal de Ancho Completo:
+            1. Sidebar Izquierdo (col-span-3): Filtros Estilo Facebook Marketplace
+            2. Grilla Principal (col-span-9): Productos en Ancho Completo (sin quitar espacio)
         */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Sidebar Izquierdo: Panel de Filtros Estilo Facebook */}
@@ -87,13 +86,30 @@ export default function MarketplacePage() {
               radiusKm={catalog.radiusKm}
               onOpenLocationModal={() => catalog.setShowLocationModal(true)}
             />
+
+            {/* Botón flotante opcional para desplegar el drawer de la Cesta sin salir de la página */}
+            {catalog.cart.itemCount > 0 && (
+              <button
+                type="button"
+                onClick={() => catalog.setShowCartDrawer(true)}
+                className="w-full py-3 px-4 bg-blue-50 dark:bg-slate-800 hover:bg-blue-100 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-slate-700 rounded-2xl text-xs font-black transition shadow-2xs flex items-center justify-between cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <span>🛒</span>
+                  <span>Ver Cesta Emergente</span>
+                </div>
+                <span className="bg-blue-600 text-white px-2 py-0.5 rounded-full text-[10px]">
+                  {catalog.cart.itemCount}
+                </span>
+              </button>
+            )}
           </div>
 
-          {/* Grilla Central: Productos */}
-          <div className="lg:col-span-6 space-y-6">
+          {/* Grilla Principal Derecha: Productos (Ancho completo 4 columnas) */}
+          <div className="lg:col-span-9 space-y-6">
             {catalog.productsLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                {Array.from({ length: 6 }).map((_, i) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                {Array.from({ length: 8 }).map((_, i) => (
                   <div key={i} className="h-64 bg-gray-200 dark:bg-slate-800 animate-pulse rounded-2xl" />
                 ))}
               </div>
@@ -119,7 +135,7 @@ export default function MarketplacePage() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                 {catalog.products.map((product) => (
                   <ProductCard
                     key={product.id}
@@ -136,22 +152,22 @@ export default function MarketplacePage() {
               </div>
             )}
           </div>
-
-          {/* Sidebar Derecha: Cesta / Carrito Flotante Estilo AliExpress (Imágenes 2, 3 y 4) */}
-          <div className="lg:col-span-3 space-y-6">
-            <MiniCartSidebar
-              cart={catalog.cart}
-              isGuest={catalog.isGuest}
-              onUpdateQuantity={catalog.updateCartItem}
-              onRemoveItem={catalog.removeFromCart}
-              onCheckoutClick={catalog.handleCheckoutClick}
-            />
-          </div>
         </div>
       </main>
 
       {/* Footer Global */}
       <Footer />
+
+      {/* Slide-over Drawer Emergente para la Cesta (No quita espacio en la grilla) */}
+      <MiniCartDrawer
+        isOpen={catalog.showCartDrawer}
+        onClose={() => catalog.setShowCartDrawer(false)}
+        cart={catalog.cart}
+        isGuest={catalog.isGuest}
+        onUpdateQuantity={catalog.updateCartItem}
+        onRemoveItem={catalog.removeFromCart}
+        onCheckoutClick={catalog.handleCheckoutClick}
+      />
 
       {/* Modal de Ubicación GPS / Radio en km (Estilo Facebook Marketplace) */}
       {catalog.showLocationModal && (
@@ -186,49 +202,6 @@ export default function MarketplacePage() {
           onClose={() => catalog.setShareProduct(null)}
           product={catalog.shareProduct}
         />
-      )}
-
-      {/* Modal de Inicio de Sesión / Registro Requerido para Comprar (Flujo de Usuario No Registrado - Imagen 2, 3 y 4) */}
-      {catalog.showAuthModal && (
-        <Modal
-          isOpen={catalog.showAuthModal}
-          onClose={() => catalog.setShowAuthModal(false)}
-          title="🔒 Registrate o Inicia Sesión para Comprar"
-        >
-          <div className="space-y-4 pt-2 text-gray-900 dark:text-slate-100">
-            <div className="p-4 bg-blue-50 dark:bg-slate-800/80 rounded-2xl border border-blue-100 dark:border-slate-700 text-xs text-blue-900 dark:text-blue-200 font-medium flex items-start gap-2.5">
-              <span className="text-xl">🛒</span>
-              <p>
-                <strong>¡Tus productos te están esperando!</strong> Tienes <strong>{catalog.cart.itemCount} artículo(s)</strong> guardado(s) en tu cesta por <strong>${catalog.cart.total.toLocaleString('es-CL')}</strong>. Inicia sesión o regístrate para seleccionar tu dirección de entrega y vendedor.
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => catalog.router.push('/auth')}
-                className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black text-xs transition shadow-sm cursor-pointer text-center"
-              >
-                🔑 Iniciar Sesión
-              </button>
-              <button
-                type="button"
-                onClick={() => catalog.router.push('/auth/register')}
-                className="flex-1 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl font-black text-xs transition shadow-sm cursor-pointer text-center"
-              >
-                ✨ Crear Cuenta Gratis
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => catalog.setShowAuthModal(false)}
-              className="w-full py-2 text-xs font-bold text-gray-400 hover:underline text-center cursor-pointer"
-            >
-              Seguir explorando el catálogo
-            </button>
-          </div>
-        </Modal>
       )}
     </div>
   );
