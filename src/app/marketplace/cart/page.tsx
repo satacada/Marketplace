@@ -113,17 +113,17 @@ export default function CartPage() {
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => c.router.push('/auth')}
-                className="w-1/2 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-extrabold"
+                onClick={() => c.router.push('/auth?redirect=/marketplace/checkout')}
+                className="w-1/2 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold cursor-pointer"
               >
-                Iniciar Sesión
+                🔑 Iniciar Sesión
               </button>
               <button
                 type="button"
-                onClick={() => c.router.push('/auth/register')}
-                className="w-1/2 py-2.5 bg-gray-100 text-gray-800 rounded-xl text-xs font-bold"
+                onClick={() => c.router.push('/auth/register?redirect=/marketplace/checkout')}
+                className="w-1/2 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl text-xs font-extrabold cursor-pointer"
               >
-                Registrarme
+                ✨ Crear Cuenta
               </button>
             </div>
           </div>

@@ -10,11 +10,13 @@
  */
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 
 export function useRegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectParam = searchParams.get('redirect');
   const { register } = useAuth();
 
   const [email, setEmail] = useState('');
@@ -30,7 +32,7 @@ export function useRegisterPage() {
 
     const res = await register({ email, password, storeName });
     if (res.success) {
-      router.push('/dashboard');
+      router.push(redirectParam || '/dashboard');
     } else {
       setError(res.error || 'Error al registrar usuario');
     }
