@@ -27,10 +27,10 @@ function SidebarContent() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!isLoading && !user && pathname.startsWith('/dashboard')) {
       router.push('/auth');
     }
-  }, [user, isLoading, router]);
+  }, [user, isLoading, pathname, router]);
 
   const handleLogout = async () => {
     await logout();
