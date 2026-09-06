@@ -568,28 +568,25 @@ export function useProducts(filters?: ProductFilters) {
 
 ---
 
-## ✅ Correcciones Realizadas
+## ✅ Correcciones y Funcionalidades Recientes Implementadas (Última Versión)
 
-### 1. Funcionalidad de Búsqueda
-**Problema**: La búsqueda no filtraba productos correctamente.
-**Solución**: 
-- Conecté los handlers del hook con las funciones del hook
-- `handleSearchSubmit` ahora llama a `setHookSearchQuery`
-- `handleSortChange` llama a `setHookSortBy`
-- `handleCategoryChange` llama a `setHookCategoryId`
-- `handlePriceRangeChange` llama a `setHookPriceRange`
+### 1. Carrito de Compras para Invitados (Estilo AliExpress)
+- **Modo Invitado 100% Funcional:** Los usuarios no registrados pueden explorar el catálogo, agregar productos y ver la lista completa de la Cesta ([`/marketplace/cart`](file:///D:/APLICACIONES/marketplace-saas/src/app/marketplace/cart/page.tsx)) con foto, cantidad e importes.
+- **Autenticación Diferida:** Solo al presionar **`Continuar Compra →`** dentro de la Cesta se solicita Iniciar Sesión o Crear Cuenta.
+- **Migración Automática Sin Pérdida de Productos:** En [`useCart.ts`](file:///D:/APLICACIONES/marketplace-saas/src/features/cart/hooks/useCart.ts), al completar la autenticación, se migran automáticamente los productos guardados en `localStorage` a la cuenta de Supabase del usuario sin perder ningún artículo.
 
-### 2. Duplicado de "Marketplace"
-**Problema**: El texto "Marketplace" aparecía dos veces en el header.
-**Solución**:
-- Modifiqué el Header para que solo muestre el título si está presente
-- En la página del marketplace, paso `title=""` para evitar duplicación
+### 2. Rediseño del Catálogo en Ancho Completo & MiniCartDrawer Emergente
+- **Grilla de Ancho Completo (`lg:col-span-9`):** Eliminada la tercera columna fija de la derecha para que las tarjetas de producto aprovechen las 4 columnas del catálogo.
+- **MiniCartDrawer Emergente (`MiniCartDrawer.tsx`):** La cesta emergente ahora se despliega como un panel lateral deslizante (slide-over) que no le quita espacio ni comprime la grilla de productos.
 
-### 3. Color de la Lupa
-**Problema**: El botón de búsqueda tenía un color claro en lugar de azul.
-**Solución**:
-- Cambié el className del botón de `bg-indigo-600` a `bg-blue-600`
-- Actualicé el hover a `hover:bg-blue-700`
+### 3. Navegación Pública y Control de Accesos
+- **Redirección Raíz `/`:** La ruta raíz redirige a [`/marketplace`](file:///D:/APLICACIONES/marketplace-saas/src/app/marketplace/page.tsx) en lugar de forzar `/auth`.
+- **Botón de Retorno al Marketplace:** En [`/auth`](file:///D:/APLICACIONES/marketplace-saas/src/app/auth/page.tsx) y [`/auth/register`](file:///D:/APLICACIONES/marketplace-saas/src/app/auth/register/page.tsx) se agregaron botones claros `← Volver al Marketplace` para evitar bloqueos.
+- **LayoutWrapper & Sidebar Scoping:** [`LayoutWrapper.tsx`](file:///D:/APLICACIONES/marketplace-saas/src/components/layout/LayoutWrapper.tsx) reserva el menú lateral exclusivamente para rutas privadas del Dashboard (`/dashboard/*`), garantizando que la cesta y el catálogo sean 100% públicos.
+
+### 4. Arquitectura de Autenticación con Google (Google Sign-In / OAuth 2.0)
+- **Costo \$0 USD:** Google Identity Services es 100% gratuito sin límite de usuarios, y Supabase Auth incluye hasta 50,000 usuarios activos mensuales gratis.
+- **Integración con `signInWithOAuth`:** Preparada la ruta callback [`/auth/callback/route.ts`](file:///D:/APLICACIONES/marketplace-saas/src/app/auth/callback/route.ts) para intercambio automático de tokens PKCE y creación de perfil con triggers de PostgreSQL.
 
 ---
 
