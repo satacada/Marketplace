@@ -101,6 +101,27 @@ export const authService = {
   },
 
   /**
+   * Inicia sesión o registra al usuario con Google OAuth 2.0
+   */
+  async loginWithGoogle(redirectTo?: string): Promise<void> {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const redirectUrl = `${origin}/auth/callback?next=${encodeURIComponent(redirectTo || '/marketplace')}`;
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: redirectUrl,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'select_account',
+        },
+      },
+    });
+
+    if (error) throw error;
+  },
+
+  /**
    * Obtiene el usuario actual
    */
   async getCurrentUser(): Promise<AuthResponse> {

@@ -12,6 +12,7 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { authService } from '../services/auth.service';
 
 export function useRegisterPage() {
   const router = useRouter();
@@ -39,6 +40,17 @@ export function useRegisterPage() {
     setLoading(false);
   };
 
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      await authService.loginWithGoogle(redirectParam || '/marketplace');
+    } catch (err: any) {
+      setError(err.message || 'Error al conectar con Google');
+      setLoading(false);
+    }
+  };
+
   return {
     email,
     setEmail,
@@ -49,5 +61,6 @@ export function useRegisterPage() {
     loading,
     error,
     handleRegister,
+    handleGoogleLogin,
   };
 }
