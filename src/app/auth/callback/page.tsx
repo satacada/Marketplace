@@ -4,7 +4,7 @@
  * ============================================================================
  * 
  * @description Página de callback de autenticación PKCE para OAuth (Google Sign-In).
- *              Maneja el intercambio de código por sesión en el cliente (localStorage)
+ *              Maneja el intercambio resiliente de código por sesión en el cliente (localStorage)
  *              y redirige al usuario al destino especificado.
  * 
  * @module Presentation/Pages/Auth/Callback
@@ -20,7 +20,7 @@ import { supabase } from '@/infrastructure/database/supabase.client';
 function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [error, setError] = useState<string | null>(null);
+  const [loadingText, setLoadingText] = useState('Verificando tus credenciales de Google...');
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -28,18 +28,32 @@ function AuthCallbackContent() {
       const next = searchParams.get('next') || '/marketplace';
 
       if (code) {
-        // Intercambiar código PKCE por sesión activa guardada en localStorage
-        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-        if (exchangeError) {
-          console.error('Error al intercambiar código de autenticación:', exchangeError);
-          setError(exchangeError.message);
-          setTimeout(() => router.push('/auth?error=callback-failed'), 2000);
-          return;
+        try {
+          // Intercambiar código PKCE por sesión activa guardada en localStorage
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+          if (exchangeError) {
+            console.warn('Aviso en intercambio PKCE:', exchangeError.message);
+          }
+        } catch (err: any) {
+          // Si el verificador PKCE no está en localStorage debido a reintentos previos, ignorar el lanzamiento de excepción
+          console.warn('Excepción PKCE capturada y manejada con seguridad:', err?.message || err);
         }
       }
 
-      // Redirigir al usuario al destino deseado
-      router.push(next);
+      // Verificar si hay una sesión activa de usuario en Supabase (incluso si PKCE reintentó)
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        setLoadingText('¡Autenticación exitosa! Redirigiendo...');
+        // Emitir evento global para que el Header y Carrito se sincronicen en vivo
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('cartUpdated'));
+        }
+        router.push(next);
+      } else {
+        console.error('No se pudo verificar la sesión de usuario tras el callback OAuth');
+        router.push('/auth');
+      }
     };
 
     handleAuthCallback();
@@ -53,7 +67,7 @@ function AuthCallbackContent() {
           Iniciando sesión...
         </h2>
         <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">
-          {error ? `Error: ${error}` : 'Verificando tus credenciales de Google y preparando tu cuenta.'}
+          {loadingText}
         </p>
       </div>
     </div>
