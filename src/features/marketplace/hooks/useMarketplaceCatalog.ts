@@ -17,6 +17,7 @@ import { useAdvancedProducts } from '@/features/products/hooks/useAdvancedProduc
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useCategories } from '@/features/categories/hooks/useCategories';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useDebounce } from '@/shared/hooks/useDebounce';
 import { AdvancedProductFilters, SortOption } from '@/features/products/types/product-filters.types';
 import { trackUserEvent } from '@/lib/telemetry';
 
@@ -44,6 +45,10 @@ export function useMarketplaceCatalog() {
   const [inStockOnly, setInStockOnly] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
+
+  // Debouncing para búsqueda por texto (350ms) y rango de precio (400ms) estilo Amazon / AliExpress
+  const debouncedSearchQuery = useDebounce(searchQuery, 350);
+  const debouncedPriceRange = useDebounce(priceRange, 400);
 
   // Estado de Ubicación y Radio GPS (Buenos Aires / Barracas · En un radio de 6 km)
   const [locationName, setLocationName] = useState('Buenos Aires');
@@ -83,17 +88,17 @@ export function useMarketplaceCatalog() {
   // Categorías
   const { categories, loading: categoriesLoading } = useCategories();
 
-  // Construir filtros memorizados para el hook avanzado
+  // Construir filtros memorizados optimizados con Debounce
   const filters: AdvancedProductFilters = useMemo(() => ({
-    searchQuery: searchQuery.trim() || undefined,
+    searchQuery: debouncedSearchQuery.trim() || undefined,
     categoryId: selectedCategory || undefined,
-    minPrice: priceRange.min,
-    maxPrice: priceRange.max,
+    minPrice: debouncedPriceRange.min,
+    maxPrice: debouncedPriceRange.max,
     inStockOnly,
     sortBy,
     page: currentPage,
     limit: itemsPerPage,
-  }), [searchQuery, selectedCategory, priceRange, inStockOnly, sortBy, currentPage]);
+  }), [debouncedSearchQuery, selectedCategory, debouncedPriceRange, inStockOnly, sortBy, currentPage]);
 
   const { products, loading: productsLoading, total, refresh } = useAdvancedProducts(filters);
   const totalPages = Math.ceil(total / itemsPerPage);
