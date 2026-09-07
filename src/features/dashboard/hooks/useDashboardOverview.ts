@@ -60,11 +60,17 @@ export function useDashboardOverview() {
     }
   };
 
+  const handleLogout = async () => {
+    await logout();
+    router.push('/marketplace');
+  };
+
   return {
     user,
     profile,
     isLoading,
     logout,
+    handleLogout,
     pendingUnmutedCount,
     totalProductsCount,
     router,

@@ -4,24 +4,10 @@
  * ============================================================================
  * 
  * @description Componente de header reutilizable con navegación.
- *              Utiliza useAuth hook para gestión de autenticación.
+ *              Muestra el nombre del usuario autenticado, acceso a /dashboard
+ *              y botón funcional de Cerrar Sesión.
  * 
  * @module Presentation/Components/Layout
- * 
- * @author System
- * @created 2026-07-16
- * 
- * @dependencies
- * - react
- * - @/features/auth/hooks/useAuth
- * 
- * @related-files
- * - @/components/layout/Sidebar.tsx
- * - @/components/layout/LayoutWrapper.tsx
- * 
- * @exports
- * - Header (default)
- * 
  * ============================================================================
  */
 
@@ -45,9 +31,9 @@ export default function Header({
   cartItemCount,
   cartTotal,
   ordersCount,
-  isMarketplacePublic = false,
 }: HeaderProps) {
-  const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
+  const { user, profile, isAuthenticated, logout } = useAuth();
   const { cart } = useCart(user?.id || null);
 
   const displayCount = cartItemCount !== undefined ? cartItemCount : cart.itemCount;
@@ -58,6 +44,13 @@ export default function Header({
     currency: 'CLP',
     maximumFractionDigits: 0,
   }).format(displayTotal || 0);
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/marketplace');
+  };
+
+  const displayName = profile?.store_name || user?.email?.split('@')[0] || 'Mi Cuenta';
 
   return (
     <header className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 sticky top-0 z-40 shadow-xs transition-colors duration-200">
@@ -72,9 +65,9 @@ export default function Header({
             {title && <h1 className="text-lg font-semibold text-gray-700 dark:text-slate-200 hidden sm:inline-block border-l border-gray-300 dark:border-slate-700 pl-3">{title}</h1>}
           </div>
 
-          {/* Acciones del Header: Cart Pill Widget + Indicadores + Cuenta */}
+          {/* Acciones del Header: Cart Pill Widget + Indicadores + Cuenta de Usuario */}
           <div className="flex items-center gap-3">
-            {/* Widget de Carrito (Pill Button estilo Importadora Mitre) */}
+            {/* Widget de Carrito */}
             <Link
               href="/marketplace/cart"
               className="flex items-center gap-2.5 border border-gray-300 dark:border-slate-700 hover:border-blue-500 bg-white dark:bg-slate-800 hover:bg-blue-50/40 dark:hover:bg-slate-700/60 px-3.5 py-1.5 rounded-full transition shadow-xs group"
@@ -103,15 +96,30 @@ export default function Header({
               </Link>
             )}
 
-            {/* Botón de Cuenta / Dashboard */}
+            {/* Estado de Cuenta del Usuario en el Header */}
             {isAuthenticated ? (
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-1.5 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 font-medium px-3.5 py-1.5 rounded-lg transition text-sm border border-gray-200 dark:border-slate-700"
-              >
-                <span>👤</span>
-                <span className="hidden sm:inline">Mi Cuenta</span>
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 font-extrabold px-3 py-1.5 rounded-xl transition text-xs shadow-2xs"
+                  title="Ir a Mi Panel de Usuario"
+                >
+                  <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-black uppercase">
+                    {displayName[0]}
+                  </span>
+                  <span className="max-w-[120px] truncate">{displayName}</span>
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="p-1.5 px-2.5 text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900 border border-rose-200 dark:border-rose-800 rounded-xl transition cursor-pointer flex items-center gap-1"
+                  title="Cerrar Sesión"
+                >
+                  <span>🚪</span>
+                  <span className="hidden md:inline">Salir</span>
+                </button>
+              </div>
             ) : (
               <Link
                 href="/auth"
