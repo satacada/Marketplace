@@ -56,16 +56,25 @@ export default function Header({
     <header className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 sticky top-0 z-40 shadow-xs transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex flex-row justify-between items-center gap-4">
-          {/* Logo / Nombre del sitio */}
+          {/* Logo / Nombre del sitio + Nombre de usuario/tienda */}
           <div className="flex items-center gap-3">
             <Link href="/marketplace" className="text-2xl font-extrabold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition flex items-center gap-2">
               <span className="text-2xl">🛒</span>
               <span>Marketplace</span>
             </Link>
             {title && <h1 className="text-lg font-semibold text-gray-700 dark:text-slate-200 hidden sm:inline-block border-l border-gray-300 dark:border-slate-700 pl-3">{title}</h1>}
+            {isAuthenticated && (
+              <Link
+                href="/dashboard"
+                className="text-gray-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-semibold text-sm transition border-l border-gray-300 dark:border-slate-700 pl-3"
+                title="Ir a Mi Panel de Usuario"
+              >
+                {displayName}
+              </Link>
+            )}
           </div>
 
-          {/* Acciones del Header: Cart Pill Widget + Indicadores + Cuenta de Usuario */}
+          {/* Acciones del Header: Cart Pill Widget + Indicadores + Botón de Salir */}
           <div className="flex items-center gap-3">
             {/* Widget de Carrito */}
             <Link
@@ -98,37 +107,27 @@ export default function Header({
 
             {/* Estado de Cuenta del Usuario en el Header */}
             {isAuthenticated ? (
-              <div className="flex items-center gap-3">
-                <Link
-                  href="/dashboard"
-                  className="text-gray-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-semibold text-sm transition"
-                  title="Ir a Mi Panel de Usuario"
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="p-2 text-gray-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition cursor-pointer flex items-center justify-center"
+                title="Cerrar Sesión"
+                aria-label="Cerrar Sesión"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  {displayName}
-                </Link>
-
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="p-2 text-gray-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition cursor-pointer flex items-center justify-center"
-                  title="Cerrar Sesión"
-                  aria-label="Cerrar Sesión"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-                    <polyline points="10 17 15 12 10 7" />
-                    <line x1="15" y1="12" x2="3" y2="12" />
-                  </svg>
-                </button>
-              </div>
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                  <polyline points="10 17 15 12 10 7" />
+                  <line x1="15" y1="12" x2="3" y2="12" />
+                </svg>
+              </button>
             ) : (
               <Link
                 href="/auth"
