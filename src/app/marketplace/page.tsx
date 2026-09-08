@@ -36,12 +36,10 @@ export default function MarketplacePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 transition-colors duration-200">
-      {/* Header global único (Contiene Logo Marketplace y Carrito Reactivo que envía directo a /marketplace/cart) */}
-      <div className="p-4 sm:p-6 max-w-7xl mx-auto pb-0">
-        <Header />
-      </div>
+      {/* Header global único (Contiene Logo Marketplace y Carrito Reactivo) */}
+      <Header />
 
-      <main className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
+      <main className="max-w-7xl mx-auto px-4 py-3 sm:py-4 space-y-4">
         {/* Barra de Búsqueda Estilo Google con Icono de Foto 📷 Embebido */}
         <CatalogHeaderBanner
           searchQuery={catalog.searchQuery}

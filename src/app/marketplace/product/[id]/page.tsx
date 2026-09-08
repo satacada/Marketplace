@@ -67,9 +67,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 transition-colors duration-200">
       {/* Header global */}
-      <div className="p-4 sm:p-6 max-w-7xl mx-auto pb-0">
-        <Header title={detail.product.title} />
-      </div>
+      <Header title={detail.product.title} />
 
       {/* Modal Informativo UI */}
       <Modal
