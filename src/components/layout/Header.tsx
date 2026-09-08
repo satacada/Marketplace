@@ -98,26 +98,35 @@ export default function Header({
 
             {/* Estado de Cuenta del Usuario en el Header */}
             {isAuthenticated ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <Link
                   href="/dashboard"
-                  className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 font-extrabold px-3 py-1.5 rounded-xl transition text-xs shadow-2xs"
+                  className="text-gray-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-semibold text-sm transition"
                   title="Ir a Mi Panel de Usuario"
                 >
-                  <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-black uppercase">
-                    {displayName[0]}
-                  </span>
-                  <span className="max-w-[120px] truncate">{displayName}</span>
+                  {displayName}
                 </Link>
 
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="p-1.5 px-2.5 text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900 border border-rose-200 dark:border-rose-800 rounded-xl transition cursor-pointer flex items-center gap-1"
+                  className="p-2 text-gray-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition cursor-pointer flex items-center justify-center"
                   title="Cerrar Sesión"
+                  aria-label="Cerrar Sesión"
                 >
-                  <span>🚪</span>
-                  <span className="hidden md:inline">Salir</span>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                    <polyline points="10 17 15 12 10 7" />
+                    <line x1="15" y1="12" x2="3" y2="12" />
+                  </svg>
                 </button>
               </div>
             ) : (
