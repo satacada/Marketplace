@@ -55,19 +55,26 @@ export default function ThemeSwitcherWidget() {
             <label className="text-[11px] font-extrabold uppercase text-gray-500 tracking-wider">
               📦 Set de Iconos Global:
             </label>
-            <div className="grid grid-cols-3 gap-1.5">
-              {(['amazon-clean', 'heroicons', 'emoji'] as IconPackName[]).map((pack) => (
+            <div className="grid grid-cols-2 gap-1.5">
+              {(
+                [
+                  { id: 'amazon-clean', label: 'Amazon' },
+                  { id: 'aliexpress', label: 'AliExpress' },
+                  { id: 'heroicons', label: 'Heroicons' },
+                  { id: 'emoji', label: 'Emoji' },
+                ] as { id: IconPackName; label: string }[]
+              ).map((pack) => (
                 <button
-                  key={pack}
+                  key={pack.id}
                   type="button"
-                  onClick={() => setIconPack(pack)}
-                  className={`py-1.5 px-2 rounded-xl text-[11px] font-bold border transition text-center capitalize ${
-                    iconPack === pack
+                  onClick={() => setIconPack(pack.id)}
+                  className={`py-1.5 px-2 rounded-xl text-[11px] font-bold border transition text-center ${
+                    iconPack === pack.id
                       ? 'bg-blue-600 text-white border-blue-600 shadow-2xs'
                       : 'bg-gray-50 dark:bg-slate-800 text-gray-700 dark:text-slate-300 border-gray-200 dark:border-slate-700 hover:bg-gray-100'
                   }`}
                 >
-                  {pack === 'amazon-clean' ? 'Amazon' : pack}
+                  {pack.label}
                 </button>
               ))}
             </div>

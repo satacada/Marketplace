@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { useTheme } from '@/shared/theme/ThemeContext';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import THEME_CONFIG from '@/shared/theme/theme.config';
+import AppIcon from '../ui/icons/AppIcon';
 
 function SidebarContent() {
   const { user, profile, logout, isLoading } = useAuth();
@@ -102,9 +103,9 @@ function SidebarContent() {
       <nav className="flex-1 p-3 space-y-3">
         {/* NAVEGACIÓN GENERAL */}
         <div className="px-1 pt-1">
-          <Link href="/marketplace" className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs bg-gray-50 hover:bg-blue-50/80 text-gray-800 hover:text-blue-600 font-bold transition border border-gray-200/60">
+          <Link href="/marketplace" className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs bg-gray-50 dark:bg-slate-800/80 hover:bg-blue-50/80 dark:hover:bg-slate-800 text-gray-800 dark:text-slate-200 hover:text-blue-600 font-bold transition border border-gray-200/60 dark:border-slate-700">
             <div className="flex items-center gap-2.5">
-              <span className="text-sm">🛒</span>
+              <AppIcon name="cart" size="sm" />
               <span>Explorar Marketplace</span>
             </div>
             <span className="text-xs text-gray-400">→</span>
@@ -116,19 +117,19 @@ function SidebarContent() {
           <div className={THEME_CONFIG.sectionCards.admin}>
             <div className="flex items-center justify-between px-2 mb-2">
               <span className={THEME_CONFIG.badges.admin}>
-                🛡️ Administración
+                <AppIcon name="shield" size="xs" /> Administración
               </span>
             </div>
             <div className="space-y-1">
               <Link href="/dashboard/admin" className={linkClass('/dashboard/admin', undefined, 'bg-purple-600')}>
                 <div className="flex items-center gap-2.5">
-                  <span className="text-sm">📊</span>
+                  <AppIcon name="admin" size="sm" />
                   <span>Panel Admin</span>
                 </div>
               </Link>
               <Link href="/dashboard/admin/products" className={linkClass('/dashboard/admin/products', undefined, 'bg-purple-600')}>
                 <div className="flex items-center gap-2.5">
-                  <span className="text-sm">📦</span>
+                  <AppIcon name="package" size="sm" />
                   <span>Gestión de Productos</span>
                 </div>
               </Link>
@@ -141,37 +142,37 @@ function SidebarContent() {
           <div className={THEME_CONFIG.sectionCards.seller}>
             <div className="flex items-center justify-between px-2 mb-2">
               <span className={THEME_CONFIG.badges.seller}>
-                🏪 Panel de Vendedor
+                <AppIcon name="store" size="xs" /> Panel de Vendedor
               </span>
             </div>
             <div className="space-y-1">
               <Link href="/dashboard" className={linkClass('/dashboard', undefined, 'bg-emerald-600')}>
                 <div className="flex items-center gap-2.5">
-                  <span className="text-sm">🏠</span>
+                  <AppIcon name="dashboard" size="sm" />
                   <span>Panel Principal</span>
                 </div>
               </Link>
               <Link href="/dashboard/sales" className={linkClass('/dashboard/sales', undefined, 'bg-emerald-600')}>
                 <div className="flex items-center gap-2.5">
-                  <span className="text-sm">📊</span>
+                  <AppIcon name="sales" size="sm" />
                   <span>Panel de Ventas</span>
                 </div>
               </Link>
               <Link href="/dashboard/products" className={linkClass('/dashboard/products', undefined, 'bg-emerald-600')}>
                 <div className="flex items-center gap-2.5">
-                  <span className="text-sm">📦</span>
+                  <AppIcon name="package" size="sm" />
                   <span>Mis Productos</span>
                 </div>
               </Link>
               <Link href="/dashboard/products/new" className={linkClass('/dashboard/products/new', undefined, 'bg-emerald-600')}>
                 <div className="flex items-center gap-2.5">
-                  <span className="text-sm">➕</span>
+                  <AppIcon name="add" size="sm" />
                   <span>Nuevo Producto</span>
                 </div>
               </Link>
               <Link href="/dashboard/questions" className={linkClass('/dashboard/questions', undefined, 'bg-emerald-600')}>
                 <div className="flex items-center gap-2.5">
-                  <span className="text-sm">✉️</span>
+                  <AppIcon name="questions" size="sm" />
                   <span>Preguntas Recibidas</span>
                 </div>
                 <div className="flex gap-1">
@@ -189,7 +190,7 @@ function SidebarContent() {
               </Link>
               <Link href="/dashboard/orders?view=sales" className={linkClass('/dashboard/orders', 'sales', 'bg-emerald-600')}>
                 <div className="flex items-center gap-2.5">
-                  <span className="text-sm">📋</span>
+                  <AppIcon name="orders" size="sm" />
                   <span>Historial de Pedidos</span>
                 </div>
               </Link>
@@ -197,48 +198,35 @@ function SidebarContent() {
           </div>
         )}
 
-        {/* Botón publicar para comprador */}
-        {role === 'buyer' && (
-          <div className="px-1">
-            <Link href="/dashboard/products/new" className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs bg-emerald-50 text-emerald-800 font-bold border border-emerald-200 hover:bg-emerald-600 hover:text-white transition">
-              <div className="flex items-center gap-2">
-                <span>🚀</span>
-                <span>Publicar Primer Producto</span>
-              </div>
-              <span>+</span>
-            </Link>
-          </div>
-        )}
-
         {/* 3. SECCIÓN MI CUENTA (Bloque Azul) */}
         <div className={THEME_CONFIG.sectionCards.account}>
           <div className="flex items-center justify-between px-2 mb-2">
             <span className={THEME_CONFIG.badges.account}>
-              👤 Mi Cuenta
+              <AppIcon name="user" size="xs" /> Mi Cuenta
             </span>
           </div>
           <div className="space-y-1">
             <Link href="/marketplace/cart" className={linkClass('/marketplace/cart')}>
               <div className="flex items-center gap-2.5">
-                <span className="text-sm">🛒</span>
+                <AppIcon name="cart" size="sm" />
                 <span>Carrito de Compras</span>
               </div>
             </Link>
             <Link href="/dashboard/orders?view=purchases" className={linkClass('/dashboard/orders', 'purchases')}>
               <div className="flex items-center gap-2.5">
-                <span className="text-sm">📋</span>
+                <AppIcon name="orders" size="sm" />
                 <span>Mis Compras</span>
               </div>
             </Link>
             <Link href="/marketplace/favorites" className={linkClass('/marketplace/favorites')}>
               <div className="flex items-center gap-2.5">
-                <span className="text-sm">❤️</span>
+                <AppIcon name="heart-filled" size="sm" />
                 <span>Mis Favoritos</span>
               </div>
             </Link>
             <Link href="/dashboard/profile" className={linkClass('/dashboard/profile')}>
               <div className="flex items-center gap-2.5">
-                <span className="text-sm">⚙️</span>
+                <AppIcon name="filter" size="sm" />
                 <span>Mi Perfil y Ajustes</span>
               </div>
             </Link>
@@ -265,7 +253,7 @@ function SidebarContent() {
             onClick={handleLogout}
             className="w-full bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-600 text-rose-700 dark:text-rose-300 hover:text-white border border-rose-200 dark:border-rose-900 rounded-xl px-3.5 py-2.5 text-xs font-bold transition flex items-center justify-center gap-2 shadow-2xs"
           >
-            <span>🚪</span>
+            <AppIcon name="logout" size="sm" />
             <span>Cerrar Sesión</span>
           </button>
         </div>

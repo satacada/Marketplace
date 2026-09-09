@@ -33,6 +33,36 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease, font-family 0.2s ease;
 }
 
+/* REGISTRO DE PALETAS DE COLOR DINÁMICAS (data-theme) */
+html[data-theme="amazon"] .bg-blue-600,
+:root[data-theme="amazon"] .bg-blue-600 {
+  background-color: #febd69 !important;
+  color: #111827 !important;
+}
+
+html[data-theme="amazon"] .text-blue-600,
+:root[data-theme="amazon"] .text-blue-600 {
+  color: #d97706 !important;
+}
+
+html[data-theme="amazon"] header,
+:root[data-theme="amazon"] header {
+  background-color: #131921 !important;
+  color: #ffffff !important;
+  border-color: #232f3e !important;
+}
+
+html[data-theme="emerald"] .bg-blue-600,
+:root[data-theme="emerald"] .bg-blue-600 {
+  background-color: #059669 !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="emerald"] .text-blue-600,
+:root[data-theme="emerald"] .text-blue-600 {
+  color: #059669 !important;
+}
+
 /* PROTECCIÓN DE PROPORCIONES Y PREVENCIÓN DE DISTORSIÓN DE MAQUETA */
 .product-card-image-container {
   aspect-ratio: 4 / 3;
