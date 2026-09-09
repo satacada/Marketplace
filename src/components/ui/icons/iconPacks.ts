@@ -39,7 +39,21 @@ export type IconName =
   | 'report'
   | 'trash'
   | 'close'
-  | 'arrow-right';
+  | 'arrow-right'
+  | 'chart'
+  | 'lightbulb'
+  | 'money'
+  | 'target'
+  | 'award'
+  | 'comment'
+  | 'pending'
+  | 'edit'
+  | 'eye'
+  | 'tag'
+  | 'lock'
+  | 'settings'
+  | 'check-circle'
+  | 'question';
 
 export type IconPackName = 'amazon-clean' | 'aliexpress' | 'heroicons' | 'emoji';
 
@@ -73,4 +87,18 @@ export const EMOJI_MAP: Record<IconName, string> = {
   trash: '🗑️',
   close: '✕',
   'arrow-right': '→',
+  chart: '📈',
+  lightbulb: '💡',
+  money: '💰',
+  target: '🎯',
+  award: '🏆',
+  comment: '💭',
+  pending: '⏳',
+  edit: '✏️',
+  eye: '👁️',
+  tag: '🏷️',
+  lock: '🔒',
+  settings: '⚙️',
+  'check-circle': '✅',
+  question: '💬',
 };

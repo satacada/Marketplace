@@ -12,6 +12,7 @@
 
 import React from 'react';
 import { ActiveTab, TimeRange } from '@/features/sales/hooks/useSalesAnalytics';
+import AppIcon from '@/components/ui/icons/AppIcon';
 
 type Props = {
   activeTab: ActiveTab;
@@ -65,35 +66,38 @@ export default function SalesHeaderBanner({
         <button
           type="button"
           onClick={() => onSelectTab('overview')}
-          className={`pb-3 text-xs font-black transition relative ${
+          className={`pb-3 text-xs font-black transition relative flex items-center gap-1.5 ${
             activeTab === 'overview'
               ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
               : 'text-gray-500 hover:text-gray-800 dark:text-slate-400'
           }`}
         >
-          📈 Resumen de Ventas
+          <AppIcon name="chart" className="w-3.5 h-3.5" />
+          <span>Resumen de Ventas</span>
         </button>
         <button
           type="button"
           onClick={() => onSelectTab('suggestions')}
-          className={`pb-3 text-xs font-black transition relative ${
+          className={`pb-3 text-xs font-black transition relative flex items-center gap-1.5 ${
             activeTab === 'suggestions'
               ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
               : 'text-gray-500 hover:text-gray-800 dark:text-slate-400'
           }`}
         >
-          💡 Sugerencias de Optimización
+          <AppIcon name="lightbulb" className="w-3.5 h-3.5 text-amber-500" />
+          <span>Sugerencias de Optimización</span>
         </button>
         <button
           type="button"
           onClick={() => onSelectTab('audit')}
-          className={`pb-3 text-xs font-black transition relative ${
+          className={`pb-3 text-xs font-black transition relative flex items-center gap-1.5 ${
             activeTab === 'audit'
               ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
               : 'text-gray-500 hover:text-gray-800 dark:text-slate-400'
           }`}
         >
-          ⭐ Auditoría de Calidad y Reseñas
+          <AppIcon name="star" className="w-3.5 h-3.5 text-amber-400" />
+          <span>Auditoría de Calidad y Reseñas</span>
         </button>
       </div>
     </div>

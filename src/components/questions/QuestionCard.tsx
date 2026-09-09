@@ -11,6 +11,7 @@
 
 import React from 'react';
 import { DashboardQuestion } from '@/features/questions/hooks/useDashboardQuestions';
+import AppIcon from '@/components/ui/icons/AppIcon';
 
 type Props = {
   question: DashboardQuestion;
@@ -22,11 +23,13 @@ export default function QuestionCard({ question, onOpenReply }: Props) {
     <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-3">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <span className="text-[10px] font-extrabold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950 px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-800">
-            📦 {question.products?.title || 'Producto'}
+          <span className="text-[10px] font-extrabold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950 px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-800 inline-flex items-center gap-1">
+            <AppIcon name="package" className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+            <span>{question.products?.title || 'Producto'}</span>
           </span>
-          <h4 className="text-sm font-extrabold text-gray-900 dark:text-slate-100 mt-1">
-            💬 "{question.question}"
+          <h4 className="text-sm font-extrabold text-gray-900 dark:text-slate-100 mt-1 flex items-center gap-1.5">
+            <AppIcon name="comment" className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+            <span>"{question.question}"</span>
           </h4>
         </div>
         <span className="text-[10px] text-gray-400 font-bold">
@@ -35,14 +38,18 @@ export default function QuestionCard({ question, onOpenReply }: Props) {
       </div>
 
       {question.answer ? (
-        <div className="p-3 bg-emerald-50/50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-100 dark:border-emerald-900 text-xs font-medium text-emerald-900 dark:text-emerald-300">
-          <span className="font-extrabold text-emerald-600">✓ Tu respuesta: </span>
-          {question.answer}
+        <div className="p-3 bg-emerald-50/50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-100 dark:border-emerald-900 text-xs font-medium text-emerald-900 dark:text-emerald-300 flex items-center gap-1.5">
+          <span className="font-extrabold text-emerald-600 flex items-center gap-1">
+            <AppIcon name="check" className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Tu respuesta:</span>
+          </span>
+          <span>{question.answer}</span>
         </div>
       ) : (
         <div className="flex justify-between items-center pt-2">
-          <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400">
-            ⏳ Pendiente de respuesta
+          <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+            <AppIcon name="pending" className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+            <span>Pendiente de respuesta</span>
           </span>
           <button
             type="button"

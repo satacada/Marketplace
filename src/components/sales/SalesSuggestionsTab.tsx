@@ -11,6 +11,7 @@
  */
 
 import React from 'react';
+import AppIcon from '@/components/ui/icons/AppIcon';
 
 type ProductSuggestion = {
   id: string;
@@ -37,7 +38,7 @@ export default function SalesSuggestionsTab({ topProducts }: Props) {
     <div className="space-y-4 animate-fadeIn text-gray-900 dark:text-slate-100">
       <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-4">
         <div className="flex items-center gap-2">
-          <span className="text-xl">💡</span>
+          <AppIcon name="lightbulb" className="w-6 h-6 text-amber-500" />
           <div>
             <h3 className="text-base font-black text-gray-900 dark:text-slate-100">
               Sugerencias de IA para Potenciar tus Ventas
@@ -53,7 +54,7 @@ export default function SalesSuggestionsTab({ topProducts }: Props) {
             <div key={item.id} className="p-4 bg-purple-50/70 dark:bg-purple-950/40 rounded-2xl border border-purple-100 dark:border-purple-900/60 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black text-purple-950 dark:text-purple-200 flex items-center gap-2">
-                  <span>✨</span>
+                  <AppIcon name="star" className="w-3.5 h-3.5 text-purple-600 dark:text-purple-300" />
                   <span>{item.title}</span>
                 </span>
                 <span className="text-[10px] font-extrabold bg-purple-600 text-white px-2.5 py-0.5 rounded-full">

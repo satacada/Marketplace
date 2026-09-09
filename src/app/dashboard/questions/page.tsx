@@ -18,6 +18,7 @@ import React from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { useDashboardQuestions } from '@/features/questions/hooks/useDashboardQuestions';
 import QuestionCard from '@/components/questions/QuestionCard';
+import AppIcon from '@/components/ui/icons/AppIcon';
 
 export default function DashboardQuestionsPage() {
   const q = useDashboardQuestions();
@@ -42,8 +43,8 @@ export default function DashboardQuestionsPage() {
       </div>
 
       {q.questions.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 p-12 rounded-3xl text-center border border-gray-200/90 dark:border-slate-800 space-y-3">
-          <span className="text-4xl">💬</span>
+        <div className="bg-white dark:bg-slate-900 p-12 rounded-3xl text-center border border-gray-200/90 dark:border-slate-800 space-y-3 flex flex-col items-center justify-center">
+          <AppIcon name="comment" className="w-12 h-12 text-gray-400" />
           <p className="text-gray-600 dark:text-slate-300 font-extrabold text-sm">
             Aún no tienes preguntas recibidas.
           </p>

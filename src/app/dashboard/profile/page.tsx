@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import AppIcon from '@/components/ui/icons/AppIcon';
 
 export default function ProfilePage() {
   const [email, setEmail] = useState('');
@@ -95,8 +96,9 @@ export default function ProfilePage() {
         <p className="text-gray-600 dark:text-slate-300 text-sm"><strong>Email:</strong> {email}</p>
         <p className="text-gray-600 dark:text-slate-300 text-sm mt-2">
           <strong>Rol actual:</strong>{' '}
-          <span className={role === 'seller' ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' : 'text-gray-500 dark:text-slate-400 font-bold'}>
-            {role === 'seller' ? '✓ Vendedor' : '👤 Comprador'}
+          <span className={role === 'seller' ? 'text-emerald-600 dark:text-emerald-400 font-extrabold flex items-center gap-1 inline-flex' : 'text-gray-500 dark:text-slate-400 font-bold flex items-center gap-1 inline-flex'}>
+            <AppIcon name={role === 'seller' ? 'check' : 'user'} className="w-3.5 h-3.5" />
+            <span>{role === 'seller' ? 'Vendedor' : 'Comprador'}</span>
           </span>
         </p>
       </div>

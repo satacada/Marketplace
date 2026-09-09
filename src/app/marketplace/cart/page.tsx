@@ -20,6 +20,7 @@ import Header from '@/components/layout/Header';
 import { Modal } from '@/components/ui/Modal';
 import { useCartPage } from '@/features/cart/hooks/useCartPage';
 import CartItemRow from '@/components/cart/CartItemRow';
+import AppIcon from '@/components/ui/icons/AppIcon';
 
 export default function CartPage() {
   const c = useCartPage();
@@ -48,8 +49,8 @@ export default function CartPage() {
         </div>
 
         {c.cart.items.length === 0 ? (
-          <div className="bg-white dark:bg-slate-900 p-12 rounded-3xl shadow-2xs border border-gray-200/90 dark:border-slate-800 text-center max-w-lg mx-auto my-12 space-y-4">
-            <span className="text-6xl block">🛒</span>
+          <div className="bg-white dark:bg-slate-900 p-12 rounded-3xl shadow-2xs border border-gray-200/90 dark:border-slate-800 text-center max-w-lg mx-auto my-12 space-y-4 flex flex-col items-center justify-center">
+            <AppIcon name="cart" className="w-14 h-14 text-gray-400 mb-1" />
             <h2 className="text-xl font-extrabold text-gray-900 dark:text-slate-100">Tu carrito está vacío</h2>
             <p className="text-gray-500 text-xs font-medium">Explora nuestro catálogo y agrega tus productos favoritos.</p>
             <Link href="/marketplace" className="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 font-extrabold transition inline-block text-xs shadow-xs">
@@ -114,16 +115,18 @@ export default function CartPage() {
               <button
                 type="button"
                 onClick={() => c.router.push('/auth?redirect=/marketplace/checkout')}
-                className="w-1/2 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold cursor-pointer"
+                className="w-1/2 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold cursor-pointer flex items-center justify-center gap-1.5"
               >
-                🔑 Iniciar Sesión
+                <AppIcon name="lock" className="w-3.5 h-3.5 text-white" />
+                <span>Iniciar Sesión</span>
               </button>
               <button
                 type="button"
                 onClick={() => c.router.push('/auth/register?redirect=/marketplace/checkout')}
-                className="w-1/2 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl text-xs font-extrabold cursor-pointer"
+                className="w-1/2 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl text-xs font-extrabold cursor-pointer flex items-center justify-center gap-1.5"
               >
-                ✨ Crear Cuenta
+                <AppIcon name="star" className="w-3.5 h-3.5 text-white" />
+                <span>Crear Cuenta</span>
               </button>
             </div>
           </div>

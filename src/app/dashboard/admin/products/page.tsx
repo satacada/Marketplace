@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import AppIcon from '@/components/ui/icons/AppIcon';
 
 type Product = {
   id: string;
@@ -151,11 +152,11 @@ export default function AdminProductsPage() {
   const getTabConfig = (t: TabType) => {
     switch (t) {
       case 'pending':
-        return { label: '⏳ Pendientes de aprobación', color: 'amber' };
+        return { icon: 'pending' as const, label: 'Pendientes de aprobación', color: 'amber' };
       case 'approved':
-        return { label: '✅ Aprobados', color: 'emerald' };
+        return { icon: 'check-circle' as const, label: 'Aprobados', color: 'emerald' };
       case 'deleted':
-        return { label: '🗑️ Eliminados', color: 'rose' };
+        return { icon: 'trash' as const, label: 'Eliminados', color: 'rose' };
     }
   };
 
@@ -182,7 +183,8 @@ export default function AdminProductsPage() {
                   : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800'
               }`}
             >
-              {config.label} ({count})
+              <AppIcon name={config.icon} className="w-3.5 h-3.5" />
+              <span>{config.label} ({count})</span>
             </button>
           );
         })}
@@ -191,8 +193,8 @@ export default function AdminProductsPage() {
       {loading ? (
         <p className="text-gray-500 dark:text-slate-400 text-center py-8 font-bold">Cargando productos...</p>
       ) : products.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 p-12 rounded-3xl shadow-2xs text-center border border-gray-200/90 dark:border-slate-800">
-          <p className="text-6xl mb-4">📦</p>
+        <div className="bg-white dark:bg-slate-900 p-12 rounded-3xl shadow-2xs text-center border border-gray-200/90 dark:border-slate-800 flex flex-col items-center justify-center space-y-3">
+          <AppIcon name="package" className="w-14 h-14 text-gray-400 mb-2" />
           <p className="text-gray-600 dark:text-slate-300 text-base font-bold">
             {tab === 'pending' && 'No hay productos pendientes de aprobación.'}
             {tab === 'approved' && 'No hay productos aprobados.'}
@@ -219,15 +221,15 @@ export default function AdminProductsPage() {
                     />
                   ) : (
                     <div className="flex items-center justify-center h-full text-gray-400 dark:text-slate-500">
-                      <span className="text-4xl">📦</span>
+                      <AppIcon name="package" className="w-10 h-10 text-gray-400" />
                     </div>
                   )}
-                  <div className={`absolute top-2 right-2 px-2 py-0.5 rounded-full text-[9px] font-black text-white shadow-xs ${
+                  <div className={`absolute top-2 right-2 px-2 py-0.5 rounded-full text-[9px] font-black text-white shadow-xs flex items-center gap-1 ${
                     product.status === 'pending' ? 'bg-amber-500' : 
                     product.status === 'approved' ? 'bg-emerald-600' : 'bg-rose-600'
                   }`}>
-                    {product.status === 'pending' ? '⏳ Pendiente' : 
-                     product.status === 'approved' ? '✅ Aprobado' : '❌ Rechazado'}
+                    <AppIcon name={product.status === 'pending' ? 'pending' : product.status === 'approved' ? 'check-circle' : 'close'} className="w-3 h-3 text-white" />
+                    <span>{product.status === 'pending' ? 'Pendiente' : product.status === 'approved' ? 'Aprobado' : 'Rechazado'}</span>
                   </div>
                 </div>
 
@@ -267,7 +269,7 @@ export default function AdminProductsPage() {
                       disabled={processingId === product.id}
                       className="flex-1 py-2.5 px-4 rounded-xl text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                     >
-                      <span>✓</span>
+                      <AppIcon name="check" className="w-3.5 h-3.5 text-white" />
                       <span>Aprobar</span>
                     </button>
                     <button

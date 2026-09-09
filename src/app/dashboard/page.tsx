@@ -17,6 +17,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useDashboardOverview } from '@/features/dashboard/hooks/useDashboardOverview';
+import AppIcon from '@/components/ui/icons/AppIcon';
 
 export default function DashboardPage() {
   const dash = useDashboardOverview();
@@ -53,7 +54,7 @@ export default function DashboardPage() {
         <Link href="/dashboard/products" className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200 dark:border-slate-800 shadow-2xs hover:border-blue-500 transition space-y-2 block">
           <div className="flex justify-between items-center text-xs font-extrabold text-gray-500">
             <span>MIS PRODUCTOS</span>
-            <span>📦</span>
+            <AppIcon name="package" className="w-5 h-5 text-gray-500" />
           </div>
           <div className="text-2xl font-black text-gray-900 dark:text-slate-100">
             {dash.totalProductsCount} publicados
@@ -64,7 +65,7 @@ export default function DashboardPage() {
         <Link href="/dashboard/questions" className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200 dark:border-slate-800 shadow-2xs hover:border-blue-500 transition space-y-2 block">
           <div className="flex justify-between items-center text-xs font-extrabold text-gray-500">
             <span>PREGUNTAS PENDIENTES</span>
-            <span>💬</span>
+            <AppIcon name="comment" className="w-5 h-5 text-gray-500" />
           </div>
           <div className="text-2xl font-black text-gray-900 dark:text-slate-100">
             {dash.pendingUnmutedCount} sin responder
@@ -75,7 +76,7 @@ export default function DashboardPage() {
         <Link href="/dashboard/sales" className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200 dark:border-slate-800 shadow-2xs hover:border-blue-500 transition space-y-2 block">
           <div className="flex justify-between items-center text-xs font-extrabold text-gray-500">
             <span>ANALÍTICA DE VENTAS</span>
-            <span>📈</span>
+            <AppIcon name="chart" className="w-5 h-5 text-gray-500" />
           </div>
           <div className="text-2xl font-black text-gray-900 dark:text-slate-100">
             Métricas & Reputación

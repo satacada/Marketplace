@@ -11,6 +11,7 @@
 
 import React from 'react';
 import { SalesSummary } from '@/features/sales/hooks/useSalesAnalytics';
+import AppIcon from '@/components/ui/icons/AppIcon';
 
 type Props = {
   summary: SalesSummary;
@@ -26,7 +27,7 @@ export default function SalesSummaryMetrics({ summary, onOpenGoalModal }: Props)
       <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-2">
         <div className="flex justify-between items-center text-xs font-extrabold text-gray-500">
           <span>INGRESOS TOTALES</span>
-          <span className="text-emerald-500">💰</span>
+          <AppIcon name="money" className="w-4 h-4 text-emerald-500" />
         </div>
         <div className="text-2xl font-black text-gray-900 dark:text-slate-100">
           ${summary.totalRevenue.toLocaleString('es-CL')}
@@ -63,7 +64,7 @@ export default function SalesSummaryMetrics({ summary, onOpenGoalModal }: Props)
       <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-2">
         <div className="flex justify-between items-center text-xs font-extrabold text-gray-500">
           <span>ÍTEMS VENDIDOS</span>
-          <span className="text-blue-500">📦</span>
+          <AppIcon name="package" className="w-4 h-4 text-blue-500" />
         </div>
         <div className="text-2xl font-black text-gray-900 dark:text-slate-100">
           {summary.itemsSold} unidades
@@ -77,7 +78,7 @@ export default function SalesSummaryMetrics({ summary, onOpenGoalModal }: Props)
       <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-2">
         <div className="flex justify-between items-center text-xs font-extrabold text-gray-500">
           <span>REPUTACIÓN TIENDA</span>
-          <span className="text-amber-500">⭐</span>
+          <AppIcon name="star" className="w-4 h-4 text-amber-500" />
         </div>
         <div className="text-2xl font-black text-gray-900 dark:text-slate-100">
           {summary.avgRating.toFixed(1)} / 5.0

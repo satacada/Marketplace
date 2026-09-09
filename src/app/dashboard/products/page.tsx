@@ -18,6 +18,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Modal } from '@/components/ui/Modal';
 import { useSellerProductsList } from '@/features/products/hooks/useSellerProductsList';
+import AppIcon from '@/components/ui/icons/AppIcon';
 
 export default function ProductsPage() {
   const p = useSellerProductsList();
@@ -45,14 +46,14 @@ export default function ProductsPage() {
           href="/dashboard/products/new"
           className="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black transition shadow-xs flex items-center gap-1.5"
         >
-          <span>➕</span>
+          <AppIcon name="add" className="w-3.5 h-3.5 text-white" />
           <span>Publicar Nuevo Producto</span>
         </Link>
       </div>
 
       {p.displayProducts.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 p-12 rounded-3xl text-center border border-gray-200 dark:border-slate-800 space-y-3">
-          <span className="text-5xl">📦</span>
+        <div className="bg-white dark:bg-slate-900 p-12 rounded-3xl text-center border border-gray-200 dark:border-slate-800 space-y-3 flex flex-col items-center justify-center">
+          <AppIcon name="package" className="w-12 h-12 text-gray-400 mb-1" />
           <p className="text-gray-700 dark:text-slate-200 font-extrabold text-sm">
             Aún no tienes productos publicados.
           </p>

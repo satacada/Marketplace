@@ -12,6 +12,7 @@
  */
 
 import React from 'react';
+import AppIcon from '@/components/ui/icons/AppIcon';
 
 type Props = {
   avgRating: number;
@@ -44,29 +45,31 @@ export default function SellerReputationAuditTab({ avgRating, positivePercent }:
             Reputación Global del Vendedor
           </span>
           <div className="text-4xl font-black text-amber-500 flex items-center justify-center gap-2">
-            <span>⭐</span>
+            <AppIcon name="star" className="w-8 h-8 text-amber-500" />
             <span>{avgRating.toFixed(1)}</span>
             <span className="text-base font-bold text-gray-400">/ 5.0</span>
           </div>
           <p className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400">
             {positivePercent}% de compradores satisfechos
           </p>
-          <span className="text-[11px] font-bold text-gray-500 bg-amber-50 dark:bg-amber-950/40 p-2 rounded-xl border border-amber-200/60 dark:border-amber-900/40">
-            🏆 Vendedor Líder con Excelente Nivel de Servicio
+          <span className="text-[11px] font-bold text-gray-500 bg-amber-50 dark:bg-amber-950/40 p-2 rounded-xl border border-amber-200/60 dark:border-amber-900/40 flex items-center justify-center gap-1">
+            <AppIcon name="award" className="w-3.5 h-3.5 text-amber-600" />
+            <span>Vendedor Líder con Excelente Nivel de Servicio</span>
           </span>
         </div>
 
         {/* Gráfico de Evolución del Puntaje en el Tiempo */}
         <div className="lg:col-span-8 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-4">
-          <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200">
-            📈 Evolución Histórica del Puntaje del Vendedor
+          <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200 flex items-center gap-1.5">
+            <AppIcon name="chart" className="w-3.5 h-3.5 text-blue-600" />
+            <span>Evolución Histórica del Puntaje del Vendedor</span>
           </h3>
 
           <div className="h-40 flex items-end justify-between gap-4 pt-4">
             {scoreHistory.map((h, idx) => (
               <div key={idx} className="flex-1 flex flex-col items-center gap-2 group">
-                <span className="text-[11px] font-black text-blue-600 dark:text-blue-400">
-                  {h.score.toFixed(1)} ⭐
+                <span className="text-[11px] font-black text-blue-600 dark:text-blue-400 flex items-center gap-0.5">
+                  {h.score.toFixed(1)} <AppIcon name="star" className="w-3 h-3 text-amber-400" />
                 </span>
                 <div className="w-full bg-blue-50 dark:bg-slate-800 rounded-t-2xl overflow-hidden h-28 flex items-end p-1">
                   <div
@@ -85,8 +88,9 @@ export default function SellerReputationAuditTab({ avgRating, positivePercent }:
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Desglose de Estrellas */}
         <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-3">
-          <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200">
-            ⭐ Distribución de Calificaciones (Reseñas)
+          <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200 flex items-center gap-1.5">
+            <AppIcon name="star" className="w-3.5 h-3.5 text-amber-400" />
+            <span>Distribución de Calificaciones (Reseñas)</span>
           </h3>
           <div className="space-y-2 pt-1">
             {ratingBreakdown.map((r) => (
@@ -106,29 +110,42 @@ export default function SellerReputationAuditTab({ avgRating, positivePercent }:
 
         {/* Métricas Operativas de Excelencia */}
         <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-4">
-          <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200">
-            🚀 Indicadores de Servicio y Despacho
+          <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200 flex items-center gap-1.5">
+            <AppIcon name="sales" className="w-3.5 h-3.5 text-blue-600" />
+            <span>Indicadores de Servicio y Despacho</span>
           </h3>
           <div className="grid grid-cols-2 gap-3">
             <div className="p-3.5 bg-blue-50/60 dark:bg-slate-800/60 rounded-2xl border border-blue-100 dark:border-slate-700">
               <span className="text-[10px] font-extrabold text-gray-400 uppercase">Tiempo de Respuesta</span>
               <p className="text-lg font-black text-blue-600 dark:text-blue-400 mt-0.5">12 min</p>
-              <span className="text-[10px] text-emerald-600 font-bold">⚡ Respuesta inmediata</span>
+              <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                <AppIcon name="shipping" className="w-3 h-3 text-emerald-600" />
+                <span>Respuesta inmediata</span>
+              </span>
             </div>
             <div className="p-3.5 bg-emerald-50/60 dark:bg-slate-800/60 rounded-2xl border border-emerald-100 dark:border-slate-700">
               <span className="text-[10px] font-extrabold text-gray-400 uppercase">Envíos a Tiempo</span>
               <p className="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-0.5">98.5%</p>
-              <span className="text-[10px] text-emerald-600 font-bold">📦 Despacho puntual</span>
+              <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                <AppIcon name="package" className="w-3 h-3 text-emerald-600" />
+                <span>Despacho puntual</span>
+              </span>
             </div>
             <div className="p-3.5 bg-purple-50/60 dark:bg-slate-800/60 rounded-2xl border border-purple-100 dark:border-slate-700">
               <span className="text-[10px] font-extrabold text-gray-400 uppercase">Tasa de Reclamos</span>
               <p className="text-lg font-black text-purple-600 dark:text-purple-400 mt-0.5">0.2%</p>
-              <span className="text-[10px] text-purple-600 font-bold">🛡️ Casi cero reclamos</span>
+              <span className="text-[10px] text-purple-600 font-bold flex items-center gap-1">
+                <AppIcon name="shield" className="w-3 h-3 text-purple-600" />
+                <span>Casi cero reclamos</span>
+              </span>
             </div>
             <div className="p-3.5 bg-amber-50/60 dark:bg-slate-800/60 rounded-2xl border border-amber-100 dark:border-slate-700">
               <span className="text-[10px] font-extrabold text-gray-400 uppercase">Precisión en Fotos</span>
               <p className="text-lg font-black text-amber-600 dark:text-amber-400 mt-0.5">99.1%</p>
-              <span className="text-[10px] text-amber-600 font-bold">📷 Fiel a la publicación</span>
+              <span className="text-[10px] text-amber-600 font-bold flex items-center gap-1">
+                <AppIcon name="camera" className="w-3 h-3 text-amber-600" />
+                <span>Fiel a la publicación</span>
+              </span>
             </div>
           </div>
         </div>

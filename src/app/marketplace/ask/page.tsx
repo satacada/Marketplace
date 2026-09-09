@@ -19,6 +19,7 @@ import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { useAskPage } from '@/features/questions/hooks/useAskPage';
+import AppIcon from '@/components/ui/icons/AppIcon';
 
 export default function AskPage() {
   const ask = useAskPage();
@@ -46,8 +47,8 @@ export default function AskPage() {
         </div>
 
         {ask.questions.length === 0 ? (
-          <div className="bg-white dark:bg-slate-900 p-12 rounded-3xl text-center border border-gray-200 dark:border-slate-800 space-y-3">
-            <span className="text-5xl">💬</span>
+          <div className="bg-white dark:bg-slate-900 p-12 rounded-3xl text-center border border-gray-200 dark:border-slate-800 space-y-3 flex flex-col items-center justify-center">
+            <AppIcon name="comment" className="w-12 h-12 text-gray-400 mb-1" />
             <p className="text-gray-600 dark:text-slate-300 font-bold text-sm">
               No has realizado preguntas sobre ningún producto.
             </p>
@@ -60,26 +61,32 @@ export default function AskPage() {
             {ask.questions.map((q) => (
               <div key={q.id} className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-3">
                 <div className="flex items-center justify-between">
-                  <Link href={`/marketplace/product/${q.products?.id}`} className="text-xs font-extrabold text-blue-600 hover:underline">
-                    📦 {q.products?.title || 'Producto'}
+                  <Link href={`/marketplace/product/${q.products?.id}`} className="text-xs font-extrabold text-blue-600 hover:underline flex items-center gap-1">
+                    <AppIcon name="package" className="w-3.5 h-3.5 text-blue-600" />
+                    <span>{q.products?.title || 'Producto'}</span>
                   </Link>
                   <span className="text-[10px] text-gray-400 font-bold">
                     {new Date(q.created_at).toLocaleDateString('es-CL')}
                   </span>
                 </div>
 
-                <p className="text-xs font-bold text-gray-900 dark:text-slate-100">
-                  💬 Tu consulta: "{q.question}"
+                <p className="text-xs font-bold text-gray-900 dark:text-slate-100 flex items-center gap-1.5">
+                  <AppIcon name="comment" className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <span>Tu consulta: "{q.question}"</span>
                 </p>
 
                 {q.answer ? (
-                  <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-100 dark:border-emerald-900 text-xs font-medium text-emerald-900 dark:text-emerald-300">
-                    <span className="font-extrabold text-emerald-600">✓ Respuesta del vendedor: </span>
-                    {q.answer}
+                  <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-100 dark:border-emerald-900 text-xs font-medium text-emerald-900 dark:text-emerald-300 flex items-center gap-1.5">
+                    <span className="font-extrabold text-emerald-600 flex items-center gap-1">
+                      <AppIcon name="check" className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Respuesta del vendedor:</span>
+                    </span>
+                    <span>{q.answer}</span>
                   </div>
                 ) : (
-                  <p className="text-[11px] text-amber-600 font-semibold italic">
-                    ⏳ Esperando respuesta del vendedor...
+                  <p className="text-[11px] text-amber-600 font-semibold italic flex items-center gap-1">
+                    <AppIcon name="pending" className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Esperando respuesta del vendedor...</span>
                   </p>
                 )}
               </div>

@@ -19,6 +19,7 @@ import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { useFavoritesPage } from '@/features/favorites/hooks/useFavoritesPage';
+import AppIcon from '@/components/ui/icons/AppIcon';
 
 export default function FavoritesPage() {
   const fav = useFavoritesPage();
@@ -46,8 +47,8 @@ export default function FavoritesPage() {
         </div>
 
         {fav.favorites.length === 0 ? (
-          <div className="bg-white dark:bg-slate-900 p-12 rounded-3xl text-center border border-gray-200 dark:border-slate-800 space-y-3">
-            <span className="text-5xl">❤️</span>
+          <div className="bg-white dark:bg-slate-900 p-12 rounded-3xl text-center border border-gray-200 dark:border-slate-800 space-y-3 flex flex-col items-center justify-center">
+            <AppIcon name="heart-filled" className="w-12 h-12 text-rose-500 mb-1" />
             <p className="text-gray-600 dark:text-slate-300 font-bold text-sm">
               No tienes productos guardados en favoritos.
             </p>
@@ -83,9 +84,10 @@ export default function FavoritesPage() {
                     <button
                       type="button"
                       onClick={() => fav.handleAddToCart(p)}
-                      className="w-full lg:w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold shadow-xs"
+                      className="w-full lg:w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
                     >
-                      🛒 Agregar al Carrito
+                      <AppIcon name="cart" className="w-3.5 h-3.5 text-white" />
+                      <span>Agregar al Carrito</span>
                     </button>
                     <button
                       type="button"
