@@ -10,17 +10,41 @@
   --text-main: #0f172a;
 }
 
-html.dark {
-  --bg-app: #090d16;
-  --text-main: #f8fafc;
-  color-scheme: dark;
+/* REGISTRO DE TIPOGRAFÍAS CONFIGURABLES SIN DISTORSIÓN DE MAQUETA */
+:root[data-font="amazon-clean"],
+html[data-font="amazon-clean"] {
+  --font-family-app: 'Amazon Ember', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+:root[data-font="modern-sans"],
+html[data-font="modern-sans"] {
+  --font-family-app: var(--font-geist-sans), 'Inter', sans-serif;
+}
+
+:root[data-font="mono"],
+html[data-font="mono"] {
+  --font-family-app: var(--font-geist-mono), monospace;
 }
 
 body {
   font-family: var(--font-family-app);
   background-color: var(--bg-app);
   color: var(--text-main);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, font-family 0.2s ease;
+}
+
+/* PROTECCIÓN DE PROPORCIONES Y PREVENCIÓN DE DISTORSIÓN DE MAQUETA */
+.product-card-image-container {
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  overflow: hidden;
+}
+
+.line-clamp-2-clean {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* 3. REGLAS MODULARES LIMPIAS PARA CONTENEDORES PRINCIPALES EN MODO OSCURO */

@@ -16,12 +16,15 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { IconPackName } from '@/components/ui/icons/iconPacks';
 
 export type ColorTheme = 'modern-blue' | 'amazon' | 'emerald';
+export type FontFamilyOption = 'system' | 'amazon-clean' | 'modern-sans' | 'mono';
 
 interface ThemeContextType {
   colorTheme: ColorTheme;
   setColorTheme: (theme: ColorTheme) => void;
   iconPack: IconPackName;
   setIconPack: (pack: IconPackName) => void;
+  fontFamily: FontFamilyOption;
+  setFontFamily: (font: FontFamilyOption) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -29,13 +32,16 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [colorTheme, setColorThemeState] = useState<ColorTheme>('modern-blue');
   const [iconPack, setIconPackState] = useState<IconPackName>('amazon-clean');
+  const [fontFamily, setFontFamilyState] = useState<FontFamilyOption>('system');
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('app_color_theme') as ColorTheme | null;
     const savedPack = localStorage.getItem('app_icon_pack') as IconPackName | null;
+    const savedFont = localStorage.getItem('app_font_family') as FontFamilyOption | null;
 
     if (savedTheme) setColorThemeState(savedTheme);
     if (savedPack) setIconPackState(savedPack);
+    if (savedFont) setFontFamilyState(savedFont);
   }, []);
 
   const setColorTheme = (theme: ColorTheme) => {
@@ -49,8 +55,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('app_icon_pack', pack);
   };
 
+  const setFontFamily = (font: FontFamilyOption) => {
+    setFontFamilyState(font);
+    localStorage.setItem('app_font_family', font);
+    document.documentElement.setAttribute('data-font', font);
+  };
+
   return (
-    <ThemeContext.Provider value={{ colorTheme, setColorTheme, iconPack, setIconPack }}>
+    <ThemeContext.Provider value={{ colorTheme, setColorTheme, iconPack, setIconPack, fontFamily, setFontFamily }}>
       {children}
     </ThemeContext.Provider>
   );
@@ -59,12 +71,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 export function useTheme() {
   const context = useContext(ThemeContext);
   if (!context) {
-    // Fallback seguro si se invoca fuera del Provider
     return {
       colorTheme: 'modern-blue' as ColorTheme,
       setColorTheme: () => {},
       iconPack: 'amazon-clean' as IconPackName,
       setIconPack: () => {},
+      fontFamily: 'system' as FontFamilyOption,
+      setFontFamily: () => {},
     };
   }
   return context;
