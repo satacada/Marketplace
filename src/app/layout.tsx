@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
 import LayoutWrapper from "@/components/layout/LayoutWrapper";
+import { ThemeProvider as SharedThemeProvider } from "@/shared/theme/ThemeContext";
 import { ThemeProvider } from "@/features/theme/context/ThemeContext";
 
 const geistSans = Geist({
@@ -33,11 +34,13 @@ export default function RootLayout({
     >
       <body className="min-h-full bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100" suppressHydrationWarning>
         <Suspense fallback={<div className="min-h-screen bg-gray-50 dark:bg-slate-950" />}>
-          <ThemeProvider>
-            <LayoutWrapper>
-              {children}
-            </LayoutWrapper>
-          </ThemeProvider>
+          <SharedThemeProvider>
+            <ThemeProvider>
+              <LayoutWrapper>
+                {children}
+              </LayoutWrapper>
+            </ThemeProvider>
+          </SharedThemeProvider>
         </Suspense>
       </body>
     </html>

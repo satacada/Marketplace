@@ -17,7 +17,7 @@
 import { Suspense } from 'react';
 import { usePathname } from 'next/navigation';
 import Sidebar from './Sidebar';
-import { ThemeProvider } from '@/shared/theme/ThemeContext';
+import ThemeSwitcherWidget from '../ui/ThemeSwitcherWidget';
 
 function SidebarWrapper() {
   return (
@@ -34,7 +34,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   const isDashboardRoute = pathname.startsWith('/dashboard');
 
   return (
-    <ThemeProvider>
+    <>
       {!isDashboardRoute ? (
         <div className="min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 transition-colors duration-300">
           {children}
@@ -47,6 +47,9 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
           </main>
         </div>
       )}
-    </ThemeProvider>
+
+      {/* Selector Flotante de Personalización Visual (Iconos, Fuente, Color) */}
+      <ThemeSwitcherWidget />
+    </>
   );
 }
