@@ -30,6 +30,7 @@ import { useProductDetail } from '@/features/products/hooks/useProductDetail';
 import ProductGalleryColumn from '@/components/marketplace/detail/ProductGalleryColumn';
 import ProductSellerSidebar from '@/components/marketplace/detail/ProductSellerSidebar';
 import ProductQuestionsSection from '@/components/marketplace/detail/ProductQuestionsSection';
+import AmazonValueBadges from '@/components/marketplace/detail/AmazonValueBadges';
 import ProductAliExpressTabs from '@/components/marketplace/detail/ProductAliExpressTabs';
 import FrequentlyBoughtTogether from '@/components/marketplace/detail/FrequentlyBoughtTogether';
 import AISellerSuggestionsBox from '@/components/marketplace/detail/AISellerSuggestionsBox';
@@ -121,6 +122,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             />
           </div>
         </div>
+
+        {/* Fila de 4 Garantías y Beneficios e-Commerce Inspirada en Amazon */}
+        <AmazonValueBadges />
 
         {/* Sección Central de 3 Pestañas Organizativas (Imagen 1):
             1. ❓ Preguntas al Vendedor
