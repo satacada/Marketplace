@@ -54,3 +54,11 @@ Este documento establece las pautas de diseño visual, sistema de componentes y 
 - Todos los botones e imágenes cuentan con atributos `title`, `alt` y `aria-label`.
 - Animaciones suaves de transición (`transition-all duration-200 ease-in-out`).
 - Diálogos y modales con comportamiento accesible (`onClose` al hacer clic fuera o presionar `Escape`).
+
+---
+
+## 🎨 5. Sistema Obligatorio de Iconos Dinámicos (`<AppIcon>`)
+
+- **Prohibición de Emojis/SVGs Hardcodeados**: Queda estrictamente prohibido colocar emojis directos (ej: `🛒`, `📦`, `🏪`, `📍`, `📈`, `💬`, `⭐`, `💰`, `🛡️`) o SVGs inline en cualquier componente, botón, badge, encabezado, sidebar o modal.
+- **Uso de `<AppIcon>`**: Todos los desarrollos e itineraciones futuras de IA (Antigravity, Cursor, Windsurf, Claude Code, GitHub Copilot, ChatGPT) DEBEN importar y utilizar `<AppIcon name="..." />` desde `@/components/ui/icons/AppIcon`.
+- **Soporte de Temas**: Este componente reacciona automáticamente al estado `iconPack` (`amazon-clean`, `aliexpress`, `heroicons`, `emoji`) configurado en el `ThemeCustomizer`, garantizando la transformación completa de los iconos en toda la plataforma.
