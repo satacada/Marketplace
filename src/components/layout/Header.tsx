@@ -107,27 +107,51 @@ export default function Header({
 
             {/* Estado de Cuenta del Usuario en el Header */}
             {isAuthenticated ? (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="p-2 text-gray-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition cursor-pointer flex items-center justify-center"
-                title="Cerrar Sesión"
-                aria-label="Cerrar Sesión"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+              <div className="flex items-center gap-1">
+                {/* Icono de Usuario (Hombrecito) -> Mi Panel */}
+                <Link
+                  href="/dashboard"
+                  className="p-2 text-gray-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition cursor-pointer flex items-center justify-center"
+                  title="Ir a Mi Panel de Usuario"
+                  aria-label="Ir a Mi Panel de Usuario"
                 >
-                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-                  <polyline points="10 17 15 12 10 7" />
-                  <line x1="15" y1="12" x2="3" y2="12" />
-                </svg>
-              </button>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </Link>
+
+                {/* Botón de Cerrar Sesión */}
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="p-2 text-gray-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition cursor-pointer flex items-center justify-center"
+                  title="Cerrar Sesión"
+                  aria-label="Cerrar Sesión"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                    <polyline points="10 17 15 12 10 7" />
+                    <line x1="15" y1="12" x2="3" y2="12" />
+                  </svg>
+                </button>
+              </div>
             ) : (
               <Link
                 href="/auth"
