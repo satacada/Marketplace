@@ -15,6 +15,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { CartSummary } from '@/features/cart/types/cart.types';
+import AppIcon from '@/components/ui/icons/AppIcon';
 
 type Props = {
   cart: CartSummary;
@@ -42,7 +43,7 @@ export default function MiniCartSidebar({
       {/* Encabezado Cesta (Estilo AliExpress Imagen 3 y 4) */}
       <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-3">
         <div className="flex items-center gap-2">
-          <span className="text-xl font-bold text-blue-600 dark:text-blue-400">🛒</span>
+          <AppIcon name="cart" className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           <h3 className="font-extrabold text-sm text-gray-900 dark:text-slate-100">
             Cesta ({cart.itemCount})
           </h3>
@@ -84,8 +85,8 @@ export default function MiniCartSidebar({
         </p>
 
         {cart.items.length === 0 ? (
-          <div className="py-8 text-center space-y-1">
-            <span className="text-3xl">🛍️</span>
+          <div className="py-8 text-center space-y-1 flex flex-col items-center justify-center">
+            <AppIcon name="cart" className="w-8 h-8 text-gray-400 mb-1" />
             <p className="text-xs text-gray-400 font-medium">Tu cesta está vacía.</p>
             <p className="text-[10px] text-gray-400">¡Agrega productos para verlos aquí!</p>
           </div>
@@ -142,7 +143,7 @@ export default function MiniCartSidebar({
                   className="text-gray-400 hover:text-red-500 text-sm p-1 transition cursor-pointer"
                   title="Eliminar de la cesta"
                 >
-                  🗑️
+                  <AppIcon name="trash" className="w-4 h-4 text-gray-400 hover:text-red-500" />
                 </button>
               </div>
             );
@@ -153,7 +154,7 @@ export default function MiniCartSidebar({
       {/* Protección del comprador estilo AliExpress */}
       <div className="pt-2 border-t border-gray-100 dark:border-slate-800 text-[10px] text-gray-500 dark:text-slate-400 space-y-1">
         <p className="font-extrabold text-gray-700 dark:text-slate-300 flex items-center gap-1">
-          <span>🛡️</span>
+          <AppIcon name="shield" className="w-3.5 h-3.5 text-emerald-600" />
           <span>Protección del comprador</span>
         </p>
         <p>Recibe reembolso completo de tu dinero si el artículo no llega o es diferente a la descripción.</p>

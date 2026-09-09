@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useCart } from '@/features/cart/hooks/useCart';
+import AppIcon from '@/components/ui/icons/AppIcon';
 
 export interface HeaderProps {
   title?: string;
@@ -59,7 +60,7 @@ export default function Header({
           {/* Logo / Nombre del sitio + Nombre de usuario/tienda */}
           <div className="flex items-center gap-3">
             <Link href="/marketplace" className="text-2xl font-extrabold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition flex items-center gap-2">
-              <span className="text-2xl">🛒</span>
+              <AppIcon name="cart" size="lg" />
               <span>Marketplace</span>
             </Link>
             {title && <h1 className="text-lg font-semibold text-gray-700 dark:text-slate-200 hidden sm:inline-block border-l border-gray-300 dark:border-slate-700 pl-3">{title}</h1>}
@@ -90,7 +91,7 @@ export default function Header({
               <span className="font-semibold text-gray-800 dark:text-slate-100 text-sm group-hover:text-blue-700 dark:group-hover:text-blue-400 transition">
                 {formattedTotal}
               </span>
-              <span className="text-base text-gray-500 dark:text-slate-400 group-hover:text-blue-600 transition">🛒</span>
+              <AppIcon name="cart" size="sm" className="text-gray-500 dark:text-slate-400 group-hover:text-blue-600" />
             </Link>
 
             {/* Cantidad escueta de pedidos (si está autenticado) */}
@@ -100,7 +101,7 @@ export default function Header({
                 className="hidden md:flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-slate-300 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 px-3 py-1.5 rounded-full transition"
                 title="Ver mis pedidos"
               >
-                <span>📦</span>
+                <AppIcon name="package" size="xs" />
                 <span>{ordersCount} {ordersCount === 1 ? 'pedido' : 'pedidos'}</span>
               </Link>
             )}
@@ -115,18 +116,7 @@ export default function Header({
                   title="Ir a Mi Panel de Usuario"
                   aria-label="Ir a Mi Panel de Usuario"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
+                  <AppIcon name="user" size="md" />
                 </Link>
 
                 {/* Botón de Cerrar Sesión */}
@@ -137,19 +127,7 @@ export default function Header({
                   title="Cerrar Sesión"
                   aria-label="Cerrar Sesión"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-                    <polyline points="10 17 15 12 10 7" />
-                    <line x1="15" y1="12" x2="3" y2="12" />
-                  </svg>
+                  <AppIcon name="logout" size="md" />
                 </button>
               </div>
             ) : (
@@ -157,7 +135,7 @@ export default function Header({
                 href="/auth"
                 className="flex items-center gap-1.5 border border-gray-300 dark:border-slate-700 hover:border-blue-500 text-gray-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 px-3.5 py-1.5 rounded-lg hover:bg-blue-50/40 dark:hover:bg-slate-800 transition text-sm font-medium"
               >
-                <span>👤</span>
+                <AppIcon name="user" size="sm" />
                 <span>Cuenta</span>
               </Link>
             )}

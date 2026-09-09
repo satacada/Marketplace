@@ -35,7 +35,11 @@ export type IconName =
   | 'add'
   | 'questions'
   | 'orders'
-  | 'home';
+  | 'home'
+  | 'report'
+  | 'trash'
+  | 'close'
+  | 'arrow-right';
 
 export type IconPackName = 'amazon-clean' | 'aliexpress' | 'heroicons' | 'emoji';
 
@@ -65,4 +69,8 @@ export const EMOJI_MAP: Record<IconName, string> = {
   questions: '✉️',
   orders: '📋',
   home: '🏠',
+  report: '🚩',
+  trash: '🗑️',
+  close: '✕',
+  'arrow-right': '→',
 };

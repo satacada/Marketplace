@@ -12,6 +12,7 @@
 
 import React from 'react';
 import { SortOption } from '@/features/products/types/product-filters.types';
+import AppIcon from '@/components/ui/icons/AppIcon';
 
 type Category = {
   id: string;
@@ -67,7 +68,7 @@ export default function CatalogHeaderBanner({
             placeholder="Buscar en Marketplace (título, marca, modelo)..."
             className="w-full pl-10 pr-12 py-3 text-xs sm:text-sm border border-gray-300 dark:border-slate-700 rounded-2xl bg-gray-50 dark:bg-slate-800/80 text-gray-900 dark:text-slate-100 font-medium focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-900 transition shadow-inner"
           />
-          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
+          <AppIcon name="search" size="sm" className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
 
           {/* Botón de Lente / Búsqueda por Foto Embebido Estilo Google Lens */}
           <button
@@ -76,7 +77,7 @@ export default function CatalogHeaderBanner({
             className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950 dark:hover:bg-blue-900 text-blue-600 dark:text-blue-400 flex items-center justify-center transition border border-blue-200 dark:border-blue-800 cursor-pointer"
             title="Buscar con foto (Estilo Google Lens)"
           >
-            <span className="text-sm">📷</span>
+            <AppIcon name="camera" size="sm" />
           </button>
         </div>
       </div>

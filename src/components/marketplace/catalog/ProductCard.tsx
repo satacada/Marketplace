@@ -12,6 +12,7 @@
 
 import React, { useState, useCallback, memo } from 'react';
 import Image from 'next/image';
+import AppIcon from '@/components/ui/icons/AppIcon';
 
 export type CatalogProduct = {
   id: string;
@@ -124,7 +125,7 @@ const ProductCard = memo(({
 
                   {/* Indicador visual de fotos (📷 1/3) */}
                   <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-xs flex items-center gap-1 z-10 pointer-events-none">
-                    <span>📷</span>
+                    <AppIcon name="camera" className="w-3 h-3 text-white" />
                     <span>{currentImageIndex + 1}/{images.length}</span>
                   </div>
                 </>
@@ -132,7 +133,7 @@ const ProductCard = memo(({
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800">
-              <span className="text-3xl mb-1">📦</span>
+              <AppIcon name="package" className="w-8 h-8 mb-1" />
               <span className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400">Sin foto</span>
             </div>
           )}
@@ -152,22 +153,20 @@ const ProductCard = memo(({
               }`}
               title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill={isFavorite ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.684a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
+              <AppIcon name={isFavorite ? "heart-filled" : "heart"} className="w-4 h-4" />
             </button>
           </div>
 
           {/* Badges compactos */}
           <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
             {product.has_free_shipping && (
-              <span className="bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded font-extrabold shadow-xs">
-                🚚
+              <span className="bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded font-extrabold shadow-xs flex items-center justify-center">
+                <AppIcon name="shipping" className="w-3 h-3 text-white" />
               </span>
             )}
             {product.average_rating && product.average_rating >= 4 && (
-              <span className="bg-amber-500 text-white text-[10px] px-1.5 py-0.5 rounded font-extrabold shadow-xs">
-                ⭐ {product.average_rating.toFixed(1)}
+              <span className="bg-amber-500 text-white text-[10px] px-1.5 py-0.5 rounded font-extrabold shadow-xs flex items-center gap-0.5">
+                <AppIcon name="star" className="w-3 h-3 text-amber-100" /> {product.average_rating.toFixed(1)}
               </span>
             )}
           </div>
@@ -217,9 +216,7 @@ const ProductCard = memo(({
                   className="w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 border border-gray-200/80 dark:border-slate-700 flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-2xs"
                   title="Compartir producto (WhatsApp, Telegram, Messenger, Facebook...)"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                  </svg>
+                  <AppIcon name="share" className="w-3.5 h-3.5" />
                 </button>
 
                 {/* Botón de Añadir al Carrito */}
@@ -243,9 +240,7 @@ const ProductCard = memo(({
                       }`}
                       title={isInCart ? `${cartQuantity} unidades en el carrito` : 'Agregar al carrito'}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
+                      <AppIcon name="cart" className="w-3.5 h-3.5" />
                       <span>{isInCart ? `${cartQuantity}` : 'Agregar'}</span>
                     </button>
                   </div>
@@ -255,11 +250,13 @@ const ProductCard = memo(({
 
             {/* Vendedor y Ubicación */}
             <div className="pt-2 mt-1 border-t border-gray-100 dark:border-slate-800 flex justify-between items-center text-[10px] text-gray-500 dark:text-slate-400">
-              <span className="truncate font-semibold max-w-[110px]" title={product.profiles?.store_name || 'Vendedor'}>
-                🏪 {product.profiles?.store_name || 'Vendedor'}
+              <span className="truncate font-semibold max-w-[110px] flex items-center gap-1" title={product.profiles?.store_name || 'Vendedor'}>
+                <AppIcon name="store" className="w-3 h-3 text-gray-500 dark:text-slate-400 flex-shrink-0" />
+                <span>{product.profiles?.store_name || 'Vendedor'}</span>
               </span>
-              <span className="truncate font-bold text-gray-400 dark:text-slate-500 max-w-[100px]" title={product.location_name || 'Barracas'}>
-                📍 {product.location_name || 'Barracas'}
+              <span className="truncate font-bold text-gray-400 dark:text-slate-500 max-w-[100px] flex items-center gap-1" title={product.location_name || 'Barracas'}>
+                <AppIcon name="location" className="w-3 h-3 text-gray-400 dark:text-slate-500 flex-shrink-0" />
+                <span>{product.location_name || 'Barracas'}</span>
               </span>
             </div>
           </div>
@@ -275,10 +272,10 @@ const ProductCard = memo(({
           <div className="relative max-w-4xl max-h-[90vh] w-full h-full flex items-center justify-center">
             <button
               onClick={closeLightbox}
-              className="absolute top-4 right-4 text-white bg-slate-800/80 hover:bg-slate-700 w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold z-50 transition"
+              className="absolute top-4 right-4 text-white bg-slate-800/80 hover:bg-slate-700 w-10 h-10 rounded-full flex items-center justify-center font-bold z-50 transition cursor-pointer"
               title="Cerrar vista ampliada"
             >
-              ✕
+              <AppIcon name="close" className="w-5 h-5 text-white" />
             </button>
             
             <Image

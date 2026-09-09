@@ -15,6 +15,7 @@ import React from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { CartSummary } from '@/features/cart/types/cart.types';
+import AppIcon from '@/components/ui/icons/AppIcon';
 
 type Props = {
   isOpen: boolean;
@@ -60,7 +61,7 @@ export default function MiniCartDrawer({
           {/* Header del Drawer */}
           <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-4">
             <div className="flex items-center gap-2">
-              <span className="text-2xl">🛒</span>
+              <AppIcon name="cart" className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               <div>
                 <h3 className="font-extrabold text-base text-gray-900 dark:text-slate-100">
                   Cesta ({cart.itemCount})
@@ -76,17 +77,17 @@ export default function MiniCartDrawer({
             <button
               type="button"
               onClick={onClose}
-              className="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-slate-200 text-lg font-black transition cursor-pointer"
+              className="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-slate-200 font-black transition cursor-pointer"
             >
-              ✕
+              <AppIcon name="close" className="w-5 h-5" />
             </button>
           </div>
 
           {/* Lista de Artículos en la Cesta */}
           <div className="flex-1 overflow-y-auto space-y-3 pr-1">
             {cart.items.length === 0 ? (
-              <div className="py-16 text-center space-y-3">
-                <span className="text-5xl block">🛍️</span>
+              <div className="py-16 text-center space-y-3 flex flex-col items-center justify-center">
+                <AppIcon name="cart" className="w-12 h-12 text-gray-400" />
                 <p className="text-sm font-extrabold text-gray-600 dark:text-slate-300">Tu cesta está vacía</p>
                 <p className="text-xs text-gray-400">¡Explora los productos y agrega tus favoritos!</p>
               </div>
@@ -140,7 +141,7 @@ export default function MiniCartDrawer({
                       className="text-gray-400 hover:text-red-500 text-base p-1 transition cursor-pointer"
                       title="Eliminar de la cesta"
                     >
-                      🗑️
+                      <AppIcon name="trash" className="w-4 h-4 text-gray-400 hover:text-red-500" />
                     </button>
                   </div>
                 );

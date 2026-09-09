@@ -21,6 +21,7 @@ import Link from 'next/link';
 import OpenStreetMapEmbed from '@/components/ui/OpenStreetMapEmbed';
 import { formatPublicationDate } from '@/lib/formatPublicationDate';
 import { DetailProduct } from '@/features/products/hooks/useProductDetail';
+import AppIcon from '@/components/ui/icons/AppIcon';
 
 type Props = {
   product: DetailProduct;
@@ -77,7 +78,7 @@ export default function ProductSellerSidebar({
           }`}
           title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
         >
-          ❤️
+          <AppIcon name={isFavorite ? "heart-filled" : "heart"} className="w-4 h-4" />
         </button>
       </div>
 
@@ -90,8 +91,9 @@ export default function ProductSellerSidebar({
           ${product.price?.toLocaleString('es-AR')} · <span className="text-emerald-600 font-extrabold text-xs">{product.stock > 0 ? 'Disponible' : 'Agotado'}</span>
         </p>
         
-        <p className="text-xs font-extrabold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-1 rounded-xl inline-block border border-amber-200 dark:border-amber-900">
-          📍 {formattedDate} en {locationText}
+        <p className="text-xs font-extrabold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-1 rounded-xl inline-flex items-center gap-1 border border-amber-200 dark:border-amber-900">
+          <AppIcon name="location" className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
+          <span>{formattedDate} en {locationText}</span>
         </p>
       </div>
 
@@ -117,13 +119,15 @@ export default function ProductSellerSidebar({
         >
           <OpenStreetMapEmbed height="h-28" interactive={false} />
           <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/10 transition flex items-center justify-center">
-            <span className="text-[10px] font-black text-white bg-slate-900/80 px-2.5 py-1 rounded-full opacity-0 group-hover:opacity-100 transition shadow-md">
-              🔍 Ver mapa completo
+            <span className="text-[10px] font-black text-white bg-slate-900/80 px-2.5 py-1 rounded-full opacity-0 group-hover:opacity-100 transition shadow-md flex items-center gap-1">
+              <AppIcon name="search" className="w-3 h-3 text-white" />
+              <span>Ver mapa completo</span>
             </span>
           </div>
         </div>
-        <p className="text-[11px] font-bold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 p-2 rounded-xl border border-amber-200/60 dark:border-amber-900/40">
-          📍 <strong>{locationText}</strong> · <span className="font-semibold">La ubicación es aproximada</span>
+        <p className="text-[11px] font-bold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 p-2 rounded-xl border border-amber-200/60 dark:border-amber-900/40 flex items-center gap-1">
+          <AppIcon name="location" className="w-3.5 h-3.5 text-amber-800 dark:text-amber-300" />
+          <span><strong>{locationText}</strong> · <span className="font-semibold">La ubicación es aproximada</span></span>
         </p>
       </div>
 
@@ -143,7 +147,7 @@ export default function ProductSellerSidebar({
                 : 'bg-blue-600 hover:bg-blue-700 text-white'
             }`}
           >
-            <span>🛒</span>
+            <AppIcon name="cart" className="w-4 h-4 text-white" />
             <span>{isCartAdded ? '¡Agregado al Carrito!' : 'Agregar al Carrito'}</span>
           </button>
         )}
@@ -154,7 +158,7 @@ export default function ProductSellerSidebar({
             onClick={onShare}
             className="w-1/2 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-bold text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            <span>🔗</span>
+            <AppIcon name="share" className="w-3.5 h-3.5" />
             <span>Compartir</span>
           </button>
           <button
@@ -162,7 +166,7 @@ export default function ProductSellerSidebar({
             onClick={() => onReport('product', product.title)}
             className="w-1/2 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-bold text-gray-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            <span>🚩</span>
+            <AppIcon name="report" className="w-3.5 h-3.5" />
             <span>Reportar</span>
           </button>
         </div>
@@ -177,7 +181,7 @@ export default function ProductSellerSidebar({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 flex items-center justify-center font-black text-sm">
-              🏪
+              <AppIcon name="store" className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
               <Link 
@@ -187,7 +191,13 @@ export default function ProductSellerSidebar({
                 {product.profiles?.store_name || 'Vendedor Verificado'}
               </Link>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="text-amber-400 text-xs">⭐⭐⭐⭐⭐</span>
+                <span className="flex items-center gap-0.5 text-amber-400 text-xs">
+                  <AppIcon name="star" className="w-3 h-3 text-amber-400" />
+                  <AppIcon name="star" className="w-3 h-3 text-amber-400" />
+                  <AppIcon name="star" className="w-3 h-3 text-amber-400" />
+                  <AppIcon name="star" className="w-3 h-3 text-amber-400" />
+                  <AppIcon name="star" className="w-3 h-3 text-amber-400" />
+                </span>
                 <span className="text-[11px] font-bold text-gray-500">5.0 (7)</span>
               </div>
             </div>
