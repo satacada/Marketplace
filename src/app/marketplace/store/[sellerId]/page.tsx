@@ -63,28 +63,28 @@ export default function StoreShowcasePage({ params }: { params: Promise<{ seller
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-gray-500 font-medium mt-1">
-                  📍 {store.sellerProfile?.city || 'Barracas, Buenos Aires'} | {store.totalProducts} productos activos
-                </p>
+                <div className="flex items-center gap-3 mt-1 flex-wrap">
+                  <p className="text-xs text-gray-500 font-medium">
+                    📍 {store.sellerProfile?.city || 'Barracas, Buenos Aires'} | {store.totalProducts} productos activos
+                  </p>
+                  {store.ratingSummary.totalReviews > 0 && (
+                    <a
+                      href="#reputacion-tienda"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-200/80 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900 transition"
+                      title="Ver valoraciones detalladas"
+                    >
+                      <span>⭐ {store.ratingSummary.averageRating}</span>
+                      <span className="text-gray-600 dark:text-slate-300">({store.ratingSummary.totalReviews})</span>
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-extrabold">• {store.ratingSummary.positivePercentage}% positivo</span>
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Resumen de Opiniones del Vendedor */}
-        <SellerRatingSummaryCard
-          sellerStoreName={store.sellerProfile?.store_name || 'Esta tienda'}
-          summary={store.ratingSummary}
-          reviews={store.reviews}
-          loading={store.loadingReviews}
-          onAddReview={async (data) => {
-            if (store.userId) {
-              await store.addReview(data as any, store.userId);
-            }
-          }}
-        />
-
-        {/* Buscador e Identificación de Catálogo de esta Tienda */}
+        {/* Buscador e Identificación de Catálogo de esta Tienda (PRODUCTOS PRIMERO) */}
         <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-200/90 dark:border-slate-800 shadow-2xs space-y-4">
           <h3 className="text-sm font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200">
             Productos de esta Tienda ({store.totalProducts})
@@ -139,6 +139,21 @@ export default function StoreShowcasePage({ params }: { params: Promise<{ seller
             ))}
           </div>
         )}
+
+        {/* Resumen de Opiniones y Reputación del Vendedor (DEBAJO DE LOS PRODUCTOS) */}
+        <div id="reputacion-tienda" className="pt-4">
+          <SellerRatingSummaryCard
+            sellerStoreName={store.sellerProfile?.store_name || 'Esta tienda'}
+            summary={store.ratingSummary}
+            reviews={store.reviews}
+            loading={store.loadingReviews}
+            onAddReview={async (data) => {
+              if (store.userId) {
+                await store.addReview(data as any, store.userId);
+              }
+            }}
+          />
+        </div>
       </main>
 
       <Footer />
