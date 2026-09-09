@@ -15,6 +15,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useRegisterPage } from '@/features/auth/hooks/useRegisterPage';
+import AppIcon from '@/components/ui/icons/AppIcon';
 
 export default function RegisterPage() {
   const reg = useRegisterPage();
@@ -32,8 +33,8 @@ export default function RegisterPage() {
         </Link>
       </div>
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-2 pt-8 sm:pt-0">
-        <span className="text-4xl">🚀</span>
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-2 pt-8 sm:pt-0 flex flex-col items-center justify-center">
+        <AppIcon name="store" size="xl" className="text-blue-600 mb-1" />
         <h2 className="text-2xl font-black text-gray-900 dark:text-slate-100">
           Crear Cuenta Gratis
         </h2>

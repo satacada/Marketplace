@@ -67,7 +67,7 @@ function SidebarContent() {
       <div className="p-5 border-b border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/60">
         <Link href="/marketplace" className="flex items-center gap-2 group mb-3">
           <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center text-lg shadow-xs group-hover:bg-blue-700 transition">
-            🛍️
+            <AppIcon name="store" size="md" className="text-white" />
           </div>
           <div>
             <h2 className="text-base font-black tracking-tight text-gray-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
@@ -87,12 +87,14 @@ function SidebarContent() {
                 ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900' 
                 : 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-900'
             }`}>
-              <span>{role === 'seller' ? '✓ Vendedor' : '👤 Comprador'}</span>
+              <AppIcon name={role === 'seller' ? 'check' : 'user'} size="xs" />
+              <span>{role === 'seller' ? 'Vendedor' : 'Comprador'}</span>
             </span>
 
             {isAdmin && (
-              <span className="inline-flex items-center text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
-                🛡️ Admin
+              <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
+                <AppIcon name="shield" size="xs" />
+                <span>Admin</span>
               </span>
             )}
           </div>
