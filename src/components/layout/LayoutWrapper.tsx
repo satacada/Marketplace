@@ -18,6 +18,7 @@ import { Suspense } from 'react';
 import { usePathname } from 'next/navigation';
 import Sidebar from './Sidebar';
 import ThemeSwitcherWidget from '../ui/ThemeSwitcherWidget';
+import MobileBottomBar from './MobileBottomBar';
 
 function SidebarWrapper() {
   return (
@@ -50,6 +51,9 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
 
       {/* Selector Flotante de Personalización Visual (Iconos, Fuente, Color) */}
       <ThemeSwitcherWidget />
+
+      {/* Barra Táctil Inferior para Celulares (Thumb Zone Ergonomics - Fase 2) */}
+      <MobileBottomBar />
     </>
   );
 }

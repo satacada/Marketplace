@@ -21,6 +21,7 @@ import { Modal } from '@/components/ui/Modal';
 import { useCartPage } from '@/features/cart/hooks/useCartPage';
 import CartItemRow from '@/components/cart/CartItemRow';
 import AppIcon from '@/components/ui/icons/AppIcon';
+import EscrowProtectionBadge from '@/components/trust/EscrowProtectionBadge';
 
 export default function CartPage() {
   const c = useCartPage();
@@ -94,6 +95,10 @@ export default function CartPage() {
                 >
                   Continuar Compra →
                 </button>
+
+                <div className="pt-2 border-t border-gray-100 dark:border-slate-800">
+                  <EscrowProtectionBadge variant="full" />
+                </div>
               </div>
             </div>
           </div>

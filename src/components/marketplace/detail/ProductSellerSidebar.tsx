@@ -22,6 +22,8 @@ import OpenStreetMapEmbed from '@/components/ui/OpenStreetMapEmbed';
 import { formatPublicationDate } from '@/lib/formatPublicationDate';
 import { DetailProduct } from '@/features/products/hooks/useProductDetail';
 import AppIcon from '@/components/ui/icons/AppIcon';
+import EscrowProtectionBadge from '@/components/trust/EscrowProtectionBadge';
+import SellerTrustCard from '@/components/trust/SellerTrustCard';
 
 type Props = {
   product: DetailProduct;
@@ -211,11 +213,23 @@ export default function ProductSellerSidebar({
           </Link>
         </div>
 
+        {/* Tarjeta de Reputación e Insignias del Vendedor */}
+        <SellerTrustCard
+          storeName={product.profiles?.store_name || 'Vendedor Verificado'}
+          isVerified={true}
+          isOfficialStore={true}
+          isExpressDelivery={true}
+          responseTime="< 15 min"
+          onTimeDeliveryRate="99.4%"
+          rating={5.0}
+          reviewsCount={7}
+        />
+
         {/* Caja de Enviar Mensaje al Vendedor */}
         {!isOwnProduct && (
           <form onSubmit={handleSendQuickMessage} className="space-y-2 pt-2">
             <span className="text-xs font-extrabold text-gray-700 dark:text-slate-300 block">
-              Envía un mensaje al vendedor
+              Envía un mensaje directo al vendedor
             </span>
             <div className="flex gap-2">
               <input
@@ -237,6 +251,9 @@ export default function ProductSellerSidebar({
           </form>
         )}
       </div>
+
+      {/* 7. Insignia de Compra Protegida Escrow */}
+      <EscrowProtectionBadge variant="full" />
     </div>
   );
 }

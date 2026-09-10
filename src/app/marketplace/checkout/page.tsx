@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
+import EscrowProtectionBadge from '@/components/trust/EscrowProtectionBadge';
 
 export default function CheckoutPage() {
   const [cartItems, setCartItems] = useState<any[]>([]);
@@ -121,15 +122,19 @@ export default function CheckoutPage() {
                 <button 
                   onClick={handleConfirmPurchase}
                   disabled={processing}
-                  className={`w-full py-3 rounded-lg font-bold text-white transition shadow-xs ${
+                  className={`w-full py-3.5 rounded-2xl font-black text-xs text-white transition shadow-xs cursor-pointer ${
                     processing ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
                   }`}
                 >
                   {processing ? 'Procesando...' : 'Confirmar y Pagar'}
                 </button>
-                <p className="text-xs text-gray-400 mt-4 text-center">
-                  * Esto es un MVP. No se procesa pago real.
+                <p className="text-[11px] text-gray-400 mt-2 text-center font-medium">
+                  * Pago seguro simulado con custodia de fondos.
                 </p>
+
+                <div className="pt-3 border-t border-gray-100 dark:border-slate-800">
+                  <EscrowProtectionBadge variant="compact" />
+                </div>
               </div>
             </div>
           </div>

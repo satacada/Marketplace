@@ -27,8 +27,8 @@ export default function AmazonValueBadges() {
     },
     {
       icon: 'shield' as const,
-      title: 'Garantía del Vendedor',
-      subtitle: 'Producto 100% verificado y protegido.',
+      title: 'Compra Protegida Escrow',
+      subtitle: 'Fondos resguardados hasta la conformidad del cliente.',
     },
     {
       icon: 'return' as const,
@@ -37,8 +37,8 @@ export default function AmazonValueBadges() {
     },
     {
       icon: 'payment' as const,
-      title: 'Pago Cifrado Seguros',
-      subtitle: 'Transacción SSL protegida por Supabase.',
+      title: 'Pago Cifrado Seguro',
+      subtitle: 'Transacción SSL protegida con custodia de dinero.',
     },
   ];
 

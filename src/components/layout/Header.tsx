@@ -18,6 +18,8 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useCart } from '@/features/cart/hooks/useCart';
 import AppIcon from '@/components/ui/icons/AppIcon';
+import VisualSearchModal from '@/components/search/VisualSearchModal';
+import { useState } from 'react';
 
 export interface HeaderProps {
   title?: string;
@@ -36,6 +38,7 @@ export default function Header({
   const router = useRouter();
   const { user, profile, isAuthenticated, logout } = useAuth();
   const { cart } = useCart(user?.id || null);
+  const [showVisualSearch, setShowVisualSearch] = useState(false);
 
   const displayCount = cartItemCount !== undefined ? cartItemCount : cart.itemCount;
   const displayTotal = cartTotal !== undefined ? cartTotal : cart.total;
@@ -75,8 +78,18 @@ export default function Header({
             )}
           </div>
 
-          {/* Acciones del Header: Cart Pill Widget + Indicadores + Botón de Salir */}
+          {/* Acciones del Header: Búsqueda Visual + Cart Pill Widget + Indicadores + Botón de Salir */}
           <div className="flex items-center gap-3">
+            {/* Botón de Búsqueda Visual por Imagen con IA */}
+            <button
+              type="button"
+              onClick={() => setShowVisualSearch(true)}
+              className="p-2 border border-gray-300 dark:border-slate-700 hover:border-blue-500 bg-white dark:bg-slate-800 hover:bg-blue-50/40 dark:hover:bg-slate-700/60 rounded-full transition shadow-xs text-gray-600 dark:text-slate-300 hover:text-blue-600 cursor-pointer flex items-center justify-center"
+              title="Búsqueda Visual por Imagen con IA"
+            >
+              <AppIcon name="camera" size="sm" />
+            </button>
+
             {/* Widget de Carrito */}
             <Link
               href="/marketplace/cart"
@@ -142,6 +155,13 @@ export default function Header({
           </div>
         </div>
       </div>
+      {/* Modal de Búsqueda Visual por Imagen con IA */}
+      {showVisualSearch && (
+        <VisualSearchModal
+          isOpen={showVisualSearch}
+          onClose={() => setShowVisualSearch(false)}
+        />
+      )}
     </header>
   );
 }
