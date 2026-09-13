@@ -26,6 +26,8 @@
 
 import { createClient } from '@supabase/supabase-js';
 
+import { getSiteUrl } from '@/shared/utils/siteUrl';
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
@@ -33,10 +35,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Faltan variables de entorno de Supabase');
 }
 
-// URL de redirección predeterminada (segura para SSR)
-const defaultRedirectUrl = process.env.NEXT_PUBLIC_SITE_URL 
-  ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
-  : 'http://localhost:3000/auth/callback';
+// URL de redirección predeterminada dinámica (segura para Vercel y SSR)
+const defaultRedirectUrl = `${getSiteUrl()}/auth/callback`;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {

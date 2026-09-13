@@ -29,6 +29,7 @@
 
 import { supabase } from '@/infrastructure/database/supabase.client';
 import { userRepository } from '@/infrastructure/repositories/user.repository';
+import { getSiteUrl } from '@/shared/utils/siteUrl';
 import { 
   LoginInput, 
   RegisterInput, 
@@ -104,8 +105,8 @@ export const authService = {
    * Inicia sesión o registra al usuario con Google OAuth 2.0
    */
   async loginWithGoogle(redirectTo?: string): Promise<void> {
-    const origin = typeof window !== 'undefined' ? window.location.origin : '';
-    const redirectUrl = `${origin}/auth/callback?next=${encodeURIComponent(redirectTo || '/marketplace')}`;
+    const siteUrl = getSiteUrl();
+    const redirectUrl = `${siteUrl}/auth/callback?next=${encodeURIComponent(redirectTo || '/marketplace')}`;
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -191,9 +192,8 @@ export const authService = {
    */
   async resetPassword(email: string): Promise<void> {
     try {
-      const redirectTo = typeof window !== 'undefined'
-        ? `${window.location.origin}/auth/reset?email=${encodeURIComponent(email)}`
-        : `http://localhost:3000/auth/reset?email=${encodeURIComponent(email)}`;
+      const siteUrl = getSiteUrl();
+      const redirectTo = `${siteUrl}/auth/reset?email=${encodeURIComponent(email)}`;
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo,
